@@ -28,7 +28,7 @@ class PostCard extends HookConsumerWidget {
                 const CircleAvatar(),
                 const Gap(5),
                 Text(
-                  post.user!.name ?? post.user!.username,
+                  post.user?.name ?? post.user?.username ?? '',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const Spacer(),

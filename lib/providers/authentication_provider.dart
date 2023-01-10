@@ -9,7 +9,7 @@ class AuthenticationNotifier extends StateNotifier<User?> {
     this.ref,
   ) : super(null) {
     secureStorage.read(key: "token").then((token) async {
-      if (token == null) return;
+      if (token == null || token.isEmpty) return;
       pb.authStore.save(token, null);
       final res = await pb.collection("users").authRefresh();
       if (res.record == null) return;
@@ -19,7 +19,9 @@ class AuthenticationNotifier extends StateNotifier<User?> {
       if (event.model != null && state == null) {
         state = User.fromRecord(event.model["data"]);
       }
-      await secureStorage.write(key: "token", value: event.token);
+      if (event.token.isNotEmpty) {
+        await secureStorage.write(key: "token", value: event.token);
+      }
     });
   }
 
@@ -42,7 +44,7 @@ class AuthenticationNotifier extends StateNotifier<User?> {
     required String passwordConfirm,
     required String email,
   }) async {
-    final res = await pb.collection("users").create(body: {
+    await pb.collection("users").create(body: {
       "username": username,
       "email": email,
       "password": password,
@@ -51,9 +53,15 @@ class AuthenticationNotifier extends StateNotifier<User?> {
       "verified": false,
       "name": name,
     });
-    state = User.fromJson(res.data);
     await pb.collection("users").requestVerification(email);
-    return state;
+
+    final loginRes =
+        await pb.collection('users').authWithPassword(email, password);
+    if (loginRes.record != null) {
+      state = User.fromRecord(loginRes.record!);
+    }
+
+    return await login(email, password);
   }
 
   Future<void> confirm(String token) async {

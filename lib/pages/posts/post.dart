@@ -1,6 +1,5 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
-import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
@@ -20,23 +19,20 @@ class PostPage extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final postQuery = useQuery(job: postQueryJob(postId), externalData: null);
     final commentController = useTextEditingController();
+    final updating = useState(false);
 
     void comment() async {
       if (commentController.text.isEmpty) return;
-      final comment =
-          Comment.fromRecord(await pb.collection("comments").create(body: {
+      updating.value = true;
+
+      await pb.collection("comments").create(body: {
         "comment": commentController.text.trim(),
         "post": postId,
         "user": ref.read(authenticationProvider)?.id,
-      }));
-      await pb.collection("posts").update(postId, body: {
-        "comments": [
-          ...?postQuery.data?.comments.map((e) => e.id),
-          comment.id,
-        ]
       });
-      await postQuery.refetch();
       commentController.clear();
+      await postQuery.refetch();
+      updating.value = false;
     }
 
     return Scaffold(
@@ -103,7 +99,7 @@ class PostPage extends HookConsumerWidget {
                   ),
                 )
               else
-                const CircularProgressIndicator.adaptive(),
+                const Center(child: CircularProgressIndicator.adaptive()),
               const Gap(60),
             ],
           ),
@@ -121,7 +117,7 @@ class PostPage extends HookConsumerWidget {
                   labelText: 'Comment',
                   suffix: IconButton(
                     icon: const Icon(Icons.send),
-                    onPressed: comment,
+                    onPressed: updating.value ? null : comment,
                   ),
                 ),
               ),

@@ -39,7 +39,7 @@ final routerConfig = Provider((ref) {
                 return "/login";
               } else if (auth.isLoggedIn &&
                   user?.verified != true &&
-                  Env.verifyEmail) {
+                  Env().verifyEmail) {
                 return "/verification";
               }
               return null;
@@ -109,7 +109,7 @@ final routerConfig = Provider((ref) {
         ),
         redirect: (context, state) {
           if (auth.isLoggedIn) {
-            if (!user!.verified && Env.verifyEmail) {
+            if (!user!.verified && Env().verifyEmail) {
               return "/verification";
             }
             return "/";

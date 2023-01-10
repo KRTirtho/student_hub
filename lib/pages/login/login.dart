@@ -37,7 +37,6 @@ class LoginPage extends HookConsumerWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 50, left: 16, right: 16),
         child: Form(
-          autovalidateMode: AutovalidateMode.onUserInteraction,
           key: formKey,
           child: Column(
             children: [

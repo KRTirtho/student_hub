@@ -22,11 +22,13 @@ class Comment extends RecordModel {
     return Comment.fromJson(map);
   }
 
-  factory Comment.fromJson(Map<String, dynamic> map) => _$CommentFromJson({
-        ...map,
-        "post": map["expand"]?["post"],
-        "user": map["expand"]?["user"],
-      });
+  factory Comment.fromJson(Map<String, dynamic> map) {
+    return _$CommentFromJson({
+      ...map,
+      "post": map["expand"]?["post"],
+      "user": map["expand"]?["user"],
+    });
+  }
 
   @override
   Map<String, dynamic> toJson() => _$CommentToJson(this);

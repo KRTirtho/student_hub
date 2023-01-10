@@ -28,7 +28,7 @@ final postQueryJob = QueryJob.withVariableKey<Post, void>(
   task: (queryKey, externalData) async {
     final res = await pb
         .collection("posts")
-        .getOne(getVariable(queryKey), expand: "user,comments,comments.user");
+        .getOne(getVariable(queryKey), expand: "user,comments(post).user");
 
     return Post.fromRecord(res);
   },

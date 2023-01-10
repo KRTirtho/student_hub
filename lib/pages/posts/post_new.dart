@@ -69,11 +69,12 @@ class PostNewPage extends HookConsumerWidget {
               onPressed: () async {
                 try {
                   if (formKey.currentState!.validate()) {
+                    final userID = ref.read(authenticationProvider)?.id;
                     final post = Post.fromRecord(
                         await pb.collection("posts").create(body: {
                       "title": titleController.text,
                       "description": descriptionController.text,
-                      "user": ref.read(authenticationProvider)?.id,
+                      "user": userID,
                     }));
                     formKey.currentState!.reset();
                     if (mounted()) {

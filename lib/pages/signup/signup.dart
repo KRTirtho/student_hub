@@ -37,9 +37,8 @@ class SignupPage extends HookConsumerWidget {
     );
 
     Widget body = SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 50, left: 16, right: 16),
+      padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
       child: Form(
-        autovalidateMode: AutovalidateMode.onUserInteraction,
         key: formKey,
         child: Column(
           children: [
@@ -193,7 +192,6 @@ class SignupPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(),
-      extendBodyBehindAppBar: true,
       body: body,
     );
   }

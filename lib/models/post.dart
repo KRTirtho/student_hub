@@ -27,7 +27,7 @@ class Post extends RecordModel {
   factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson({
         ...json,
         "user": json["expand"]["user"],
-        "comments": [...?json["expand"]["comments"]],
+        "comments": [...?json["expand"]["comments(post)"]],
       });
 
   @override

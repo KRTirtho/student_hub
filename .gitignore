@@ -46,3 +46,5 @@ app.*.map.json
 /pb/pb_data
 
 /*.env
+
+/lib/collections/env.g.dart
