@@ -1,9 +1,13 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:eusc_freaks/queries/posts.dart';
+import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -16,6 +20,7 @@ class PostNewPage extends HookConsumerWidget {
     final descriptionController = useTextEditingController();
     final formKey = GlobalKey<FormState>();
     final error = useState<String?>(null);
+    final mounted = useIsMounted();
 
     return Scaffold(
       appBar: AppBar(
@@ -64,14 +69,19 @@ class PostNewPage extends HookConsumerWidget {
               onPressed: () async {
                 try {
                   if (formKey.currentState!.validate()) {
-                    await pb.collection("posts").create(body: {
+                    final post = Post.fromRecord(
+                        await pb.collection("posts").create(body: {
                       "title": titleController.text,
                       "description": descriptionController.text,
                       "user": ref.read(authenticationProvider)?.id,
-                    });
+                    }));
                     formKey.currentState!.reset();
-                    // GoRouter.of(context).go("/post/${payload.id}");
-                    // QueryBowl.of(context).getInfiniteQuery(postsInfiniteQuery.query)?.refetchPages();
+                    if (mounted()) {
+                      GoRouter.of(context).go("/posts/${post.id}");
+                      QueryBowl.of(context)
+                          .getInfiniteQuery(postsInfiniteQueryJob.queryKey)
+                          ?.refetchPages();
+                    }
                   }
                 } on ClientException catch (e) {
                   error.value = e.response["message"];

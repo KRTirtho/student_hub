@@ -1,3 +1,4 @@
+import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/user.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -9,22 +10,25 @@ class Post extends RecordModel {
   final String description;
 
   final User? user;
+  final List<Comment> comments;
 
   Post({
     required this.title,
     required this.description,
     this.user,
+    this.comments = const [],
   }) : super();
 
   factory Post.fromRecord(RecordModel record) {
-    final map = record.toJson();
-    return Post.fromJson({
-      ...map,
-      "user": map["user"] is String ? map["expand"]["user"] : null,
-    });
+    final json = record.toJson();
+    return Post.fromJson(json);
   }
 
-  factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson(json);
+  factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson({
+        ...json,
+        "user": json["expand"]["user"],
+        "comments": [...?json["expand"]["comments"]],
+      });
 
   @override
   Map<String, dynamic> toJson() => _$PostToJson(this);

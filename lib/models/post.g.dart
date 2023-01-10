@@ -12,6 +12,10 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       user: json['user'] == null
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
+      comments: (json['comments'] as List<dynamic>?)
+              ?.map((e) => Comment.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     )
       ..id = json['id'] as String
       ..created = json['created'] as String
@@ -28,4 +32,5 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'title': instance.title,
       'description': instance.description,
       'user': instance.user,
+      'comments': instance.comments,
     };

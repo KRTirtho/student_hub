@@ -42,6 +42,8 @@ class PostCard extends HookConsumerWidget {
               "${post.description} ",
               moreStyle: Theme.of(context).textTheme.caption,
               lessStyle: Theme.of(context).textTheme.caption,
+              trimMode: TrimMode.Line,
+              trimLines: 6,
             ),
             const Gap(20),
             if (!expanded)
