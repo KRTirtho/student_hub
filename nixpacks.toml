@@ -1,9 +1,0 @@
-[phases.build]
-cmds = [
-  'curl https://github.com/pocketbase/pocketbase/releases/download/v0.11.0/pocketbase_0.11.0_linux_amd64.zip -o pocketbase.zip',
-  'unzip pocketbase.zip',
-  'chmod +x pocketbase',
-]
-
-[start]
-cmd = './pocketbase serve'
