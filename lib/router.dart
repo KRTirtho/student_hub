@@ -48,8 +48,8 @@ final routerConfig = Provider((ref) {
               GoRoute(
                 path: 'posts/:id',
                 parentNavigatorKey: shellNavigatorKey,
-                pageBuilder: (context, state) => const MaterialPage(
-                  child: PostPage(),
+                pageBuilder: (context, state) => MaterialPage(
+                  child: PostPage(postId: state.params['id']!),
                 ),
               ),
             ],

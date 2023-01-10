@@ -1,7 +1,6 @@
 import 'package:eusc_freaks/collections/sstorage.dart';
 import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/providers/pocketbase_provider.dart';
-import 'package:pocketbase/pocketbase.dart';
+import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:riverpod/riverpod.dart';
 
 class AuthenticationNotifier extends StateNotifier<User?> {
@@ -25,8 +24,6 @@ class AuthenticationNotifier extends StateNotifier<User?> {
   }
 
   bool get isLoggedIn => state != null;
-
-  PocketBase get pb => ref.read(pocketbaseProvider);
 
   Future<User?> login(String email, String password) async {
     final res = await pb.collection('users').authWithPassword(email, password);

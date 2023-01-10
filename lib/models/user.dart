@@ -12,12 +12,15 @@ class User extends RecordModel {
   final bool emailVisibility;
   @JsonKey()
   final bool verified;
+  @JsonKey()
+  final String? name;
 
   User({
     required this.username,
     required this.email,
     required this.emailVisibility,
     required this.verified,
+    this.name,
   });
 
   factory User.fromRecord(RecordModel record) => User.fromJson(record.toJson());

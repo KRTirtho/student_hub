@@ -43,6 +43,7 @@ class EuscFreaks extends HookConsumerWidget {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,
+        titleSpacing: 0,
       ),
     );
 
@@ -65,6 +66,7 @@ class EuscFreaks extends HookConsumerWidget {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
         elevation: 0,
+        titleSpacing: 0,
       ),
     );
 
@@ -75,6 +77,7 @@ class EuscFreaks extends HookConsumerWidget {
         dark: darkTheme,
         initial: AdaptiveThemeMode.system,
         builder: (light, dark) => MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           title: 'Eusc Freaks',
           theme: light,
           darkTheme: dark,

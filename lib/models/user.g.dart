@@ -11,6 +11,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       email: json['email'] as String,
       emailVisibility: json['emailVisibility'] as bool,
       verified: json['verified'] as bool,
+      name: json['name'] as String?,
     )
       ..id = json['id'] as String? ?? ""
       ..created = json['created'] as String? ?? ""
@@ -28,4 +29,5 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'email': instance.email,
       'emailVisibility': instance.emailVisibility,
       'verified': instance.verified,
+      'name': instance.name,
     };
