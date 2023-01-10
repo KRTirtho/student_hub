@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const routes = {
   {"label": "Feed", "path": "/", "icon": Icons.feed_outlined},
@@ -8,7 +9,7 @@ const routes = {
   {"label": "Profile", "path": "/profile", "icon": Icons.person_outline_rounded}
 };
 
-class Shell extends HookWidget {
+class Shell extends HookConsumerWidget {
   final Widget child;
   const Shell({
     required this.child,
@@ -16,7 +17,7 @@ class Shell extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final selectedIndex = useState(0);
 
     return Scaffold(

@@ -6,14 +6,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const EuscFreaks());
+  runApp(const ProviderScope(child: EuscFreaks()));
 }
 
-class EuscFreaks extends StatelessWidget {
+class EuscFreaks extends HookConsumerWidget {
   const EuscFreaks({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final theme = ThemeData(
       useMaterial3: true,
       primaryColor: Colors.black,
@@ -68,19 +68,17 @@ class EuscFreaks extends StatelessWidget {
       ),
     );
 
-    return ProviderScope(
-      child: QueryBowlScope(
-        bowl: QueryBowl(),
-        child: AdaptiveTheme(
-          light: theme,
-          dark: darkTheme,
-          initial: AdaptiveThemeMode.system,
-          builder: (light, dark) => MaterialApp.router(
-            title: 'Eusc Freaks',
-            theme: light,
-            darkTheme: dark,
-            routerConfig: routerConfig,
-          ),
+    return QueryBowlScope(
+      bowl: QueryBowl(),
+      child: AdaptiveTheme(
+        light: theme,
+        dark: darkTheme,
+        initial: AdaptiveThemeMode.system,
+        builder: (light, dark) => MaterialApp.router(
+          title: 'Eusc Freaks',
+          theme: light,
+          darkTheme: dark,
+          routerConfig: ref.watch(routerConfig),
         ),
       ),
     );

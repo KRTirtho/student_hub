@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -7,6 +8,9 @@ class SettingsPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final authNotifier = ref.watch(authenticationProvider.notifier);
+    final isLoggedIn = ref.watch(authenticationProvider) != null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
@@ -39,6 +43,14 @@ class SettingsPage extends HookConsumerWidget {
               ],
             ),
           ),
+          if (isLoggedIn)
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text("Logout"),
+              onTap: () {
+                authNotifier.logout();
+              },
+            ),
         ],
       ),
     );
