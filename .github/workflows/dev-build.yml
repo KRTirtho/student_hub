@@ -1,0 +1,36 @@
+name: Development Build
+on:
+  push:
+    branches:
+      - build
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@latest
+        with:
+          cache: true
+      - run: |
+          sudo apt-get update -y
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev make python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot
+
+      - run: |
+          curl -sS https://webi.sh/yq | sh
+          yq -i '.version |= sub("\+\d+", "-nightly-")' pubspec.yaml
+          yq -i '.version += strenv(GITHUB_RUN_NUMBER)' pubspec.yaml
+          flutter pub get
+          flutter build apk
+          mv build/app/outputs/apk/release/app-release.apk build/Eusc-freaks-all-arch.apk
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Android
+          path: |
+            build/Eusc-freaks-all-arch.apk
+      - name: Setup upterm session
+        if: ${{ failure() }}
+        uses: lhotari/action-upterm@v1
+        with:
+          limit-access-to-actor: true
