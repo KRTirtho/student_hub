@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
@@ -20,7 +21,16 @@ class PostPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final postQuery = useQuery(job: postQueryJob(postId), externalData: null);
+    final controller = useScrollController();
+
+    final postQuery = useQuery(
+      job: postQueryJob(postId),
+      externalData: null,
+    );
+    final commentsQuery = useInfiniteQuery(
+      job: postCommentsInfiniteQueryJob(postId),
+      externalData: null,
+    );
     final commentController = useTextEditingController();
     final updating = useState(false);
 
@@ -33,10 +43,15 @@ class PostPage extends HookConsumerWidget {
         "post": postId,
         "user": ref.read(authenticationProvider)?.id,
       });
+      await commentsQuery.refetchPages();
       commentController.clear();
-      await postQuery.refetch();
       updating.value = false;
     }
+
+    final comments = commentsQuery.pages
+        .map((page) => page?.items ?? [])
+        .expand((element) => element)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -45,21 +60,36 @@ class PostPage extends HookConsumerWidget {
       ),
       body: Stack(
         children: [
-          ListView(
-            padding: const EdgeInsets.all(8),
-            children: [
-              if (postQuery.hasData && !postQuery.hasError) ...[
-                PostCard(post: postQuery.data!, expanded: true),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    postQuery.data!.type == PostType.question
-                        ? "Solutions"
-                        : "Comments",
-                    style: Theme.of(context).textTheme.caption,
+          Waypoint(
+            controller: controller,
+            onTouchEdge: () {
+              if (commentsQuery.hasNextPage) commentsQuery.fetchNextPage();
+            },
+            child: ListView(
+              padding: const EdgeInsets.all(8),
+              controller: controller,
+              children: [
+                if (postQuery.hasData && !postQuery.hasError) ...[
+                  PostCard(post: postQuery.data!, expanded: true),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      postQuery.data!.type == PostType.question
+                          ? "Solutions"
+                          : "Comments",
+                      style: Theme.of(context).textTheme.caption,
+                    ),
                   ),
-                ),
-                ...postQuery.data!.comments.map(
+                ] else if (postQuery.hasError &&
+                    postQuery.error is ClientException)
+                  Center(
+                    child: Text(
+                      (postQuery.error as ClientException).response["message"],
+                    ),
+                  )
+                else
+                  const Center(child: CircularProgressIndicator.adaptive()),
+                ...comments.map(
                   (comment) {
                     return Card(
                       child: Padding(
@@ -99,17 +129,9 @@ class PostPage extends HookConsumerWidget {
                     );
                   },
                 ),
-              ] else if (postQuery.hasError &&
-                  postQuery.error is ClientException)
-                Center(
-                  child: Text(
-                    (postQuery.error as ClientException).response["message"],
-                  ),
-                )
-              else
-                const Center(child: CircularProgressIndicator.adaptive()),
-              const Gap(80),
-            ],
+                const Gap(80),
+              ],
+            ),
           ),
           Align(
             alignment: Alignment.bottomCenter,
