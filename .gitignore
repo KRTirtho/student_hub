@@ -43,7 +43,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-/pb/pb_data
+**/pb_data
 
 /*.env
 
