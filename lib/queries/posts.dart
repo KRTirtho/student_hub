@@ -66,3 +66,28 @@ final postCommentsInfiniteQueryJob =
     );
   },
 );
+
+final userPostsInfiniteQueryJob =
+    InfiniteQueryJob.withVariableKey<ResultList<Post>, void, int>(
+  preQueryKey: "user-posts-query",
+  initialParam: 1,
+  getNextPageParam: (lastPage, pages) =>
+      lastPage.items.length < lastPage.perPage ? null : lastPage.page + 1,
+  getPreviousPageParam: (firstPage, pages) => firstPage.page - 1,
+  task: (queryKey, pageParam, externalData) async {
+    final res = await pb.collection("posts").getList(
+          expand: "user",
+          filter: "user = '${getVariable(queryKey)}'",
+          page: pageParam,
+          perPage: 5,
+        );
+
+    return ResultList(
+      items: res.items.map((r) => Post.fromRecord(r)).toList(),
+      page: res.page,
+      perPage: res.perPage,
+      totalItems: res.totalItems,
+      totalPages: res.totalPages,
+    );
+  },
+);

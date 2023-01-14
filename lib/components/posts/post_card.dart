@@ -1,3 +1,4 @@
+import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/utils/number_ending_type.dart';
 import 'package:flutter/material.dart';
@@ -44,35 +45,7 @@ class PostCard extends HookConsumerWidget {
           children: [
             Row(
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: post.user?.isMaster == true
-                              ? Colors.orange
-                              : Colors.blueAccent[200]!,
-                          width: 2,
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const CircleAvatar(),
-                    ),
-                    Positioned(
-                      right: 15,
-                      bottom: -1,
-                      child: Icon(
-                        post.user?.isMaster == true
-                            ? Icons.location_city_outlined
-                            : Icons.school_sharp,
-                        size: 15,
-                        color: post.user?.isMaster == true
-                            ? Colors.orange
-                            : Colors.blue[300],
-                      ),
-                    )
-                  ],
-                ),
+                Avatar(user: post.user!),
                 const Gap(5),
                 Expanded(
                   child: Column(
