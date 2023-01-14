@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
@@ -19,6 +20,7 @@ class PostsPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final controller = useScrollController();
     final postsQuery = useInfiniteQuery(
       job: postsInfiniteQueryJob(type),
       externalData: null,
@@ -54,15 +56,24 @@ class PostsPage extends HookConsumerWidget {
                   child: const Icon(Icons.add),
                 )
               : null,
-      body: ListView.separated(
-        separatorBuilder: (context, index) => const Gap(10),
-        padding: const EdgeInsets.all(8),
-        itemCount: posts.length,
-        itemBuilder: (context, index) {
-          final post = posts.elementAt(index);
-
-          return PostCard(post: post);
+      body: Waypoint(
+        controller: controller,
+        onTouchEdge: () async {
+          if (postsQuery.hasNextPage) {
+            await postsQuery.fetchNextPage();
+          }
         },
+        child: ListView.separated(
+          controller: controller,
+          separatorBuilder: (context, index) => const Gap(10),
+          padding: const EdgeInsets.all(8),
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            final post = posts.elementAt(index);
+
+            return PostCard(post: post);
+          },
+        ),
       ),
     );
   }

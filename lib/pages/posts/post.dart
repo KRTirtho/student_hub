@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/models/post.dart';
@@ -106,26 +108,33 @@ class PostPage extends HookConsumerWidget {
                 )
               else
                 const Center(child: CircularProgressIndicator.adaptive()),
-              const Gap(60),
+              const Gap(80),
             ],
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: commentController,
-                onSubmitted: (_) => comment(),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Theme.of(context).backgroundColor,
-                  isDense: true,
-                  labelText: postQuery.data?.type == PostType.question
-                      ? 'Answer'
-                      : 'Comment',
-                  suffix: IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: updating.value ? null : comment,
+            child: Container(
+              decoration: BoxDecoration(
+                color:
+                    Theme.of(context).scaffoldBackgroundColor.withOpacity(.3),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: TextField(
+                  controller: commentController,
+                  onSubmitted: (_) => comment(),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    isDense: true,
+                    labelText: postQuery.data?.type == PostType.question
+                        ? 'Answer'
+                        : 'Comment',
+                    suffix: IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: updating.value ? null : comment,
+                    ),
                   ),
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/models/post.dart';
+import 'package:eusc_freaks/utils/number_ending_type.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +34,7 @@ class PostCard extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final chipThrils = chipOfType[post.type]!;
+    final session = post.user?.currentSession;
 
     return Card(
       child: Padding(
@@ -42,42 +44,84 @@ class PostCard extends HookConsumerWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(),
-                const Gap(5),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Stack(
                   children: [
-                    Text(
-                      post.user?.name ?? post.user?.username ?? '',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const Gap(3),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 3,
-                      ),
                       decoration: BoxDecoration(
-                        color: chipThrils['backgroundColor']!,
-                        borderRadius: BorderRadius.circular(50),
                         border: Border.all(
-                          color: chipThrils['color']!,
-                          width: 1,
+                          color: post.user?.isMaster == true
+                              ? Colors.orange
+                              : Colors.blueAccent[200]!,
+                          width: 2,
                         ),
+                        shape: BoxShape.circle,
                       ),
-                      child: Text(
-                        post.type.name,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: chipThrils['color'],
-                              fontSize: 10,
-                            ),
-                      ),
+                      child: const CircleAvatar(),
                     ),
+                    Positioned(
+                      right: 15,
+                      bottom: -1,
+                      child: Icon(
+                        post.user?.isMaster == true
+                            ? Icons.location_city_outlined
+                            : Icons.school_sharp,
+                        size: 15,
+                        color: post.user?.isMaster == true
+                            ? Colors.orange
+                            : Colors.blue[300],
+                      ),
+                    )
                   ],
                 ),
-                const Spacer(),
-                Text(timeago.format(DateTime.parse(post.created))),
+                const Gap(5),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post.user?.name ?? post.user?.username ?? '',
+                        style: Theme.of(context).textTheme.titleSmall,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (post.user?.isMaster != true)
+                        Text(
+                          "B. ${session?.year}'s  ${session?.serial}${getNumberEnding(session?.serial ?? 999)} of C. ${session?.standard}",
+                          style: Theme.of(context).textTheme.caption,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      const Gap(3),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: chipThrils['backgroundColor']!,
+                          borderRadius: BorderRadius.circular(50),
+                          border: Border.all(
+                            color: chipThrils['color']!,
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          post.type.name,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: chipThrils['color'],
+                                    fontSize: 10,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  timeago.format(DateTime.parse(post.created)),
+                  style: Theme.of(context).textTheme.caption,
+                ),
               ],
             ),
             const Gap(20),

@@ -11,7 +11,6 @@ final routes = {
     "path": "/?type=${PostType.question.name},${PostType.informative.name}",
     "icon": Icons.feed_outlined
   },
-  {"label": "Search", "path": "/search", "icon": Icons.search_outlined},
   {
     "label": "Announces",
     "path": "/?type=${PostType.announcement.name}",
@@ -38,6 +37,12 @@ class Shell extends HookConsumerWidget {
         centerTitle: false,
         leading: const UniversalImage(path: "assets/logo.jpg", height: 40),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search_outlined),
+            onPressed: () {
+              GoRouter.of(context).push("/search");
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
