@@ -14,9 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod/riverpod.dart';
 
-final navigatorKey = GlobalKey<NavigatorState>();
-final shellNavigatorKey = GlobalKey<NavigatorState>();
 final routerConfig = Provider((ref) {
+  final navigatorKey = GlobalKey<NavigatorState>();
+  final shellNavigatorKey = GlobalKey<NavigatorState>();
   final auth = ref.watch(authenticationProvider.notifier);
   final user = ref.watch(authenticationProvider);
 
@@ -39,7 +39,7 @@ final routerConfig = Provider((ref) {
                 return "/login";
               } else if (auth.isLoggedIn &&
                   user?.verified != true &&
-                  Env().verifyEmail) {
+                  Env.verifyEmail) {
                 return "/verification";
               }
               return null;
@@ -109,7 +109,7 @@ final routerConfig = Provider((ref) {
         ),
         redirect: (context, state) {
           if (auth.isLoggedIn) {
-            if (!user!.verified && Env().verifyEmail) {
+            if (!user!.verified && Env.verifyEmail) {
               return "/verification";
             }
             return "/";

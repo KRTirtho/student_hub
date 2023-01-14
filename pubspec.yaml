@@ -42,7 +42,6 @@ dependencies:
   adaptive_theme: ^3.1.1
   cached_network_image: ^3.2.3
   shared_preferences: ^2.0.15
-  envied: ^0.3.0
   json_serializable: ^6.5.4
   json_annotation: ^4.7.0
   gap: ^2.0.1
@@ -50,12 +49,12 @@ dependencies:
   flutter_secure_storage: ^7.0.1
   timeago: ^3.3.0
   readmore: ^2.2.0
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-  envied_generator: ^0.3.0
   build_runner: ^2.2.0
 
 # For information on the generic Dart part of this file, see the
@@ -72,6 +71,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - dev.env
+    - prod.env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -232,20 +232,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.8"
-  envied:
-    dependency: "direct main"
-    description:
-      name: envied
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.0"
-  envied_generator:
-    dependency: "direct dev"
-    description:
-      name: envied_generator
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.0"
   fake_async:
     dependency: transitive
     description:
@@ -307,6 +293,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.3.0"
+  flutter_dotenv:
+    dependency: "direct main"
+    description:
+      name: flutter_dotenv
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.2"
   flutter_hooks:
     dependency: "direct main"
     description:

@@ -1,51 +1,22 @@
-import 'package:envied/envied.dart';
-import 'package:eusc_freaks/utils/platform.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-part 'env.g.dart';
+abstract class Env {
+  static final String pocketbaseUrl = dotenv.get(
+    'POCKETBASE_URL',
+    fallback: 'http://127.0.0.1:8090',
+  );
+  static final bool verifyEmail = dotenv.get(
+        'VERIFY_EMAIL',
+        fallback: 'false',
+      ) ==
+      'true';
 
-final _envInstance = Env._();
-
-class Env {
-  late final String pocketbaseUrl;
-  late final bool verifyEmail;
-
-  factory Env() => _envInstance;
-
-  Env._() {
-    if (!kReleaseMode) {
-      pocketbaseUrl = _ProdEnv.pocketbaseUrl;
-      verifyEmail = _ProdEnv.verifyEmail;
+  static configure() async {
+    if (kReleaseMode) {
+      await dotenv.load(fileName: "prod.env");
     } else {
-      pocketbaseUrl =
-          kIsMobile ? _ProdEnv.pocketbaseUrl : _DevEnv.pocketbaseUrl;
-      verifyEmail = _DevEnv.verifyEmail;
+      await dotenv.load(fileName: "dev.env");
     }
   }
-}
-
-@Envied(
-  name: "EnvDev",
-  obfuscate: true,
-  path: "dev.env",
-)
-class _DevEnv {
-  @EnviedField(varName: "POCKETBASE_URL")
-  static String pocketbaseUrl = _EnvDev.pocketbaseUrl;
-
-  @EnviedField(varName: "VERIFY_EMAIL")
-  static bool verifyEmail = _EnvDev.verifyEmail;
-}
-
-@Envied(
-  name: "EnvProd",
-  obfuscate: true,
-  path: "prod.env",
-)
-class _ProdEnv {
-  @EnviedField(varName: "POCKETBASE_URL")
-  static String pocketbaseUrl = _EnvProd.pocketbaseUrl;
-
-  @EnviedField(varName: "VERIFY_EMAIL")
-  static bool verifyEmail = _EnvProd.verifyEmail;
 }
