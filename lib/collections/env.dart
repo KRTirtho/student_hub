@@ -13,7 +13,7 @@ class Env {
   factory Env() => _envInstance;
 
   Env._() {
-    if (kReleaseMode) {
+    if (!kReleaseMode) {
       pocketbaseUrl = _ProdEnv.pocketbaseUrl;
       verifyEmail = _ProdEnv.verifyEmail;
     } else {

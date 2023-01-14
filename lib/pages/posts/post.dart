@@ -36,7 +36,10 @@ class PostPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text("Post"),
+        centerTitle: true,
+      ),
       body: Stack(
         children: [
           ListView(

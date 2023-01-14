@@ -60,7 +60,7 @@ class _EnvDev {
         .map((i) => _envieddatapocketbaseUrl[i] ^ _enviedkeypocketbaseUrl[i])
         .toList(growable: false),
   );
-  static final bool _enviedkeyverifyEmail = false;
+  static const bool _enviedkeyverifyEmail = false;
   static final bool verifyEmail = _enviedkeyverifyEmail ^ false;
 }
 
@@ -128,6 +128,6 @@ class _EnvProd {
         .map((i) => _envieddatapocketbaseUrl[i] ^ _enviedkeypocketbaseUrl[i])
         .toList(growable: false),
   );
-  static final bool _enviedkeyverifyEmail = false;
+  static const bool _enviedkeyverifyEmail = false;
   static final bool verifyEmail = _enviedkeyverifyEmail ^ false;
 }
