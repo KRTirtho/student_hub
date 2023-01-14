@@ -17,7 +17,7 @@ class AuthenticationNotifier extends StateNotifier<User?> {
     });
     pb.authStore.onChange.listen((event) async {
       if (event.model != null && state == null) {
-        state = User.fromRecord(event.model["data"]);
+        state = User.fromRecord(event.model);
       }
       if (event.token.isNotEmpty) {
         await secureStorage.write(key: "token", value: event.token);
@@ -43,6 +43,8 @@ class AuthenticationNotifier extends StateNotifier<User?> {
     required String password,
     required String passwordConfirm,
     required String email,
+    required SessionObject? session,
+    required bool isMaster,
   }) async {
     await pb.collection("users").create(body: {
       "username": username,
@@ -52,6 +54,8 @@ class AuthenticationNotifier extends StateNotifier<User?> {
       "emailVisibility": true,
       "verified": false,
       "name": name,
+      "sessions": session?.toString() ?? "",
+      "isMaster": isMaster,
     });
     await pb.collection("users").requestVerification(email);
 

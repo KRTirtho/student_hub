@@ -31,8 +31,10 @@ final routerConfig = Provider((ref) {
           GoRoute(
             path: '/',
             parentNavigatorKey: shellNavigatorKey,
-            pageBuilder: (context, state) => const MaterialPage(
-              child: PostsPage(),
+            pageBuilder: (context, state) => MaterialPage(
+              child: PostsPage(
+                type: state.queryParams["type"],
+              ),
             ),
             redirect: (context, state) {
               if (!auth.isLoggedIn) {
@@ -47,9 +49,16 @@ final routerConfig = Provider((ref) {
             routes: [
               GoRoute(
                 path: 'posts/:id',
-                parentNavigatorKey: shellNavigatorKey,
+                parentNavigatorKey: navigatorKey,
                 pageBuilder: (context, state) => MaterialPage(
                   child: PostPage(postId: state.params['id']!),
+                ),
+              ),
+              GoRoute(
+                path: 'new',
+                parentNavigatorKey: navigatorKey,
+                pageBuilder: (context, state) => MaterialPage(
+                  child: PostNewPage(type: state.queryParams["type"]),
                 ),
               ),
             ],
@@ -61,24 +70,18 @@ final routerConfig = Provider((ref) {
               child: ProfilePage(),
             ),
           ),
-          GoRoute(
-            path: '/settings',
-            parentNavigatorKey: shellNavigatorKey,
-            pageBuilder: (context, state) => const MaterialPage(
-              child: SettingsPage(),
-            ),
-          ),
         ],
       ),
 
       //? ============ Outside of Shell ==================== ?//
       GoRoute(
-        path: '/new',
+        path: '/settings',
         parentNavigatorKey: navigatorKey,
         pageBuilder: (context, state) => const MaterialPage(
-          child: PostNewPage(),
+          child: SettingsPage(),
         ),
       ),
+
       GoRoute(
         path: '/login',
         parentNavigatorKey: navigatorKey,

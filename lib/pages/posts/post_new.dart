@@ -12,7 +12,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class PostNewPage extends HookConsumerWidget {
-  const PostNewPage({Key? key}) : super(key: key);
+  final String type;
+  PostNewPage({
+    Key? key,
+    String? type,
+  })  : type = type ?? "${PostType.question.name},${PostType.informative.name}",
+        super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
@@ -21,10 +26,12 @@ class PostNewPage extends HookConsumerWidget {
     final formKey = GlobalKey<FormState>();
     final error = useState<String?>(null);
     final mounted = useIsMounted();
+    final types = type.split(",");
+    final typeOfPost = useState(types.first);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("New Post"),
+        title: Text("New ${typeOfPost.value}"),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.close_outlined),
@@ -55,6 +62,23 @@ class PostNewPage extends HookConsumerWidget {
                 floatingLabelBehavior: FloatingLabelBehavior.always,
               ),
             ),
+            if (types.length > 1) ...[
+              const Gap(20),
+              const Text("Type of post"),
+              DropdownButtonFormField<String>(
+                value: typeOfPost.value,
+                items: [
+                  for (final type in types)
+                    DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value != null) typeOfPost.value = value;
+                },
+              )
+            ],
             const Gap(20),
             if (error.value != null)
               Text(
@@ -75,12 +99,14 @@ class PostNewPage extends HookConsumerWidget {
                       "title": titleController.text,
                       "description": descriptionController.text,
                       "user": userID,
+                      "type": typeOfPost.value,
                     }));
                     formKey.currentState!.reset();
                     if (mounted()) {
                       GoRouter.of(context).go("/posts/${post.id}");
                       QueryBowl.of(context)
-                          .getInfiniteQuery(postsInfiniteQueryJob.queryKey)
+                          .getInfiniteQuery(
+                              postsInfiniteQueryJob(type).queryKey)
                           ?.refetchPages();
                     }
                   }

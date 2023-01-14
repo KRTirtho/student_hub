@@ -1,5 +1,6 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
@@ -50,7 +51,9 @@ class PostPage extends HookConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    "Comments",
+                    postQuery.data!.type == PostType.question
+                        ? "Solutions"
+                        : "Comments",
                     style: Theme.of(context).textTheme.caption,
                   ),
                 ),
@@ -117,7 +120,9 @@ class PostPage extends HookConsumerWidget {
                   filled: true,
                   fillColor: Theme.of(context).backgroundColor,
                   isDense: true,
-                  labelText: 'Comment',
+                  labelText: postQuery.data?.type == PostType.question
+                      ? 'Answer'
+                      : 'Comment',
                   suffix: IconButton(
                     icon: const Icon(Icons.send),
                     onPressed: updating.value ? null : comment,

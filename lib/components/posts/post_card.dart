@@ -6,6 +6,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+final chipOfType = {
+  PostType.question: {
+    'color': Colors.deepPurple,
+    'backgroundColor': Colors.purple[100],
+  },
+  PostType.informative: {
+    'color': Colors.blue,
+    'backgroundColor': Colors.blue[100],
+  },
+  PostType.announcement: {
+    'color': Colors.red,
+    'backgroundColor': Colors.red[100],
+  },
+};
+
 class PostCard extends HookConsumerWidget {
   final Post post;
   final bool expanded;
@@ -17,6 +32,8 @@ class PostCard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final chipThrils = chipOfType[post.type]!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -27,9 +44,37 @@ class PostCard extends HookConsumerWidget {
               children: [
                 const CircleAvatar(),
                 const Gap(5),
-                Text(
-                  post.user?.name ?? post.user?.username ?? '',
-                  style: Theme.of(context).textTheme.titleMedium,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      post.user?.name ?? post.user?.username ?? '',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const Gap(3),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: chipThrils['backgroundColor']!,
+                        borderRadius: BorderRadius.circular(50),
+                        border: Border.all(
+                          color: chipThrils['color']!,
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        post.type.name,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: chipThrils['color'],
+                              fontSize: 10,
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
                 const Spacer(),
                 Text(timeago.format(DateTime.parse(post.created))),
@@ -51,7 +96,9 @@ class PostCard extends HookConsumerWidget {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(40),
                 ),
-                child: const Text("Comments"),
+                child: Text(
+                  post.type == PostType.question ? "Solve" : "Comments",
+                ),
                 onPressed: () {
                   GoRouter.of(context).push("/posts/${post.id}");
                 },

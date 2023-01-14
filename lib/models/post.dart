@@ -4,6 +4,21 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';
 part 'post.g.dart';
 
+enum PostType {
+  @JsonValue('announcement')
+  announcement,
+  @JsonValue('question')
+  question,
+  @JsonValue('informative')
+  informative;
+
+  static PostType fromName(String type) {
+    return PostType.values.firstWhere((element) {
+      return element.name == type;
+    });
+  }
+}
+
 @JsonSerializable()
 class Post extends RecordModel {
   final String title;
@@ -12,9 +27,12 @@ class Post extends RecordModel {
   final User? user;
   final List<Comment> comments;
 
+  final PostType type;
+
   Post({
     required this.title,
     required this.description,
+    required this.type,
     this.user,
     this.comments = const [],
   }) : super();

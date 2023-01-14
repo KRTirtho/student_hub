@@ -1,6 +1,6 @@
-import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/models/post.dart';
+import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +10,20 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class PostsPage extends HookConsumerWidget {
-  const PostsPage({Key? key}) : super(key: key);
+  final String type;
+  PostsPage({
+    Key? key,
+    String? type,
+  })  : type = type ?? "${PostType.question.name},${PostType.informative.name}",
+        super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
-    final postsQuery =
-        useInfiniteQuery(job: postsInfiniteQueryJob, externalData: null);
+    final postsQuery = useInfiniteQuery(
+      job: postsInfiniteQueryJob(type),
+      externalData: null,
+    );
+    final user = ref.watch(authenticationProvider);
 
     final posts =
         postsQuery.pages.expand<Post>((page) => page?.items.toList() ?? []);
@@ -36,26 +44,16 @@ class PostsPage extends HookConsumerWidget {
     }, [postsQuery]);
 
     return Scaffold(
-      appBar: AppBar(
-        primary: true,
-        title: const Text("Eusc Freaks"),
-        centerTitle: false,
-        leading: const UniversalImage(path: "assets/logo.jpg", height: 40),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              GoRouter.of(context).push("/settings");
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          GoRouter.of(context).push("/new");
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton:
+          (user?.isMaster != true && type != PostType.announcement.name) ||
+                  user?.isMaster == true
+              ? FloatingActionButton(
+                  onPressed: () {
+                    GoRouter.of(context).push("/new?type=$type");
+                  },
+                  child: const Icon(Icons.add),
+                )
+              : null,
       body: ListView.separated(
         separatorBuilder: (context, index) => const Gap(10),
         padding: const EdgeInsets.all(8),
