@@ -1,4 +1,3 @@
-import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -31,26 +30,6 @@ class Shell extends HookConsumerWidget {
     final selectedIndex = useState(0);
 
     return Scaffold(
-      appBar: AppBar(
-        primary: true,
-        title: const Text("Eusc Freaks"),
-        centerTitle: false,
-        leading: const UniversalImage(path: "assets/logo.jpg", height: 40),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search_outlined),
-            onPressed: () {
-              GoRouter.of(context).push("/search");
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              GoRouter.of(context).push("/settings");
-            },
-          ),
-        ],
-      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex.value,
         destinations: [

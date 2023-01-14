@@ -5,10 +5,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 class Avatar extends HookWidget {
   final User user;
   final double radius;
+  final double? iconSize;
   const Avatar({
     Key? key,
     required this.user,
     this.radius = 20,
+    this.iconSize,
   }) : super(key: key);
 
   @override
@@ -37,7 +39,7 @@ class Avatar extends HookWidget {
               user.isMaster == true
                   ? Icons.location_city_outlined
                   : Icons.school_sharp,
-              size: 15,
+              size: iconSize ?? radius * .75,
               color: user.isMaster == true ? Colors.orange : Colors.blue[300],
             ),
           ),

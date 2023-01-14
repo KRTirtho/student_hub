@@ -26,6 +26,10 @@ class ProfilePage extends HookConsumerWidget {
         .expand((element) => element)
         .toList();
 
+    final tableStyle = Theme.of(context).textTheme.caption!;
+    final tableHeaderStyle = tableStyle.copyWith(
+      fontWeight: FontWeight.bold,
+    );
     return Scaffold(
       body: Waypoint(
         controller: controller,
@@ -38,7 +42,9 @@ class ProfilePage extends HookConsumerWidget {
           controller: controller,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           children: [
+            const Gap(50),
             Avatar(user: user, radius: 50),
+            const Gap(20),
             if (user.name != null)
               Center(
                 child: Text(
@@ -59,64 +65,84 @@ class ProfilePage extends HookConsumerWidget {
                     title: const Text('Username'),
                     subtitle: Text(user.username),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Text(
-                      'Sessions',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                  if (!user.isMaster) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Text(
+                        'Sessions',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Table(
-                      children: [
-                        const TableRow(
-                          children: [
-                            TableCell(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text('Year'),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Table(
+                        children: [
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Year',
+                                    style: tableHeaderStyle,
+                                  ),
+                                ),
                               ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text('Class'),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Class',
+                                    style: tableHeaderStyle,
+                                  ),
+                                ),
                               ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text('Roll'),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Roll',
+                                    style: tableHeaderStyle,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        ...user.sessionObjects.map((session) {
-                          return TableRow(children: [
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(session.year.toString()),
+                            ],
+                          ),
+                          ...user.sessionObjects.map((session) {
+                            return TableRow(children: [
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    session.year.toString(),
+                                    style: tableStyle,
+                                  ),
+                                ),
                               ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(session.standard.toString()),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    session.standard.toString(),
+                                    style: tableStyle,
+                                  ),
+                                ),
                               ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(session.serial.toString()),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    session.serial.toString(),
+                                    style: tableStyle,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ]);
-                        }).toList(),
-                      ],
+                            ]);
+                          }).toList(),
+                        ],
+                      ),
                     ),
-                  ),
+                  ]
                 ],
               ),
             ),
