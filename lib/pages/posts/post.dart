@@ -194,72 +194,84 @@ class PostPage extends HookConsumerWidget {
             onTouchEdge: () {
               if (commentsQuery.hasNextPage) commentsQuery.fetchNextPage();
             },
-            child: ListView(
-              padding: const EdgeInsets.all(8),
-              controller: controller,
-              children: [
-                if (postQuery.hasData && !postQuery.hasError) ...[
-                  PostCard(post: postQuery.data!, expanded: true),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      postQuery.data!.type == PostType.question
-                          ? "Solutions"
-                          : "Comments",
-                      style: Theme.of(context).textTheme.caption,
-                    ),
-                  ),
-                ] else if (postQuery.hasError &&
-                    postQuery.error is ClientException)
-                  Center(
-                    child: Text(
-                      (postQuery.error as ClientException).response["message"],
-                    ),
-                  )
-                else
-                  const Center(child: CircularProgressIndicator.adaptive()),
-                ...comments.map(
-                  (comment) {
-                    return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const CircleAvatar(radius: 8),
-                                const Gap(5),
-                                Text(
-                                  comment.user!.name ?? comment.user!.username,
-                                  style:
-                                      Theme.of(context).textTheme.labelMedium!,
-                                ),
-                                const Spacer(),
-                                Text(
-                                  format(DateTime.parse(comment.created)),
-                                  style:
-                                      Theme.of(context).textTheme.labelSmall!,
-                                ),
-                              ],
-                            ),
-                            const Gap(10),
-                            ReadMoreText(
-                              "${comment.comment} ",
-                              trimMode: TrimMode.Line,
-                              trimLines: 3,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              lessStyle: Theme.of(context).textTheme.caption,
-                              moreStyle: Theme.of(context).textTheme.caption,
-                            ),
-                          ],
-                        ),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await Future.wait([
+                  postQuery.refetch(),
+                  commentsQuery.refetchPages(),
+                ]);
+              },
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: controller,
+                children: [
+                  if (postQuery.hasData && !postQuery.hasError) ...[
+                    PostCard(post: postQuery.data!, expanded: true),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        postQuery.data!.type == PostType.question
+                            ? "Solutions"
+                            : "Comments",
+                        style: Theme.of(context).textTheme.caption,
                       ),
-                    );
-                  },
-                ),
-                const Gap(80),
-              ],
+                    ),
+                  ] else if (postQuery.hasError &&
+                      postQuery.error is ClientException)
+                    Center(
+                      child: Text(
+                        (postQuery.error as ClientException)
+                            .response["message"],
+                      ),
+                    )
+                  else
+                    const Center(child: CircularProgressIndicator.adaptive()),
+                  ...comments.map(
+                    (comment) {
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const CircleAvatar(radius: 8),
+                                  const Gap(5),
+                                  Text(
+                                    comment.user!.name ??
+                                        comment.user!.username,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelMedium!,
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    format(DateTime.parse(comment.created)),
+                                    style:
+                                        Theme.of(context).textTheme.labelSmall!,
+                                  ),
+                                ],
+                              ),
+                              const Gap(10),
+                              ReadMoreText(
+                                "${comment.comment} ",
+                                trimMode: TrimMode.Line,
+                                trimLines: 3,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                lessStyle: Theme.of(context).textTheme.caption,
+                                moreStyle: Theme.of(context).textTheme.caption,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const Gap(80),
+                ],
+              ),
             ),
           ),
           Align(

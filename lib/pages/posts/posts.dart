@@ -97,16 +97,20 @@ class PostsPage extends HookConsumerWidget {
             await postsQuery.fetchNextPage();
           }
         },
-        child: ListView.separated(
-          controller: controller,
-          separatorBuilder: (context, index) => const Gap(10),
-          padding: const EdgeInsets.all(8),
-          itemCount: posts.length,
-          itemBuilder: (context, index) {
-            final post = posts.elementAt(index);
+        child: RefreshIndicator(
+          onRefresh: postsQuery.refetchPages,
+          child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: controller,
+            separatorBuilder: (context, index) => const Gap(10),
+            padding: const EdgeInsets.all(8),
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts.elementAt(index);
 
-            return PostCard(post: post);
-          },
+              return PostCard(post: post);
+            },
+          ),
         ),
       ),
     );
