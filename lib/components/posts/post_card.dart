@@ -57,13 +57,14 @@ class PostCard extends HookConsumerWidget {
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (post.user?.isMaster != true)
-                        Text(
-                          "B. ${session?.year}'s  ${session?.serial}${getNumberEnding(session?.serial ?? 999)} of C. ${session?.standard}",
-                          style: Theme.of(context).textTheme.caption,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      Text(
+                        post.user?.isMaster == true
+                            ? "${session?.subject?.formattedName} Teacher since ${session?.year}"
+                            : "B. ${session?.year}'s  ${session?.serial}${getNumberEnding(session?.serial ?? 999)} of C. ${session?.standard}",
+                        style: Theme.of(context).textTheme.caption,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const Gap(3),
                       Container(
                         padding: const EdgeInsets.symmetric(

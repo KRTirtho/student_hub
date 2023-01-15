@@ -9,6 +9,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:collection/collection.dart';
 
 class SignupPage extends HookConsumerWidget {
   const SignupPage({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class SignupPage extends HookConsumerWidget {
     final serialController = useTextEditingController();
     final year = useState<int?>(null);
     final standard = useState<int?>(null);
+    final subject = useState<Subject?>(null);
     final isMaster = useState(false);
     final visibility = useState(false);
     final error = useState<String?>(null);
@@ -94,39 +96,40 @@ class SignupPage extends HookConsumerWidget {
                 ),
               ],
             ),
-            if (!isMaster.value) ...[
-              const Gap(10),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Session*"),
-              ),
-              Row(
-                children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 65),
-                    child: DropdownButtonFormField<int>(
-                      validator: (v) => v == null ? "Year is required" : null,
-                      isExpanded: false,
-                      value: year.value,
-                      decoration: const InputDecoration(hintText: "Year"),
-                      onChanged: (value) {
-                        if (value != null) {
-                          year.value = value;
-                        }
-                      },
-                      items: [
-                        for (int year = 2000;
-                            year <= DateTime.now().year;
-                            year++)
-                          DropdownMenuItem(
-                            value: year,
-                            child: Center(child: Text(year.toString())),
-                          ),
-                      ],
+            const Gap(10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(!isMaster.value ? "Session*" : "Job info*"),
+            ),
+            Row(
+              children: [
+                ConstrainedBox(
+                  constraints:
+                      BoxConstraints(maxWidth: isMaster.value ? 120 : 65),
+                  child: DropdownButtonFormField<int>(
+                    validator: (v) => v == null ? "Year is required" : null,
+                    isExpanded: false,
+                    value: year.value,
+                    decoration: InputDecoration(
+                      hintText: isMaster.value ? "Joining Year" : "Year",
                     ),
+                    onChanged: (value) {
+                      if (value != null) {
+                        year.value = value;
+                      }
+                    },
+                    items: [
+                      for (int year = 2000; year <= DateTime.now().year; year++)
+                        DropdownMenuItem(
+                          value: year,
+                          child: Center(child: Text(year.toString())),
+                        ),
+                    ],
                   ),
+                ),
+                const Gap(20),
+                if (!isMaster.value) ...[
                   const Spacer(),
-                  //  dropdown button for 1-12
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 60),
                     child: DropdownButtonFormField<int>(
@@ -140,30 +143,56 @@ class SignupPage extends HookConsumerWidget {
                         }
                       },
                       items: [
-                        for (int roll = 1; roll <= 12; roll++)
+                        for (int grade = 1; grade <= 12; grade++)
                           DropdownMenuItem(
-                            value: roll,
-                            child: Center(child: Text(roll.toString())),
+                            value: grade,
+                            child: Center(child: Text(grade.toString())),
                           ),
                       ],
                     ),
                   ),
                   const Spacer(),
-                  Expanded(
-                    child: TextFormField(
-                      controller: serialController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: ValidationBuilder()
-                          .regExp(
-                            RegExp(r"^[1-9][0-9]{0,3}$"),
-                            "Invalid roll (only 1-9999)",
-                          )
-                          .required()
-                          .build(),
-                      decoration: const InputDecoration(hintText: "Roll"),
+                ],
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 60),
+                  child: TextFormField(
+                    controller: serialController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: ValidationBuilder()
+                        .regExp(
+                          RegExp(r"^[1-9][0-9]{0,3}$"),
+                          "Invalid ${isMaster.value ? "ID" : "roll"} (only 1-9999)",
+                        )
+                        .required()
+                        .build(),
+                    decoration: InputDecoration(
+                      hintText: isMaster.value ? "ID" : "Roll",
                     ),
                   ),
+                ),
+              ],
+            ),
+            if (isMaster.value) ...[
+              const Gap(10),
+              DropdownButtonFormField<Subject>(
+                isExpanded: false,
+                validator: (v) => v == null ? "Subject is required" : null,
+                decoration: const InputDecoration(hintText: "Subject"),
+                value: subject.value,
+                onChanged: (value) {
+                  if (value != null) {
+                    subject.value = value;
+                  }
+                },
+                items: [
+                  for (final subject in Subject.values.sorted(
+                    (a, b) => a.name.compareTo(b.name),
+                  ))
+                    DropdownMenuItem(
+                      value: subject,
+                      child: Center(child: Text(subject.formattedName)),
+                    ),
                 ],
               )
             ],
@@ -267,13 +296,12 @@ class SignupPage extends HookConsumerWidget {
                           username: usernameController.text,
                           password: passwordController.text,
                           passwordConfirm: confirmPasswordController.text,
-                          session: isMaster.value
-                              ? null
-                              : SessionObject(
-                                  year: year.value!,
-                                  standard: standard.value!,
-                                  serial: int.parse(serialController.text),
-                                ),
+                          session: SessionObject(
+                            year: year.value!,
+                            standard: standard.value,
+                            serial: int.parse(serialController.text),
+                            subject: subject.value,
+                          ),
                           isMaster: isMaster.value,
                         );
                         if (user == null) {
@@ -281,7 +309,7 @@ class SignupPage extends HookConsumerWidget {
                           return;
                         }
                         formKey.currentState?.reset();
-                        error.value = null;
+                        if (mounted()) error.value = null;
                       } on ClientException catch (e) {
                         error.value = e.response["message"];
                       } finally {

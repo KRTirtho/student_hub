@@ -142,6 +142,22 @@ class ProfilePage extends HookConsumerWidget {
                         ],
                       ),
                     ),
+                  ] else ...[
+                    ListTile(
+                      title: const Text('Subject'),
+                      subtitle: Text(
+                          user.currentSession?.subject?.formattedName ?? ""),
+                    ),
+                    ListTile(
+                      title: const Text('Joining Year'),
+                      subtitle:
+                          Text(user.currentSession?.year.toString() ?? ""),
+                    ),
+                    ListTile(
+                      title: const Text('ID No.'),
+                      subtitle:
+                          Text(user.currentSession?.serial.toString() ?? ""),
+                    ),
                   ]
                 ],
               ),

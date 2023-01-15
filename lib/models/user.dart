@@ -3,32 +3,73 @@ import 'package:collection/collection.dart';
 import 'package:pocketbase/pocketbase.dart';
 part 'user.g.dart';
 
+enum Subject {
+  bangla,
+  english,
+  math,
+  physics,
+  chemistry,
+  biology,
+  ict,
+  accounting,
+  economics,
+  religion,
+  art,
+  music,
+  physical_education,
+  social_studies,
+  bushiness_studies,
+  agriculture;
+
+  static Subject? tryFromName(String name) {
+    return Subject.values.firstWhereOrNull((element) => element.name == name);
+  }
+
+  String get formattedName {
+    return name.replaceAll("_", " ").split(" ").map((e) {
+      if (e == "of") return e;
+      return e[0].toUpperCase() + e.substring(1);
+    }).join(" ");
+  }
+}
+
 class SessionObject {
   final int year;
-  final int standard;
+  final int? standard;
   final int serial;
+  final Subject? subject;
 
-  /// follows this pattern `^(20\d{2}-[1-12]{1,2}-[1-9][0-9]{0,3},?)+$`
+  /// follows this pattern
+  ///  ```regex
+  /// ^((20\d{2}-[1-12]{1,2}-[1-9][0-9]{0,3})|(20\d{2}-(bangla|english|math|
+  /// physics|chemistry|biology|ict|accounting|economics|religion|art|music
+  /// |physical_education|social_studies|bushiness_studies|agriculture)-[1-9]
+  /// [0-9]{0,3}),?)+$`
+  /// ```
   SessionObject({
     required this.year,
-    required this.standard,
     required this.serial,
+    required this.standard,
+    required this.subject,
   })  : assert(year >= 2000 && year <= 2099),
-        assert(standard >= 1 && standard <= 12),
+        assert(standard == null || standard >= 1 && standard <= 12),
         assert(serial >= 1 && serial <= 9999);
 
   factory SessionObject.fromString(String session) {
     final slopes = session.split("-");
     return SessionObject(
       year: int.parse(slopes[0]),
-      standard: int.parse(slopes[1]),
+      standard: int.tryParse(slopes[1]),
+      subject: Subject.tryFromName(slopes[1]),
       serial: int.parse(slopes[2]),
     );
   }
 
+  bool get isMaster => standard == null && subject != null;
+
   @override
   String toString() {
-    return "$year-$standard-$serial";
+    return "$year-${standard ?? subject?.name}-$serial";
   }
 
   @override
@@ -38,11 +79,13 @@ class SessionObject {
     return other is SessionObject &&
         other.year == year &&
         other.standard == standard &&
-        other.serial == serial;
+        other.serial == serial &&
+        other.subject == subject;
   }
 
   @override
-  int get hashCode => year.hashCode ^ standard.hashCode ^ serial.hashCode;
+  int get hashCode =>
+      year.hashCode ^ standard.hashCode ^ serial.hashCode ^ subject.hashCode;
 }
 
 @JsonSerializable(explicitToJson: true)

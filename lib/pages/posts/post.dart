@@ -7,8 +7,10 @@ import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
+import 'package:eusc_freaks/utils/platform.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -49,6 +51,18 @@ class PostPage extends HookConsumerWidget {
       commentController.clear();
       updating.value = false;
     }
+
+    final focusNode = useFocusNode(
+      onKey: (node, event) {
+        if (kIsDesktop &&
+            event.isKeyPressed(LogicalKeyboardKey.enter) &&
+            event.isShiftPressed) {
+          comment();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+    );
 
     final comments = commentsQuery.pages
         .map((page) => page?.items ?? [])
@@ -251,6 +265,7 @@ class PostPage extends HookConsumerWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
+              height: 70,
               decoration: BoxDecoration(
                 color:
                     Theme.of(context).scaffoldBackgroundColor.withOpacity(.3),
@@ -259,8 +274,10 @@ class PostPage extends HookConsumerWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: TextField(
+                  focusNode: focusNode,
                   controller: commentController,
-                  onSubmitted: (_) => comment(),
+                  maxLines: 2,
+                  keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.transparent,
