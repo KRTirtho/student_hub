@@ -19,6 +19,7 @@ final postsInfiniteQueryJob =
           page: pageParam,
           perPage: 5,
           expand: "user",
+          sort: "-created",
           filter: filter,
         );
     return ResultList(
@@ -53,6 +54,7 @@ final postCommentsInfiniteQueryJob =
     final res = await pb.collection("comments").getList(
           expand: "user",
           filter: "post = '${getVariable(queryKey)}'",
+          sort: "-created",
           page: pageParam,
           perPage: 10,
         );
@@ -79,6 +81,7 @@ final userPostsInfiniteQueryJob =
           expand: "user",
           filter: "user = '${getVariable(queryKey)}'",
           page: pageParam,
+          sort: "-created",
           perPage: 5,
         );
 

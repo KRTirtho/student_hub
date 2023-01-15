@@ -14,7 +14,7 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
       comments: (json['comments'] as List<dynamic>?)
-              ?.map((e) => Comment.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => e as String)
               .toList() ??
           const [],
     )

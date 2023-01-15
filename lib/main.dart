@@ -1,15 +1,17 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:eusc_freaks/collections/env.dart';
 import 'package:eusc_freaks/router.dart';
+import 'package:eusc_freaks/utils/platform.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() async {
-  FlutterNativeSplash.preserve(
-    widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
-  );
+  final bindings = WidgetsFlutterBinding.ensureInitialized();
+  if (kIsMobile) {
+    FlutterNativeSplash.preserve(widgetsBinding: bindings);
+  }
   await Env.configure();
   runApp(const ProviderScope(child: EuscFreaks()));
 }

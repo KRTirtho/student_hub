@@ -1,4 +1,3 @@
-import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/user.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -25,7 +24,7 @@ class Post extends RecordModel {
   final String description;
 
   final User? user;
-  final List<Comment> comments;
+  final List<String> comments;
 
   final PostType type;
 
@@ -45,7 +44,6 @@ class Post extends RecordModel {
   factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson({
         ...json,
         "user": json["expand"]["user"],
-        "comments": [...?json["expand"]["comments(post)"]],
       });
 
   @override
