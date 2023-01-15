@@ -22,6 +22,8 @@ jobs:
           curl -sS https://webi.sh/yq | sh
           yq -i '.version |= sub("\+\d+", "-nightly-")' pubspec.yaml
           yq -i '.version += strenv(GITHUB_RUN_NUMBER)' pubspec.yaml
+          echo '${{ secrets.PROD_ENV }}' > prod.env
+          echo '${{ secrets.PROD_ENV }}' > dev.env
           flutter pub get
           flutter build apk
           mv build/app/outputs/apk/release/app-release.apk build/Eusc-freaks-all-arch.apk
