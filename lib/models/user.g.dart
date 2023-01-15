@@ -13,6 +13,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       verified: json['verified'] as bool,
       isMaster: json['isMaster'] as bool,
       sessions: json['sessions'] as String,
+      avatar: json['avatar'] as String,
       name: json['name'] as String?,
     )
       ..id = json['id'] as String
@@ -34,4 +35,5 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'name': instance.name,
       'isMaster': instance.isMaster,
       'sessions': instance.sessions,
+      'avatar': instance.avatar,
     };

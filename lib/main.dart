@@ -26,6 +26,9 @@ class EuscFreaks extends HookConsumerWidget {
       primaryColor: Colors.black,
       primarySwatch: Colors.grey,
       backgroundColor: Colors.white,
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+      ),
       colorScheme: const ColorScheme.light(secondary: Colors.black),
       scaffoldBackgroundColor: Colors.white,
       cardColor: Colors.grey[200],
@@ -57,6 +60,9 @@ class EuscFreaks extends HookConsumerWidget {
     final darkTheme = ThemeData(
       useMaterial3: true,
       primarySwatch: Colors.grey,
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+      ),
       primaryColorDark: Colors.grey[100],
       primaryColor: Colors.white,
       colorScheme: const ColorScheme.dark(secondary: Colors.white),

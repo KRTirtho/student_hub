@@ -1,3 +1,5 @@
+import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -24,12 +26,26 @@ class Avatar extends HookWidget {
               color: user.isMaster == true
                   ? Colors.orange
                   : Colors.blueAccent[200]!,
-              width: 2,
+              width: radius < 20 ? 1 : 2,
             ),
             shape: BoxShape.circle,
           ),
           child: CircleAvatar(
             radius: radius,
+            child: user.avatar.isNotEmpty
+                ? ClipOval(
+                    child: UniversalImage(
+                      path: pb
+                          .getFileUrl(
+                            user,
+                            user.avatar,
+                            thumb: "${radius}x$radius",
+                          )
+                          .toString(),
+                      fit: BoxFit.fill,
+                    ),
+                  )
+                : null,
           ),
         ),
         Positioned.fill(

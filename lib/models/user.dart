@@ -104,6 +104,8 @@ class User extends RecordModel {
   final bool isMaster;
   @JsonKey()
   final String sessions;
+  @JsonKey()
+  final String avatar;
 
   @JsonKey(ignore: true)
   final Set<SessionObject> sessionObjects;
@@ -123,6 +125,7 @@ class User extends RecordModel {
     required this.verified,
     required this.isMaster,
     required this.sessions,
+    required this.avatar,
     this.name,
   }) : sessionObjects = sessions.isEmpty
             ? {}

@@ -1,13 +1,19 @@
+import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
+import 'package:eusc_freaks/utils/platform.dart';
+import 'package:eusc_freaks/utils/snackbar.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 
 class ProfilePage extends HookConsumerWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -20,6 +26,7 @@ class ProfilePage extends HookConsumerWidget {
       job: userPostsInfiniteQueryJob(user!.id),
       externalData: null,
     );
+    final mounted = useIsMounted();
 
     final posts = userPostsQuery.pages
         .map((page) => page?.items ?? [])
@@ -30,6 +37,7 @@ class ProfilePage extends HookConsumerWidget {
     final tableHeaderStyle = tableStyle.copyWith(
       fontWeight: FontWeight.bold,
     );
+
     return Scaffold(
       body: Waypoint(
         controller: controller,
@@ -45,7 +53,111 @@ class ProfilePage extends HookConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             children: [
               const Gap(50),
-              Avatar(user: user, radius: 50),
+              HookBuilder(builder: (context) {
+                final avatarEditMode = useState(false);
+                return MouseRegion(
+                  onEnter: (event) {
+                    avatarEditMode.value = true;
+                  },
+                  onExit: (event) {
+                    avatarEditMode.value = false;
+                  },
+                  child: GestureDetector(
+                    onTap: () {
+                      if (kIsMobile) {
+                        avatarEditMode.value = !avatarEditMode.value;
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Avatar(user: user, radius: 50),
+                        ),
+                        if (avatarEditMode.value)
+                          Center(
+                            child: CircleAvatar(
+                              radius: 52,
+                              backgroundColor: Colors.black45,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.image_outlined),
+                                    onPressed: () async {
+                                      final file =
+                                          await FilePicker.platform.pickFiles(
+                                        dialogTitle:
+                                            "Select an profile picture",
+                                        type: FileType.image,
+                                        allowedExtensions: [
+                                          'jpg',
+                                          'png',
+                                          'jpeg'
+                                        ],
+                                      );
+                                      if (file == null || file.files.isEmpty) {
+                                        avatarEditMode.value = false;
+                                        return;
+                                      }
+
+                                      await pb.collection('users').update(
+                                        user.id,
+                                        files: [
+                                          await MultipartFile.fromPath(
+                                            'avatar',
+                                            file.files.first.path!,
+                                            filename: file.files.first.name,
+                                            contentType: MediaType(
+                                              'image',
+                                              file.files.first.extension!,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                      await ref
+                                          .read(authenticationProvider.notifier)
+                                          .refetch();
+                                      avatarEditMode.value = false;
+                                      if (mounted()) {
+                                        showSnackbar(
+                                          context,
+                                          'Profile picture updated. Restart the app to see the changes',
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () async {
+                                      await pb.collection('users').update(
+                                        user.id,
+                                        body: {
+                                          'avatar': null,
+                                        },
+                                      );
+                                      await ref
+                                          .read(authenticationProvider.notifier)
+                                          .refetch();
+                                      avatarEditMode.value = false;
+                                      if (mounted()) {
+                                        showSnackbar(
+                                          context,
+                                          'Profile picture removed. Restart the app to see the changes',
+                                          backgroundColor: Colors.red[400],
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
               const Gap(20),
               if (user.name != null)
                 Center(

@@ -1,6 +1,7 @@
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
+import 'package:eusc_freaks/hooks/use_redirect.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
@@ -32,6 +33,8 @@ class PostsPage extends HookConsumerWidget {
 
     final posts =
         postsQuery.pages.expand<Post>((page) => page?.items.toList() ?? []);
+
+    useRedirect("/login", user == null);
 
     useEffect(() {
       if (postsQuery.hasError) {

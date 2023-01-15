@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/comment.dart';
@@ -237,7 +238,7 @@ class PostPage extends HookConsumerWidget {
                             children: [
                               Row(
                                 children: [
-                                  const CircleAvatar(radius: 8),
+                                  Avatar(user: comment.user!, radius: 10),
                                   const Gap(5),
                                   Text(
                                     comment.user!.name ??

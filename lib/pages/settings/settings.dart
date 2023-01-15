@@ -1,6 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SettingsPage extends HookConsumerWidget {
@@ -49,6 +50,7 @@ class SettingsPage extends HookConsumerWidget {
               title: const Text("Logout"),
               onTap: () {
                 authNotifier.logout();
+                GoRouter.of(context).go('/login');
               },
             ),
         ],

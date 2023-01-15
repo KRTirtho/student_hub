@@ -11,12 +11,14 @@ class UniversalImage extends HookWidget {
   final double? width;
   final double scale;
   final PlaceholderWidgetBuilder? placeholder;
+  final BoxFit fit;
   const UniversalImage({
     required this.path,
     this.height,
     this.width,
     this.placeholder,
     this.scale = 1,
+    this.fit = BoxFit.cover,
     Key? key,
   }) : super(key: key);
 
@@ -53,6 +55,7 @@ class UniversalImage extends HookWidget {
         memCacheWidth: width?.toInt(),
         placeholder: placeholder,
         cacheKey: path,
+        fit: fit,
       );
     } else if (Uri.tryParse(path) != null && !path.startsWith("assets")) {
       return Image.file(

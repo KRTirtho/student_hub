@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/hooks/use_redirect.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -21,17 +22,7 @@ class LoginPage extends HookConsumerWidget {
     final mounted = useIsMounted();
     final error = useState(false);
 
-    useEffect(
-      () {
-        if (user != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            GoRouter.of(context).go("/");
-          });
-        }
-        return null;
-      },
-      [user],
-    );
+    useRedirect("/", user != null);
 
     return Scaffold(
       body: SingleChildScrollView(

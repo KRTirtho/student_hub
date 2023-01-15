@@ -35,6 +35,13 @@ class AuthenticationNotifier extends StateNotifier<User?> {
 
   bool get isLoggedIn => state != null;
 
+  Future<void> refetch() async {
+    if (state == null) return;
+    final res = await pb.collection("users").authRefresh();
+    if (res.record == null) return;
+    state = User.fromRecord(res.record!);
+  }
+
   Future<User?> login(String email, String password) async {
     final res = await pb.collection('users').authWithPassword(email, password);
 

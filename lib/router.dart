@@ -17,8 +17,6 @@ import 'package:riverpod/riverpod.dart';
 final routerConfig = Provider((ref) {
   final navigatorKey = GlobalKey<NavigatorState>();
   final shellNavigatorKey = GlobalKey<NavigatorState>();
-  final auth = ref.watch(authenticationProvider.notifier);
-  final user = ref.watch(authenticationProvider);
 
   return GoRouter(
     initialLocation: '/',
@@ -37,6 +35,8 @@ final routerConfig = Provider((ref) {
               ),
             ),
             redirect: (context, state) {
+              final auth = ref.read(authenticationProvider.notifier);
+              final user = ref.read(authenticationProvider);
               if (!auth.isLoggedIn) {
                 return "/login";
               } else if (auth.isLoggedIn &&
@@ -98,6 +98,7 @@ final routerConfig = Provider((ref) {
           ),
         ],
         redirect: (context, state) {
+          final auth = ref.read(authenticationProvider.notifier);
           if (auth.isLoggedIn) {
             return "/";
           }
@@ -111,7 +112,9 @@ final routerConfig = Provider((ref) {
           child: SignupPage(),
         ),
         redirect: (context, state) {
+          final auth = ref.read(authenticationProvider.notifier);
           if (auth.isLoggedIn) {
+            final user = ref.read(authenticationProvider);
             if (!user!.verified && Env.verifyEmail) {
               return "/verification";
             }
