@@ -51,7 +51,7 @@ class PostsPage extends HookConsumerWidget {
         primary: true,
         title: const Text("Eusc Freaks"),
         centerTitle: false,
-        leading: const UniversalImage(path: "assets/logo.jpg", height: 40),
+        leading: const UniversalImage(path: "assets/logo.png", height: 40),
         actions: [
           IconButton(
             icon: const Icon(Icons.search_outlined),

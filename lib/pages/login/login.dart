@@ -43,7 +43,7 @@ class LoginPage extends HookConsumerWidget {
               Container(
                 constraints: const BoxConstraints(maxHeight: 200),
                 child: const UniversalImage(
-                  path: "assets/logo.jpg",
+                  path: "assets/logo.png",
                 ),
               ),
               const Gap(10),

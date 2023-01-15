@@ -3,10 +3,13 @@ import 'package:eusc_freaks/collections/env.dart';
 import 'package:eusc_freaks/router.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(
+    widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
+  );
   await Env.configure();
   runApp(const ProviderScope(child: EuscFreaks()));
 }

@@ -1,6 +1,7 @@
 import 'package:eusc_freaks/collections/sstorage.dart';
 import 'package:eusc_freaks/models/user.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:riverpod/riverpod.dart';
 
 class AuthenticationNotifier extends StateNotifier<User?> {
@@ -9,10 +10,16 @@ class AuthenticationNotifier extends StateNotifier<User?> {
     this.ref,
   ) : super(null) {
     secureStorage.read(key: "token").then((token) async {
-      if (token == null || token.isEmpty) return;
+      if (token == null || token.isEmpty) {
+        FlutterNativeSplash.remove();
+        return;
+      }
       pb.authStore.save(token, null);
       final res = await pb.collection("users").authRefresh();
-      if (res.record == null) return;
+      if (res.record == null) {
+        FlutterNativeSplash.remove();
+        return;
+      }
       state = User.fromRecord(res.record!);
     });
     pb.authStore.onChange.listen((event) async {
