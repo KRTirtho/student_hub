@@ -21,10 +21,9 @@ class PostMedia extends HookConsumerWidget {
     final pageController = usePageController(initialPage: initialPage);
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-      child: Dialog(
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.zero,
-        child: ScrollConfiguration(
+        body: ScrollConfiguration(
           behavior: const ScrollBehavior().copyWith(
             overscroll: true,
             dragDevices: {

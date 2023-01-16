@@ -4,7 +4,6 @@ import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
-import 'package:eusc_freaks/components/posts/post_media.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/post.dart';
@@ -17,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' hide ClientException;
 import 'package:http_parser/http_parser.dart';
@@ -245,8 +245,8 @@ class PostPage extends HookConsumerWidget {
                               const Gap(10),
                               Row(
                                 children: [
-                                  ...urls.map(
-                                    (url) {
+                                  ...urls.mapIndexed(
+                                    (index, url) {
                                       return Padding(
                                         padding:
                                             const EdgeInsets.only(right: 5),
@@ -255,22 +255,30 @@ class PostPage extends HookConsumerWidget {
                                               BorderRadius.circular(10),
                                           child: InkWell(
                                             onTap: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) => PostMedia(
-                                                  medias: urls,
-                                                  initialPage:
-                                                      urls.indexOf(url),
-                                                ),
+                                              GoRouter.of(context).push(
+                                                "/media?initialPage=$index",
+                                                extra: urls,
                                               );
                                             },
                                             borderRadius:
                                                 BorderRadius.circular(10),
-                                            child: UniversalImage(
-                                              path: url.toString(),
-                                              width: 80,
-                                              height: 80,
-                                              fit: BoxFit.cover,
+                                            child: SizedBox(
+                                              height: 100,
+                                              width: 100,
+                                              child: Hero(
+                                                tag: url.toString(),
+                                                transitionOnUserGestures: true,
+                                                child: UniversalImage(
+                                                  path: url.toString(),
+                                                  fit: BoxFit.cover,
+                                                  placeholder: (context, url) =>
+                                                      const Center(
+                                                    child:
+                                                        CircularProgressIndicator
+                                                            .adaptive(),
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),

@@ -1,13 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/components/posts/post_media.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/utils/number_ending_type.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -26,22 +24,33 @@ final chipOfType = {
   },
 };
 
-class PostCard extends HookConsumerWidget {
+class PostCard extends StatefulWidget {
   final Post post;
   final bool expanded;
-  PostCard({
+  const PostCard({
     Key? key,
     required this.post,
     this.expanded = false,
   }) : super(key: key);
 
-  final carouselController = CarouselController();
+  @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  late final CarouselController carouselController;
 
   @override
-  Widget build(BuildContext context, ref) {
-    final chipThrils = chipOfType[post.type]!;
-    final session = post.user?.currentSession;
-    final medias = post.getMediaURL();
+  void initState() {
+    super.initState();
+    carouselController = CarouselController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chipThrills = chipOfType[widget.post.type]!;
+    final session = widget.post.user?.currentSession;
+    final medias = widget.post.getMediaURL();
 
     return Card(
       child: Padding(
@@ -51,20 +60,22 @@ class PostCard extends HookConsumerWidget {
           children: [
             Row(
               children: [
-                Avatar(user: post.user!),
+                Avatar(user: widget.post.user!),
                 const Gap(5),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        post.user?.name ?? post.user?.username ?? '',
+                        widget.post.user?.name ??
+                            widget.post.user?.username ??
+                            '',
                         style: Theme.of(context).textTheme.titleSmall,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        post.user?.isMaster == true
+                        widget.post.user?.isMaster == true
                             ? "${session?.subject?.formattedName} Teacher since ${session?.year}"
                             : "B. ${session?.year}'s  ${session?.serial}${getNumberEnding(session?.serial ?? 999)} of C. ${session?.standard}",
                         style: Theme.of(context).textTheme.caption,
@@ -78,19 +89,19 @@ class PostCard extends HookConsumerWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: chipThrils['backgroundColor']!,
+                          color: chipThrills['backgroundColor']!,
                           borderRadius: BorderRadius.circular(50),
                           border: Border.all(
-                            color: chipThrils['color']!,
+                            color: chipThrills['color']!,
                             width: 1,
                           ),
                         ),
                         child: Text(
-                          post.type.name,
+                          widget.post.type.name,
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: chipThrils['color'],
+                                    color: chipThrills['color'],
                                     fontSize: 10,
                                   ),
                         ),
@@ -99,16 +110,17 @@ class PostCard extends HookConsumerWidget {
                   ),
                 ),
                 Text(
-                  timeago.format(DateTime.parse(post.created)),
+                  timeago.format(DateTime.parse(widget.post.created)),
                   style: Theme.of(context).textTheme.caption,
                 ),
               ],
             ),
             const Gap(20),
-            Text(post.title, style: Theme.of(context).textTheme.titleSmall),
+            Text(widget.post.title,
+                style: Theme.of(context).textTheme.titleSmall),
             const Gap(20),
             ReadMoreText(
-              "${post.description} ",
+              "${widget.post.description} ",
               moreStyle: Theme.of(context).textTheme.caption,
               lessStyle: Theme.of(context).textTheme.caption,
               trimMode: TrimMode.Line,
@@ -141,12 +153,9 @@ class PostCard extends HookConsumerWidget {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => PostMedia(
-                                    medias: medias,
-                                    initialPage: index,
-                                  ),
+                                GoRouter.of(context).push(
+                                  "/media?initialPage=$index",
+                                  extra: medias,
                                 );
                               },
                               child: Center(
@@ -234,16 +243,16 @@ class PostCard extends HookConsumerWidget {
                 ],
               ),
             const Gap(20),
-            if (!expanded)
+            if (!widget.expanded)
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(40),
                 ),
                 child: Text(
-                  post.type == PostType.question ? "Solve" : "Comments",
+                  widget.post.type == PostType.question ? "Solve" : "Comments",
                 ),
                 onPressed: () {
-                  GoRouter.of(context).push("/posts/${post.id}");
+                  GoRouter.of(context).push("/posts/${widget.post.id}");
                 },
               ),
           ],

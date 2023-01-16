@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/collections/env.dart';
+import 'package:eusc_freaks/pages/media/media.dart';
 import 'package:eusc_freaks/pages/login/forgot_password.dart';
 import 'package:eusc_freaks/pages/login/login.dart';
 import 'package:eusc_freaks/pages/posts/post.dart';
@@ -10,6 +11,7 @@ import 'package:eusc_freaks/pages/signup/signup.dart';
 import 'package:eusc_freaks/pages/signup/verfication.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/shell.dart';
+import 'package:eusc_freaks/utils/transparent_route.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod/riverpod.dart';
@@ -74,6 +76,18 @@ final routerConfig = Provider((ref) {
       ),
 
       //? ============ Outside of Shell ==================== ?//
+      GoRoute(
+        path: '/media',
+        parentNavigatorKey: navigatorKey,
+        pageBuilder: (context, state) => MaterialTransparentPage(
+          child: PostMedia(
+            medias: state.extra as List<Uri>,
+            initialPage: state.queryParams["initialPage"] != null
+                ? int.parse(state.queryParams["initialPage"]!)
+                : 0,
+          ),
+        ),
+      ),
       GoRoute(
         path: '/settings',
         parentNavigatorKey: navigatorKey,
