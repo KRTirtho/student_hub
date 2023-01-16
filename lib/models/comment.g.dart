@@ -8,6 +8,9 @@ part of 'comment.dart';
 
 Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
       comment: json['comment'] as String,
+      media:
+          (json['media'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
       post: json['post'] == null
           ? null
           : Post.fromJson(json['post'] as Map<String, dynamic>),
@@ -30,4 +33,5 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'comment': instance.comment,
       'post': instance.post,
       'user': instance.user,
+      'media': instance.media,
     };

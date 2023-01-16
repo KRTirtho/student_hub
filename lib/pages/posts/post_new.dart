@@ -167,7 +167,7 @@ class PostNewPage extends HookConsumerWidget {
                             }
                           },
                     child: const Icon(
-                      Icons.add_a_photo_outlined,
+                      Icons.add_photo_alternate_outlined,
                       size: 40,
                     ),
                   ),

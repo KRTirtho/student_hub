@@ -2,19 +2,24 @@ import 'dart:ui';
 
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
+import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/components/posts/post_media.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:eusc_freaks/utils/platform.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:http/http.dart' hide ClientException;
+import 'package:http_parser/http_parser.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart';
@@ -35,34 +40,6 @@ class PostPage extends HookConsumerWidget {
     final commentsQuery = useInfiniteQuery(
       job: postCommentsInfiniteQueryJob(postId),
       externalData: null,
-    );
-    final commentController = useTextEditingController();
-    final updating = useState(false);
-
-    void comment() async {
-      if (commentController.text.isEmpty) return;
-      updating.value = true;
-
-      await pb.collection("comments").create(body: {
-        "comment": commentController.text.trim(),
-        "post": postId,
-        "user": ref.read(authenticationProvider)?.id,
-      });
-      await commentsQuery.refetchPages();
-      commentController.clear();
-      updating.value = false;
-    }
-
-    final focusNode = useFocusNode(
-      onKey: (node, event) {
-        if (kIsDesktop &&
-            event.isKeyPressed(LogicalKeyboardKey.enter) &&
-            event.isShiftPressed) {
-          comment();
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      },
     );
 
     final comments = commentsQuery.pages
@@ -230,6 +207,7 @@ class PostPage extends HookConsumerWidget {
                     const Center(child: CircularProgressIndicator.adaptive()),
                   ...comments.map(
                     (comment) {
+                      final urls = comment.getMediaURL();
                       return Card(
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -264,6 +242,43 @@ class PostPage extends HookConsumerWidget {
                                 lessStyle: Theme.of(context).textTheme.caption,
                                 moreStyle: Theme.of(context).textTheme.caption,
                               ),
+                              const Gap(10),
+                              Row(
+                                children: [
+                                  ...urls.map(
+                                    (url) {
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 5),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          child: InkWell(
+                                            onTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) => PostMedia(
+                                                  medias: urls,
+                                                  initialPage:
+                                                      urls.indexOf(url),
+                                                ),
+                                              );
+                                            },
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: UniversalImage(
+                                              path: url.toString(),
+                                              width: 80,
+                                              height: 80,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
@@ -275,38 +290,199 @@ class PostPage extends HookConsumerWidget {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 70,
-              decoration: BoxDecoration(
-                color:
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(.3),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: TextField(
-                  focusNode: focusNode,
-                  controller: commentController,
-                  maxLines: 2,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.transparent,
-                    isDense: true,
-                    labelText: postQuery.data?.type == PostType.question
-                        ? 'Answer'
-                        : 'Comment',
-                    suffix: IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: updating.value ? null : comment,
-                    ),
+          HookBuilder(builder: (context) {
+            final medias = useState<List<PlatformFile>>([]);
+            final updating = useState(false);
+
+            final commentController = useTextEditingController();
+            void comment() async {
+              if (commentController.text.isEmpty) return;
+              updating.value = true;
+
+              await pb.collection("comments").create(
+                body: {
+                  "comment": commentController.text.trim(),
+                  "post": postId,
+                  "user": ref.read(authenticationProvider)?.id,
+                },
+                files: medias.value
+                    .map(
+                      (e) => MultipartFile.fromBytes(
+                        'media',
+                        e.bytes!,
+                        filename: e.name,
+                        contentType: MediaType(
+                          'image',
+                          e.extension!,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+              await commentsQuery.refetchPages();
+              medias.value = [];
+              commentController.clear();
+              updating.value = false;
+            }
+
+            final focusNode = useFocusNode(
+              onKey: (node, event) {
+                if (kIsDesktop &&
+                    event.isKeyPressed(LogicalKeyboardKey.enter) &&
+                    event.isShiftPressed) {
+                  comment();
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+            );
+
+            final addMedia = updating.value
+                ? null
+                : () async {
+                    final files = await FilePicker.platform.pickFiles(
+                      allowMultiple: true,
+                      dialogTitle: "Select post media",
+                      type: FileType.image,
+                      withData: true,
+                    );
+                    if (files == null) return;
+                    if ((files.count + medias.value.length) > 3) {
+                      medias.value = [
+                        ...medias.value,
+                        ...files.files.sublist(0, 3 - medias.value.length),
+                      ];
+                    } else {
+                      medias.value = [...medias.value, ...files.files];
+                    }
+                  };
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  color:
+                      Theme.of(context).scaffoldBackgroundColor.withOpacity(.3),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (medias.value.isNotEmpty) ...[
+                        const Gap(10),
+                        SizedBox(
+                          height: 70,
+                          child: Row(
+                            children: [
+                              const Gap(10),
+                              ...medias.value.map(
+                                (media) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          height: 70,
+                                          width: 70,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: Colors.white,
+                                            image: DecorationImage(
+                                              image: MemoryImage(
+                                                media.bytes!,
+                                              ),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned.fill(
+                                          child: Center(
+                                            child: IconButton(
+                                              style: IconButton.styleFrom(
+                                                backgroundColor: Colors.white60,
+                                              ),
+                                              color: Colors.red[400]
+                                                  ?.withOpacity(.8),
+                                              icon: const Icon(
+                                                Icons.delete_outline_rounded,
+                                              ),
+                                              onPressed: () {
+                                                medias.value = medias.value
+                                                    .where(
+                                                      (element) =>
+                                                          element != media,
+                                                    )
+                                                    .toList();
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              SizedBox(
+                                width: 70,
+                                child: MaterialButton(
+                                  height: 80,
+                                  color: Theme.of(context).cardColor,
+                                  elevation: 0,
+                                  focusElevation: 0,
+                                  hoverElevation: 0,
+                                  highlightElevation: 0,
+                                  disabledElevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  onPressed: addMedia,
+                                  child: const Icon(
+                                    Icons.add_photo_alternate_outlined,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Gap(10),
+                      ],
+                      TextField(
+                        focusNode: focusNode,
+                        controller: commentController,
+                        maxLines: 2,
+                        keyboardType: TextInputType.multiline,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.transparent,
+                          isDense: true,
+                          labelText: postQuery.data?.type == PostType.question
+                              ? 'Answer'
+                              : 'Comment',
+                          suffix: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (medias.value.isEmpty)
+                                IconButton(
+                                  icon: const Icon(
+                                      Icons.add_photo_alternate_outlined),
+                                  onPressed: addMedia,
+                                ),
+                              IconButton(
+                                icon: const Icon(Icons.send),
+                                onPressed: updating.value ? null : comment,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
