@@ -1,4 +1,6 @@
+import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/models/user.dart';
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';
 part 'post.g.dart';
@@ -27,14 +29,30 @@ class Post extends RecordModel {
   final List<String> comments;
 
   final PostType type;
+  final List<String> media;
 
   Post({
     required this.title,
     required this.description,
     required this.type,
     this.user,
+    this.media = const [],
     this.comments = const [],
   }) : super();
+
+  List<Uri> getMediaURL([Size? size]) {
+    assert(
+      size?.height != double.infinity && size?.width != double.infinity,
+      "Size cannot be infinite",
+    );
+    return media.map((e) {
+      return pb.getFileUrl(
+        this,
+        e,
+        thumb: size != null ? "${size.height}x${size.width}" : null,
+      );
+    }).toList();
+  }
 
   factory Post.fromRecord(RecordModel record) {
     final json = record.toJson();

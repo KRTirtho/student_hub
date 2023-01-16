@@ -13,6 +13,9 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       user: json['user'] == null
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
+      media:
+          (json['media'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
       comments: (json['comments'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -35,6 +38,7 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'user': instance.user,
       'comments': instance.comments,
       'type': _$PostTypeEnumMap[instance.type]!,
+      'media': instance.media,
     };
 
 const _$PostTypeEnumMap = {

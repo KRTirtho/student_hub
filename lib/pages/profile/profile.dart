@@ -79,10 +79,10 @@ class ProfilePage extends HookConsumerWidget {
                               radius: 52,
                               backgroundColor: Colors.black45,
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
+                                    color: Colors.white,
                                     icon: const Icon(Icons.image_outlined),
                                     onPressed: () async {
                                       final file =
@@ -128,6 +128,7 @@ class ProfilePage extends HookConsumerWidget {
                                     },
                                   ),
                                   IconButton(
+                                    color: Colors.white,
                                     icon: const Icon(Icons.delete_outline),
                                     onPressed: () async {
                                       await pb.collection('users').update(
