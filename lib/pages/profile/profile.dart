@@ -89,7 +89,7 @@ class ProfilePage extends HookConsumerWidget {
                                           await FilePicker.platform.pickFiles(
                                         dialogTitle:
                                             "Select an profile picture",
-                                        type: FileType.image,
+                                        type: FileType.custom,
                                         allowedExtensions: [
                                           'jpg',
                                           'png',

@@ -32,18 +32,15 @@ class Avatar extends HookWidget {
           ),
           child: CircleAvatar(
             radius: radius,
-            child: user.avatar.isNotEmpty
-                ? ClipOval(
-                    child: UniversalImage(
-                      path: pb
-                          .getFileUrl(
-                            user,
-                            user.avatar,
-                            thumb: "${radius}x$radius",
-                          )
-                          .toString(),
-                      fit: BoxFit.fill,
-                    ),
+            backgroundImage: user.avatar.isNotEmpty
+                ? UniversalImage.imageProvider(
+                    pb
+                        .getFileUrl(
+                          user,
+                          user.avatar,
+                          thumb: "${radius}x$radius",
+                        )
+                        .toString(),
                   )
                 : null,
           ),
