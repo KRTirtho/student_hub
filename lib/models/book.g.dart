@@ -16,6 +16,7 @@ Book _$BookFromJson(Map<String, dynamic> json) => Book(
       media: json['media'] as String,
       bio: json['bio'] as String?,
       externalUrl: json['external_url'] as String?,
+      thumbnail: json['thumbnail'] as String,
     )
       ..id = json['id'] as String
       ..created = json['created'] as String
@@ -36,4 +37,5 @@ Map<String, dynamic> _$BookToJson(Book instance) => <String, dynamic>{
       'tags': instance.tags,
       'media': instance.media,
       'external_url': instance.externalUrl,
+      'thumbnail': instance.thumbnail,
     };

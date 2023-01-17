@@ -16,6 +16,7 @@ class Book extends RecordModel {
   final String media;
   @JsonKey(name: 'external_url')
   final String? externalUrl;
+  final String thumbnail;
 
   Book({
     required this.title,
@@ -23,12 +24,17 @@ class Book extends RecordModel {
     required this.user,
     required this.tags,
     required this.media,
+    required this.thumbnail,
     this.bio,
     this.externalUrl,
   });
 
   Uri getMediaURL() {
     return pb.getFileUrl(this, media);
+  }
+
+  Uri getThumbnailURL() {
+    return pb.getFileUrl(this, thumbnail);
   }
 
   factory Book.fromRecord(RecordModel record) => Book.fromJson(record.toJson());

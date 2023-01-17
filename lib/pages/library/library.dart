@@ -34,14 +34,20 @@ class LibraryPage extends HookConsumerWidget {
           if (booksQuery.hasNextPage) booksQuery.fetchNextPage();
         },
         controller: controller,
-        child: ListView.builder(
-          controller: controller,
-          padding: const EdgeInsets.all(8),
-          itemCount: books.length,
-          itemBuilder: (context, index) {
-            final book = books[index];
-            return BookCard(book: book);
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await booksQuery.refetch();
           },
+          child: ListView.builder(
+            controller: controller,
+            padding: const EdgeInsets.all(8),
+            itemCount: books.length,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final book = books[index];
+              return BookCard(book: book);
+            },
+          ),
         ),
       ),
     );

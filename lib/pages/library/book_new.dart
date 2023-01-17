@@ -1,5 +1,5 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/hooks/use_pdf_controller.dart';
+import 'package:eusc_freaks/hooks/use_pdf_thumbnail.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/books.dart';
@@ -119,6 +119,10 @@ class BookNewPage extends HookConsumerWidget {
                           );
 
                           if (files == null) return;
+                          if (files.files.first.size > 40000000) {
+                            error.value = "File size must be less than 40MB";
+                            return;
+                          }
                           media.value = files.files.first;
                         },
                   child: const Icon(
@@ -130,10 +134,13 @@ class BookNewPage extends HookConsumerWidget {
             else ...[
               HookBuilder(builder: (context) {
                 final document = useMemoized(
-                  () => PdfDocument.openData(media.value!.bytes!),
+                  () => media.value?.bytes != null
+                      ? PdfDocument.openData(media.value!.bytes!)
+                      : null,
                   [media],
                 );
-                final pdfController = usePdfController(document: document);
+
+                final thumbnail = usePdfThumbnail(document);
                 return SizedBox(
                   height: 200,
                   child: InkWell(
@@ -143,12 +150,20 @@ class BookNewPage extends HookConsumerWidget {
                         extra: document,
                       );
                     },
-                    child: IgnorePointer(
-                      child: PdfView(
-                        controller: pdfController,
-                        physics: const NeverScrollableScrollPhysics(),
-                      ),
-                    ),
+                    child: FutureBuilder<PdfPageImage?>(
+                        future: thumbnail,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          print("Size ${snapshot.data!.bytes.length}");
+                          return Image.memory(
+                            snapshot.data!.bytes,
+                            fit: BoxFit.contain,
+                          );
+                        }),
                   ),
                 );
               }),
@@ -240,6 +255,9 @@ class BookNewPage extends HookConsumerWidget {
                         return;
                       }
                       updating.value = true;
+                      final thumb = await getPdfThumbnail(
+                        PdfDocument.openData(media.value!.bytes!),
+                      );
                       try {
                         await pb.collection("books").create(
                           body: {
@@ -258,6 +276,14 @@ class BookNewPage extends HookConsumerWidget {
                               media.value!.bytes!,
                               filename: media.value!.name,
                               contentType: MediaType("application", "pdf"),
+                            ),
+                            MultipartFile.fromBytes(
+                              "thumbnail",
+                              thumb!.bytes,
+                              filename:
+                                  "${media.value!.name}.thumbnail.${thumb.format.name}",
+                              contentType:
+                                  MediaType("image", thumb.format.name),
                             ),
                           ],
                         );

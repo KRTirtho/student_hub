@@ -1,5 +1,5 @@
 import 'package:eusc_freaks/components/image/avatar.dart';
-import 'package:eusc_freaks/hooks/use_pdf_controller.dart';
+import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +30,6 @@ class BookCard extends HookConsumerWidget {
       });
       return (await PdfDocument.openData(await file.readAsBytes()));
     }, [mediaUrl]);
-
-    final controller = usePdfController(document: bookMedia);
 
     return Card(
       child: Padding(
@@ -94,36 +92,40 @@ class BookCard extends HookConsumerWidget {
                 onTap: () {
                   GoRouter.of(context).push('/media/pdf', extra: bookMedia);
                 },
-                child: IgnorePointer(
-                  child: PdfView(
-                    controller: controller,
-                    physics: const NeverScrollableScrollPhysics(),
+                child: UniversalImage(
+                  path: book.getThumbnailURL().toString(),
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
                   ),
                 ),
               ),
             ),
             const Gap(20),
-            if (book.externalUrl != null) ...[
-              Text(
-                "Was originally published at:",
-                style: Theme.of(context).textTheme.caption?.copyWith(
-                      fontStyle: FontStyle.italic,
+            if (book.externalUrl != null)
+              Wrap(
+                spacing: 3,
+                children: [
+                  Text(
+                    "Was originally published at:",
+                    style: Theme.of(context).textTheme.caption?.copyWith(
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                  InkWell(
+                    onTap: () => launchUrlString(
+                      book.externalUrl!,
+                      mode: LaunchMode.externalApplication,
                     ),
+                    child: Text(
+                      book.externalUrl!,
+                      style: Theme.of(context).textTheme.caption?.copyWith(
+                            color: Colors.blue,
+                          ),
+                    ),
+                  ),
+                ],
               ),
-              const Gap(5),
-              InkWell(
-                onTap: () => launchUrlString(
-                  book.externalUrl!,
-                  mode: LaunchMode.externalApplication,
-                ),
-                child: Text(
-                  book.externalUrl!,
-                  style: Theme.of(context).textTheme.caption?.copyWith(
-                        color: Colors.blue,
-                      ),
-                ),
-              ),
-            ],
             Row(
               children: [
                 RichText(
