@@ -94,9 +94,11 @@ class BookCard extends HookConsumerWidget {
                 onTap: () {
                   GoRouter.of(context).push('/media/pdf', extra: bookMedia);
                 },
-                child: PdfView(
-                  controller: controller,
-                  physics: const NeverScrollableScrollPhysics(),
+                child: IgnorePointer(
+                  child: PdfView(
+                    controller: controller,
+                    physics: const NeverScrollableScrollPhysics(),
+                  ),
                 ),
               ),
             ),

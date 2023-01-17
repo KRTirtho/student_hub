@@ -5,6 +5,7 @@ import 'package:eusc_freaks/models/book.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:eusc_freaks/queries/books.dart';
 
@@ -24,6 +25,10 @@ class LibraryPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: RooAppBar(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => GoRouter.of(context).push("/library/new"),
+        child: const Icon(Icons.menu_book_rounded),
+      ),
       body: Waypoint(
         onTouchEdge: () {
           if (booksQuery.hasNextPage) booksQuery.fetchNextPage();

@@ -1,5 +1,6 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/models/book.dart';
+import 'package:eusc_freaks/models/book_tags.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -24,5 +25,14 @@ final booksInfiniteQueryJob = InfiniteQueryJob<ResultList<Book>, void, int>(
       totalItems: res.totalItems,
       totalPages: res.totalPages,
     );
+  },
+);
+
+final bookTagsQueryJob = QueryJob<List<BookTag>, void>(
+  queryKey: "book-tags-query",
+  task: (queryKey, externalData) async {
+    final res = await pb.collection("book_tags").getFullList(sort: "-created");
+
+    return res.map((r) => BookTag.fromRecord(r)).toList();
   },
 );

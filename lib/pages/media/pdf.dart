@@ -42,7 +42,10 @@ class PdfViewPage extends HookConsumerWidget {
                   right: 10,
                   child: IconButton(
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.white38,
+                      backgroundColor:
+                          Theme.of(context).backgroundColor.withOpacity(
+                                0.5,
+                              ),
                       shape: const CircleBorder(),
                     ),
                     icon: const Icon(Icons.close),

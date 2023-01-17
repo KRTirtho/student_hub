@@ -188,7 +188,9 @@ class _PostCardState extends State<PostCard> {
                                   vertical: 3,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Theme.of(context)
+                                      .backgroundColor
+                                      .withOpacity(.5),
                                   borderRadius: BorderRadius.circular(50),
                                 ),
                                 child: Text(
@@ -214,7 +216,9 @@ class _PostCardState extends State<PostCard> {
                           padding: const EdgeInsets.all(8.0),
                           child: IconButton(
                             style: IconButton.styleFrom(
-                                backgroundColor: Colors.white38),
+                                backgroundColor: Theme.of(context)
+                                    .backgroundColor
+                                    .withOpacity(.5)),
                             icon: const Icon(Icons.chevron_left),
                             onPressed: () {
                               carouselController.previousPage();
@@ -230,7 +234,9 @@ class _PostCardState extends State<PostCard> {
                           padding: const EdgeInsets.all(8.0),
                           child: IconButton(
                             style: IconButton.styleFrom(
-                                backgroundColor: Colors.white38),
+                                backgroundColor: Theme.of(context)
+                                    .backgroundColor
+                                    .withOpacity(.5)),
                             icon: const Icon(Icons.chevron_right),
                             onPressed: () {
                               carouselController.nextPage();

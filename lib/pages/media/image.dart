@@ -63,7 +63,8 @@ class ImagePage extends HookConsumerWidget {
                   right: 10,
                   child: IconButton(
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.white38,
+                      backgroundColor:
+                          Theme.of(context).backgroundColor.withOpacity(.5),
                       shape: const CircleBorder(),
                     ),
                     icon: const Icon(Icons.close),
@@ -78,7 +79,9 @@ class ImagePage extends HookConsumerWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: IconButton(
                           style: IconButton.styleFrom(
-                              backgroundColor: Colors.white38),
+                              backgroundColor: Theme.of(context)
+                                  .backgroundColor
+                                  .withOpacity(.5)),
                           icon: const Icon(Icons.chevron_left),
                           onPressed: () {
                             pageController.previousPage(
@@ -97,7 +100,9 @@ class ImagePage extends HookConsumerWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: IconButton(
                           style: IconButton.styleFrom(
-                              backgroundColor: Colors.white38),
+                              backgroundColor: Theme.of(context)
+                                  .backgroundColor
+                                  .withOpacity(.5)),
                           icon: const Icon(Icons.chevron_right),
                           onPressed: () {
                             pageController.nextPage(
