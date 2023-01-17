@@ -154,7 +154,7 @@ class _PostCardState extends State<PostCard> {
                               ),
                               onPressed: () {
                                 GoRouter.of(context).push(
-                                  "/media?initialPage=$index",
+                                  "/media/image?initialPage=$index",
                                   extra: medias,
                                 );
                               },

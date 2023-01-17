@@ -1,6 +1,6 @@
-import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
+import 'package:eusc_freaks/components/shared/root_app_bar.dart';
 import 'package:eusc_freaks/hooks/use_redirect.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -63,26 +63,7 @@ class PostsPage extends HookConsumerWidget {
     }, []);
 
     return Scaffold(
-      appBar: AppBar(
-        primary: true,
-        title: const Text("Eusc Freaks"),
-        centerTitle: false,
-        leading: const UniversalImage(path: "assets/logo.png", height: 40),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search_outlined),
-            onPressed: () {
-              GoRouter.of(context).push("/search");
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              GoRouter.of(context).push("/settings");
-            },
-          ),
-        ],
-      ),
+      appBar: RooAppBar(),
       floatingActionButton:
           (user?.isMaster != true && type != PostType.announcement.name) ||
                   user?.isMaster == true

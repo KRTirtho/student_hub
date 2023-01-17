@@ -256,7 +256,7 @@ class PostPage extends HookConsumerWidget {
                                           child: InkWell(
                                             onTap: () {
                                               GoRouter.of(context).push(
-                                                "/media?initialPage=$index",
+                                                "/media/image?initialPage=$index",
                                                 extra: urls,
                                               );
                                             },

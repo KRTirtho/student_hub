@@ -15,6 +15,11 @@ final routes = {
     "path": "/?type=${PostType.announcement.name}",
     "icon": Icons.campaign_outlined
   },
+  {
+    "label": "Library",
+    "path": "/library",
+    "icon": Icons.library_books_outlined
+  },
   {"label": "Profile", "path": "/profile", "icon": Icons.person_outline_rounded}
 };
 

@@ -1,7 +1,9 @@
 import 'package:eusc_freaks/collections/env.dart';
-import 'package:eusc_freaks/pages/media/media.dart';
+import 'package:eusc_freaks/pages/library/library.dart';
+import 'package:eusc_freaks/pages/media/image.dart';
 import 'package:eusc_freaks/pages/login/forgot_password.dart';
 import 'package:eusc_freaks/pages/login/login.dart';
+import 'package:eusc_freaks/pages/media/pdf.dart';
 import 'package:eusc_freaks/pages/posts/post.dart';
 import 'package:eusc_freaks/pages/posts/post_new.dart';
 import 'package:eusc_freaks/pages/posts/posts.dart';
@@ -14,6 +16,7 @@ import 'package:eusc_freaks/shell.dart';
 import 'package:eusc_freaks/utils/transparent_route.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pdfx/pdfx.dart';
 import 'package:riverpod/riverpod.dart';
 
 final routerConfig = Provider((ref) {
@@ -72,19 +75,35 @@ final routerConfig = Provider((ref) {
               child: ProfilePage(),
             ),
           ),
+          GoRoute(
+            path: '/library',
+            parentNavigatorKey: shellNavigatorKey,
+            pageBuilder: (context, state) => const MaterialPage(
+              child: LibraryPage(),
+            ),
+          ),
         ],
       ),
 
       //? ============ Outside of Shell ==================== ?//
       GoRoute(
-        path: '/media',
+        path: '/media/image',
         parentNavigatorKey: navigatorKey,
         pageBuilder: (context, state) => MaterialTransparentPage(
-          child: PostMedia(
+          child: ImagePage(
             medias: state.extra as List<Uri>,
             initialPage: state.queryParams["initialPage"] != null
                 ? int.parse(state.queryParams["initialPage"]!)
                 : 0,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/media/pdf',
+        parentNavigatorKey: navigatorKey,
+        pageBuilder: (context, state) => MaterialTransparentPage(
+          child: PdfViewPage(
+            document: state.extra as Future<PdfDocument>,
           ),
         ),
       ),
