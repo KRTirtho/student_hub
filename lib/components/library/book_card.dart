@@ -3,12 +3,9 @@ import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pdfx/pdfx.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -23,13 +20,6 @@ class BookCard extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final mediaUrl = book.getMediaURL().toString();
-    final bookMedia = useMemoized(() async {
-      final file =
-          await DefaultCacheManager().getSingleFile(mediaUrl, headers: {
-        'Accept': 'application/pdf',
-      });
-      return (await PdfDocument.openData(await file.readAsBytes()));
-    }, [mediaUrl]);
 
     return Card(
       child: Padding(
@@ -90,7 +80,7 @@ class BookCard extends HookConsumerWidget {
               width: double.infinity,
               child: InkWell(
                 onTap: () {
-                  GoRouter.of(context).push('/media/pdf', extra: bookMedia);
+                  GoRouter.of(context).push('/media/pdf', extra: mediaUrl);
                 },
                 child: UniversalImage(
                   path: book.getThumbnailURL().toString(),
@@ -157,25 +147,29 @@ class BookCard extends HookConsumerWidget {
             ),
             const Gap(10),
             const Text("Tags#"),
-            Wrap(
-              spacing: 5,
+            Row(
               children: [
-                for (final tag in book.tags)
-                  MaterialButton(
-                    elevation: 0,
-                    focusElevation: 0,
-                    hoverElevation: 0,
-                    highlightElevation: 0,
-                    disabledElevation: 0,
-                    color: Theme.of(context).cardColor,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    height: 30,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    onPressed: () {},
-                    child: Text(tag.tag),
-                  ),
+                Wrap(
+                  spacing: 5,
+                  children: [
+                    for (final tag in book.tags)
+                      MaterialButton(
+                        elevation: 0,
+                        focusElevation: 0,
+                        hoverElevation: 0,
+                        highlightElevation: 0,
+                        disabledElevation: 0,
+                        color: Theme.of(context).cardColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        height: 30,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        onPressed: () {},
+                        child: Text(tag.tag),
+                      ),
+                  ],
+                ),
               ],
             ),
           ],

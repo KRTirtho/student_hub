@@ -113,7 +113,12 @@ final routerConfig = Provider((ref) {
         parentNavigatorKey: navigatorKey,
         pageBuilder: (context, state) => MaterialTransparentPage(
           child: PdfViewPage(
-            document: state.extra as Future<PdfDocument>,
+            document: state.extra != null && state.extra is Future<PdfDocument>
+                ? state.extra as Future<PdfDocument>
+                : null,
+            documentUrl: state.extra != null && state.extra is String
+                ? state.extra as String
+                : null,
           ),
         ),
       ),
