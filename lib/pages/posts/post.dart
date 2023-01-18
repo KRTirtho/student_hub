@@ -70,8 +70,9 @@ class PostPage extends HookConsumerWidget {
                         ...?oldData,
                         commentsQuery.pageParams.first: ResultList(
                           items: [
+                            ...?oldResultList?.items.where((e) => e.solve),
                             comment,
-                            ...?oldResultList?.items,
+                            ...?oldResultList?.items.where((e) => !e.solve),
                           ],
                           page: oldResultList?.page ?? 1,
                           perPage: oldResultList?.perPage ?? 10,
@@ -156,6 +157,8 @@ class PostPage extends HookConsumerWidget {
       };
     }, []);
 
+    final isAlreadySolved = comments.any((e) => e.solve);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Post"),
@@ -202,7 +205,23 @@ class PostPage extends HookConsumerWidget {
                   else
                     const Center(child: CircularProgressIndicator.adaptive()),
                   ...comments.map(
-                    (comment) => PostComment(comment: comment),
+                    (comment) {
+                      return PostComment(
+                        isSolvable: postQuery.data?.type == PostType.question &&
+                            !comment.solve &&
+                            !isAlreadySolved,
+                        comment: comment,
+                        onSolveToggle: (solved) async {
+                          await pb.collection("comments").update(
+                            comment.id,
+                            body: {
+                              "solve": solved,
+                            },
+                          );
+                          await commentsQuery.refetchPages();
+                        },
+                      );
+                    },
                   ),
                   const Gap(80),
                 ],

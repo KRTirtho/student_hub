@@ -12,9 +12,11 @@ class Comment extends RecordModel {
   final Post? post;
   final User? user;
   final List<String> media;
+  final bool solve;
 
   Comment({
     required this.comment,
+    required this.solve,
     this.media = const [],
     this.post,
     this.user,

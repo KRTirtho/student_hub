@@ -54,7 +54,7 @@ final postCommentsInfiniteQueryJob =
     final res = await pb.collection("comments").getList(
           expand: "user",
           filter: "post = '${getVariable(queryKey)}'",
-          sort: "-created",
+          sort: "-solve,-created",
           page: pageParam,
           perPage: 10,
         );

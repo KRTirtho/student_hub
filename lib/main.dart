@@ -55,6 +55,11 @@ class EuscFreaks extends HookConsumerWidget {
         elevation: 0,
         titleSpacing: 0,
       ),
+      popupMenuTheme: PopupMenuThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      ),
     );
 
     final darkTheme = ThemeData(
@@ -80,6 +85,11 @@ class EuscFreaks extends HookConsumerWidget {
         backgroundColor: Colors.black,
         elevation: 0,
         titleSpacing: 0,
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
       ),
     );
 

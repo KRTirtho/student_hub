@@ -1,8 +1,8 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -24,17 +24,23 @@ class BookCard extends HookConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  book.title,
-                  style: Theme.of(context).textTheme.titleMedium,
+                Expanded(
+                  child: AutoSizeText(
+                    book.title,
+                    maxLines: 2,
+                    minFontSize: 14,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
-                const Spacer(),
+                const Gap(10),
                 Text(
                   format(
                     DateTime.parse(book.created),
@@ -43,6 +49,7 @@ class BookCard extends HookConsumerWidget {
                 ),
               ],
             ),
+            const Gap(5),
             RichText(
               text: TextSpan(
                 children: [
@@ -117,43 +124,43 @@ class BookCard extends HookConsumerWidget {
                   ),
                 ],
               ),
+            const Gap(10),
+            Text(
+              "Uploaded by ",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const Gap(5),
             Row(
               children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Uploaded by ",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      TextSpan(
-                        text: book.user.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            if (book.user.id ==
-                                ref.read(authenticationProvider)?.id) {
-                              GoRouter.of(context).go(
-                                "/profile/authenticated",
-                              );
-                            } else {
-                              GoRouter.of(context).push(
-                                "/profile/${book.user.id}",
-                              );
-                            }
-                          },
-                      ),
-                    ],
+                Avatar(user: book.user, radius: 12),
+                const Gap(5),
+                Flexible(
+                  child: InkWell(
+                    onTap: () {
+                      if (book.user.id ==
+                          ref.read(authenticationProvider)?.id) {
+                        GoRouter.of(context).go(
+                          "/profile/authenticated",
+                        );
+                      } else {
+                        GoRouter.of(context).push(
+                          "/profile/${book.user.id}",
+                        );
+                      }
+                    },
+                    child: AutoSizeText(
+                      book.user.name ?? '',
+                      maxLines: 2,
+                      minFontSize: 14,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
-                const Gap(5),
-                Avatar(user: book.user, radius: 12),
               ],
             ),
             const Gap(10),
             const Text("Tags#"),
+            const Gap(5),
             Row(
               children: [
                 Wrap(
