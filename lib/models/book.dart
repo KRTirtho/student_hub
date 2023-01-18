@@ -1,6 +1,7 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
 import 'package:eusc_freaks/models/user.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -33,8 +34,17 @@ class Book extends RecordModel {
     return pb.getFileUrl(this, media);
   }
 
-  Uri getThumbnailURL() {
-    return pb.getFileUrl(this, thumbnail);
+  Uri getThumbnailURL([Size? size]) {
+    assert(
+      size?.height != double.infinity && size?.width != double.infinity,
+      "Infinity is not a valid size",
+    );
+    return pb.getFileUrl(
+      this,
+      thumbnail,
+      thumb:
+          size != null ? "${size.width.toInt()}x${size.height.toInt()}" : null,
+    );
   }
 
   factory Book.fromRecord(RecordModel record) => Book.fromJson(record.toJson());

@@ -69,7 +69,8 @@ class PdfViewPage extends HookConsumerWidget {
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       child: SafeArea(
         child: Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor:
+              Theme.of(context).scaffoldBackgroundColor.withOpacity(.6),
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: Colors.transparent,

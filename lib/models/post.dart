@@ -49,7 +49,9 @@ class Post extends RecordModel {
       return pb.getFileUrl(
         this,
         e,
-        thumb: size != null ? "${size.height}x${size.width}" : null,
+        thumb: size != null
+            ? "${size.width.toInt()}x${size.height.toInt()}"
+            : null,
       );
     }).toList();
   }

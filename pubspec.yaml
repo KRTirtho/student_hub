@@ -11,6 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  collection: ^1.16.0
   cupertino_icons: ^1.0.2
   pocketbase: ^0.6.0
   flutter_hooks: ^0.18.5+1
@@ -32,7 +33,6 @@ dependencies:
   flutter_dotenv: ^5.0.2
   visibility_detector: ^0.3.3
   flutter_native_splash: ^2.2.16
-  collection: ^1.16.0
   file_picker: ^5.2.5
   http: ^0.13.5
   carousel_slider: ^4.2.1

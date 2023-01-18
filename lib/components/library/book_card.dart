@@ -84,7 +84,7 @@ class BookCard extends HookConsumerWidget {
                   GoRouter.of(context).push('/media/pdf', extra: mediaUrl);
                 },
                 child: UniversalImage(
-                  path: book.getThumbnailURL().toString(),
+                  path: book.getThumbnailURL(const Size(0, 400)).toString(),
                   fit: BoxFit.contain,
                   placeholder: (context, url) => const Center(
                     child: CircularProgressIndicator(),

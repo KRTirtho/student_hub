@@ -1,9 +1,8 @@
 import 'dart:ui';
 
 import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/components/image/avatar.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/components/posts/post_comment.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/post.dart';
@@ -16,13 +15,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' hide ClientException;
 import 'package:http_parser/http_parser.dart';
 import 'package:pocketbase/pocketbase.dart';
-import 'package:readmore/readmore.dart';
-import 'package:timeago/timeago.dart';
 import 'package:collection/collection.dart';
 
 class PostPage extends HookConsumerWidget {
@@ -206,92 +202,7 @@ class PostPage extends HookConsumerWidget {
                   else
                     const Center(child: CircularProgressIndicator.adaptive()),
                   ...comments.map(
-                    (comment) {
-                      final urls = comment.getMediaURL();
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Avatar(user: comment.user!, radius: 10),
-                                  const Gap(5),
-                                  Text(
-                                    comment.user!.name ??
-                                        comment.user!.username,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium!,
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    format(DateTime.parse(comment.created)),
-                                    style:
-                                        Theme.of(context).textTheme.labelSmall!,
-                                  ),
-                                ],
-                              ),
-                              const Gap(10),
-                              ReadMoreText(
-                                "${comment.comment} ",
-                                trimMode: TrimMode.Line,
-                                trimLines: 3,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                lessStyle: Theme.of(context).textTheme.caption,
-                                moreStyle: Theme.of(context).textTheme.caption,
-                              ),
-                              const Gap(10),
-                              Row(
-                                children: [
-                                  ...urls.mapIndexed(
-                                    (index, url) {
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 5),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: InkWell(
-                                            onTap: () {
-                                              GoRouter.of(context).push(
-                                                "/media/image?initialPage=$index",
-                                                extra: urls,
-                                              );
-                                            },
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: SizedBox(
-                                              height: 100,
-                                              width: 100,
-                                              child: Hero(
-                                                tag: url.toString(),
-                                                transitionOnUserGestures: true,
-                                                child: UniversalImage(
-                                                  path: url.toString(),
-                                                  fit: BoxFit.cover,
-                                                  placeholder: (context, url) =>
-                                                      const Center(
-                                                    child:
-                                                        CircularProgressIndicator
-                                                            .adaptive(),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                    (comment) => PostComment(comment: comment),
                   ),
                   const Gap(80),
                 ],
@@ -398,9 +309,7 @@ class PostPage extends HookConsumerWidget {
                                                 BorderRadius.circular(10),
                                             color: Colors.white,
                                             image: DecorationImage(
-                                              image: MemoryImage(
-                                                media.bytes!,
-                                              ),
+                                              image: MemoryImage(media.bytes!),
                                               fit: BoxFit.cover,
                                             ),
                                           ),

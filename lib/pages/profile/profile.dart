@@ -5,7 +5,6 @@ import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:eusc_freaks/queries/user.dart';
-import 'package:eusc_freaks/utils/platform.dart';
 import 'package:eusc_freaks/utils/snackbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
@@ -41,6 +40,39 @@ class ProfilePage extends HookConsumerWidget {
       fontWeight: FontWeight.bold,
     );
 
+    Future<void> updateProfilePicture() async {
+      final file = await FilePicker.platform.pickFiles(
+        dialogTitle: "Select an profile picture",
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
+      );
+      if (file == null || file.files.isEmpty) {
+        return;
+      }
+
+      await pb.collection('users').update(
+        userQuery.data!.id,
+        files: [
+          await MultipartFile.fromPath(
+            'avatar',
+            file.files.first.path!,
+            filename: file.files.first.name,
+            contentType: MediaType(
+              'image',
+              file.files.first.extension!,
+            ),
+          ),
+        ],
+      );
+      await ref.read(authenticationProvider.notifier).refetch();
+      if (mounted()) {
+        showSnackbar(
+          context,
+          'Profile picture updated. Restart the app to see the changes',
+        );
+      }
+    }
+
     return Scaffold(
       appBar: GoRouter.of(context).canPop()
           ? AppBar(
@@ -60,6 +92,8 @@ class ProfilePage extends HookConsumerWidget {
                   .map((page) => page?.items ?? [])
                   .expand((element) => element)
                   .toList();
+
+              final avatarURL = userQuery.data!.getAvatarURL();
               return Waypoint(
                 controller: controller,
                 onTouchEdge: () {
@@ -74,127 +108,69 @@ class ProfilePage extends HookConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     children: [
                       const Gap(50),
-                      HookBuilder(builder: (context) {
-                        final avatarEditMode = useState(false);
-                        return MouseRegion(
-                          onEnter: (event) {
-                            avatarEditMode.value = true;
-                          },
-                          onExit: (event) {
-                            avatarEditMode.value = false;
-                          },
-                          child: GestureDetector(
-                            onTap: () {
-                              if (kIsMobile) {
-                                avatarEditMode.value = !avatarEditMode.value;
-                              }
-                            },
-                            child: Stack(
-                              children: [
-                                Center(
-                                  child:
-                                      Avatar(user: userQuery.data!, radius: 50),
-                                ),
-                                if (avatarEditMode.value && isOwner)
-                                  Center(
-                                    child: CircleAvatar(
-                                      radius: 52,
-                                      backgroundColor: Colors.black45,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                            color: Colors.white,
-                                            icon: const Icon(
-                                                Icons.image_outlined),
-                                            onPressed: () async {
-                                              final file = await FilePicker
-                                                  .platform
-                                                  .pickFiles(
-                                                dialogTitle:
-                                                    "Select an profile picture",
-                                                type: FileType.custom,
-                                                allowedExtensions: [
-                                                  'jpg',
-                                                  'png',
-                                                  'jpeg'
-                                                ],
-                                              );
-                                              if (file == null ||
-                                                  file.files.isEmpty) {
-                                                avatarEditMode.value = false;
-                                                return;
-                                              }
-
-                                              await pb
-                                                  .collection('users')
-                                                  .update(
-                                                userQuery.data!.id,
-                                                files: [
-                                                  await MultipartFile.fromPath(
-                                                    'avatar',
-                                                    file.files.first.path!,
-                                                    filename:
-                                                        file.files.first.name,
-                                                    contentType: MediaType(
-                                                      'image',
-                                                      file.files.first
-                                                          .extension!,
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                              await ref
-                                                  .read(authenticationProvider
-                                                      .notifier)
-                                                  .refetch();
-                                              avatarEditMode.value = false;
-                                              if (mounted()) {
-                                                showSnackbar(
-                                                  context,
-                                                  'Profile picture updated. Restart the app to see the changes',
-                                                );
-                                              }
-                                            },
-                                          ),
-                                          IconButton(
-                                            color: Colors.white,
-                                            icon: const Icon(
-                                                Icons.delete_outline),
-                                            onPressed: () async {
-                                              await pb
-                                                  .collection('users')
-                                                  .update(
-                                                userQuery.data!.id,
-                                                body: {
-                                                  'avatar': null,
-                                                },
-                                              );
-                                              await ref
-                                                  .read(authenticationProvider
-                                                      .notifier)
-                                                  .refetch();
-                                              avatarEditMode.value = false;
-                                              if (mounted()) {
-                                                showSnackbar(
-                                                  context,
-                                                  'Profile picture removed. Restart the app to see the changes',
-                                                  backgroundColor:
-                                                      Colors.red[400],
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                      Stack(
+                        children: [
+                          Center(
+                            child: Avatar(
+                              user: userQuery.data!,
+                              radius: 50,
+                              tag: avatarURL,
+                              onTap: () {
+                                GoRouter.of(context).push(
+                                  '/media/image',
+                                  extra: [avatarURL],
+                                );
+                              },
                             ),
                           ),
-                        );
-                      }),
+                          if (isOwner)
+                            Positioned.fill(
+                              child: Align(
+                                alignment: Alignment.bottomRight,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.image_outlined),
+                                      color: Colors.black,
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: Colors.white60,
+                                      ),
+                                      onPressed: updateProfilePicture,
+                                    ),
+                                    const Gap(5),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline),
+                                      color: Colors.red[400],
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: Colors.white60,
+                                      ),
+                                      onPressed: () async {
+                                        await pb.collection('users').update(
+                                          userQuery.data!.id,
+                                          body: {
+                                            'avatar': null,
+                                          },
+                                        );
+                                        await ref
+                                            .read(
+                                                authenticationProvider.notifier)
+                                            .refetch();
+                                        if (mounted()) {
+                                          showSnackbar(
+                                            context,
+                                            'Profile picture removed. Restart the app to see the changes',
+                                            backgroundColor: Colors.red[400],
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                       const Gap(20),
                       if (userQuery.data!.name != null)
                         Center(

@@ -52,7 +52,8 @@ class _PostCardState extends ConsumerState<PostCard> {
   Widget build(BuildContext context) {
     final chipThrills = chipOfType[widget.post.type]!;
     final session = widget.post.user?.currentSession;
-    final medias = widget.post.getMediaURL();
+    final medias = widget.post.getMediaURL(const Size(0, 200));
+    final fullLengthMedia = widget.post.getMediaURL();
 
     return Card(
       child: Padding(
@@ -171,12 +172,12 @@ class _PostCardState extends ConsumerState<PostCard> {
                               onPressed: () {
                                 GoRouter.of(context).push(
                                   "/media/image?initialPage=$index",
-                                  extra: medias,
+                                  extra: fullLengthMedia,
                                 );
                               },
                               child: Center(
                                 child: Hero(
-                                  tag: media,
+                                  tag: fullLengthMedia[index],
                                   transitionOnUserGestures: true,
                                   child: Container(
                                     height: 200,

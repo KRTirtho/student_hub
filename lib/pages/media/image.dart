@@ -23,7 +23,8 @@ class ImagePage extends HookConsumerWidget {
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       child: SafeArea(
         child: Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor:
+              Theme.of(context).scaffoldBackgroundColor.withOpacity(.4),
           body: ScrollConfiguration(
             behavior: const ScrollBehavior().copyWith(
               overscroll: true,
@@ -52,7 +53,7 @@ class ImagePage extends HookConsumerWidget {
                       minScale: PhotoViewComputedScale.contained * 0.8,
                       maxScale: PhotoViewComputedScale.covered * 2,
                       heroAttributes: PhotoViewHeroAttributes(
-                        tag: medias[index].toString(),
+                        tag: medias[index],
                         transitionOnUserGestures: true,
                       ),
                     );

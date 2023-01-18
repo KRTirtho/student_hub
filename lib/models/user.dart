@@ -1,3 +1,5 @@
+import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:flutter/animation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:collection/collection.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -135,6 +137,19 @@ class User extends RecordModel {
                 .toList()
                 .sorted((a, b) => a.year.compareTo(b.year))
                 .toSet();
+
+  Uri getAvatarURL([Size? size]) {
+    assert(
+      size?.height != double.infinity && size?.width != double.infinity,
+      "Size cannot be infinite",
+    );
+    return pb.getFileUrl(
+      this,
+      avatar,
+      thumb:
+          size != null ? "${size.width.toInt()}x${size.height.toInt()}" : null,
+    );
+  }
 
   factory User.fromRecord(RecordModel record) => User.fromJson(record.toJson());
 

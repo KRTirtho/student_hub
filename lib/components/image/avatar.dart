@@ -1,22 +1,62 @@
-import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/user.dart';
+import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class Avatar extends HookWidget {
+class Avatar extends HookConsumerWidget {
   final User user;
   final double radius;
   final double? iconSize;
+  final Object? tag;
+  final VoidCallback? onTap;
   const Avatar({
     Key? key,
     required this.user,
     this.radius = 20,
+    this.onTap,
     this.iconSize,
+    this.tag,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final imageProvider = user.avatar.isNotEmpty
+        ? UniversalImage.imageProvider(
+            user.getAvatarURL(Size(0, radius * 2)).toString(),
+          )
+        : null;
+    final avatar = imageProvider != null
+        ? Material(
+            type: MaterialType.transparency,
+            child: Ink(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                ),
+                shape: BoxShape.circle,
+              ),
+              height: radius * 2,
+              width: radius * 2,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(radius),
+                onTap: onTap ??
+                    () {
+                      if (user.id == ref.read(authenticationProvider)?.id) {
+                        GoRouter.of(context).go("/profile/authenticated");
+                      } else {
+                        GoRouter.of(context).push("/profile/${user.id}");
+                      }
+                    },
+              ),
+            ),
+          )
+        : CircleAvatar(
+            radius: radius,
+            backgroundImage: imageProvider,
+          );
     return Stack(
       fit: StackFit.passthrough,
       children: [
@@ -30,20 +70,13 @@ class Avatar extends HookWidget {
             ),
             shape: BoxShape.circle,
           ),
-          child: CircleAvatar(
-            radius: radius,
-            backgroundImage: user.avatar.isNotEmpty
-                ? UniversalImage.imageProvider(
-                    pb
-                        .getFileUrl(
-                          user,
-                          user.avatar,
-                          thumb: "${radius}x$radius",
-                        )
-                        .toString(),
-                  )
-                : null,
-          ),
+          child: tag != null
+              ? Hero(
+                  tag: tag!,
+                  transitionOnUserGestures: true,
+                  child: avatar,
+                )
+              : avatar,
         ),
         Positioned.fill(
           child: Align(
@@ -56,7 +89,7 @@ class Avatar extends HookWidget {
               color: user.isMaster == true ? Colors.orange : Colors.blue[300],
             ),
           ),
-        )
+        ),
       ],
     );
   }
