@@ -5,7 +5,12 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackbar(
   String message, {
   bool isDismissible = true,
   Color? backgroundColor,
+  SnackBarAction? customAction,
 }) {
+  assert(
+    !(customAction != null && isDismissible),
+    "Can't have a custom action and be dismissible",
+  );
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(message),
@@ -14,11 +19,12 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackbar(
       action: isDismissible
           ? SnackBarAction(
               label: 'Dismiss',
+              textColor: Theme.of(context).backgroundColor,
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
             )
-          : null,
+          : customAction,
     ),
   );
 }

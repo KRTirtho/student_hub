@@ -1,13 +1,22 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:eusc_freaks/hooks/use_pdf_controller.dart';
+import 'package:eusc_freaks/utils/platform.dart';
+import 'package:eusc_freaks/utils/save_file/save_file.dart';
+import 'package:eusc_freaks/utils/snackbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PdfViewPage extends HookConsumerWidget {
   final Future<PdfDocument>? document;
@@ -26,6 +35,7 @@ class PdfViewPage extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final progress = useState<double>(0);
     final media = useState<Future<PdfDocument>?>(null);
+    final mounted = useIsMounted();
 
     final stream = useMemoized(
       () => documentUrl != null
@@ -66,6 +76,76 @@ class PdfViewPage extends HookConsumerWidget {
             automaticallyImplyLeading: false,
             elevation: 0,
             actions: [
+              IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor:
+                      Theme.of(context).backgroundColor.withOpacity(
+                            0.5,
+                          ),
+                  shape: const CircleBorder(),
+                ),
+                tooltip: "Save to device",
+                icon: const Icon(Icons.file_download_outlined),
+                onPressed: media.value == null
+                    ? null
+                    : () async {
+                        final file = await DefaultCacheManager().getSingleFile(
+                          documentUrl!,
+                          headers: {
+                            'Accept': 'application/pdf',
+                          },
+                        );
+                        if (!mounted()) return;
+                        if (kIsWeb) {
+                          await saveFile(
+                            await file.readAsBytes(),
+                            file.basename,
+                          );
+                          return;
+                        }
+                        Directory? directory;
+
+                        switch (Theme.of(context).platform) {
+                          case TargetPlatform.android:
+                            directory = await getExternalStorageDirectory();
+                            break;
+                          case TargetPlatform.iOS:
+                            directory =
+                                await getApplicationDocumentsDirectory();
+                            break;
+                          case TargetPlatform.linux:
+                          case TargetPlatform.macOS:
+                          case TargetPlatform.windows:
+                            directory = await getDownloadsDirectory();
+                            break;
+                          default:
+                            throw UnsupportedError("Unsupported platform");
+                        }
+
+                        if (directory == null) return;
+                        final path = join(directory.path, file.basename);
+                        await file.copy(path);
+                        if (mounted()) {
+                          showSnackbar(
+                            context,
+                            "Book saved to $path",
+                            isDismissible: false,
+                            customAction: SnackBarAction(
+                              textColor: Theme.of(context).backgroundColor,
+                              label: "Open",
+                              onPressed: () async {
+                                if (kIsDesktop) {
+                                  await launchUrl(Uri.file(directory!.path));
+                                } else {
+                                  await OpenFilex.open(path);
+                                }
+                              },
+                            ),
+                          );
+                        }
+                      },
+              ),
+              const Gap(10),
               IconButton(
                 style: IconButton.styleFrom(
                   backgroundColor:

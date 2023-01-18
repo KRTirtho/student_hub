@@ -30,6 +30,7 @@ final booksInfiniteQueryJob = InfiniteQueryJob<ResultList<Book>, void, int>(
 
 final bookTagsQueryJob = QueryJob<List<BookTag>, void>(
   queryKey: "book-tags-query",
+  refetchOnMount: true,
   task: (queryKey, externalData) async {
     final res = await pb.collection("book_tags").getFullList(sort: "-created");
 

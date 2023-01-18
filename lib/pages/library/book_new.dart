@@ -259,15 +259,13 @@ class BookNewPage extends HookConsumerWidget {
                         PdfDocument.openData(media.value!.bytes!),
                       );
                       try {
-                        await pb.collection("books").create(
+                        final book = await pb.collection("books").create(
                           body: {
                             "title": titleController.text,
                             "bio": bioController.text,
                             "author": authorController.text,
                             "external_url": externalUrlController.text,
-                            "tags": selectedTags.value.length == 1
-                                ? selectedTags.value.first.id
-                                : selectedTags.value.map((e) => e.id).toList(),
+                            "tags": selectedTags.value.first.id,
                             "user": ref.read(authenticationProvider)?.id,
                           },
                           files: [
@@ -287,6 +285,18 @@ class BookNewPage extends HookConsumerWidget {
                             ),
                           ],
                         );
+                        // Workaround for a bug in the backend
+                        if (selectedTags.value.length > 1) {
+                          await pb.collection("books").update(
+                            book.id,
+                            body: {
+                              "tags": [
+                                ...book.data["tags"],
+                                ...selectedTags.value.map((e) => e.id),
+                              ]
+                            },
+                          );
+                        }
                         formKey.currentState?.reset();
                         media.value = null;
                         error.value = null;
@@ -302,7 +312,15 @@ class BookNewPage extends HookConsumerWidget {
                         updating.value = false;
                       }
                     },
-              child: const Text("Publish"),
+              child: updating.value
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.grey[600],
+                      ),
+                    )
+                  : const Text("Publish"),
             ),
           ],
         ),
