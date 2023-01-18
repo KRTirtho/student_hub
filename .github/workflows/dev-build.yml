@@ -34,6 +34,7 @@ jobs:
             build/Eusc-freaks-all-arch.apk
       - uses: ncipollo/release-action@v1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag: v0.0.0
           omitBodyDuringUpdate: true
           omitNameDuringUpdate: true
