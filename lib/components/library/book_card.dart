@@ -1,6 +1,7 @@
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/book.dart';
+import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -132,10 +133,16 @@ class BookCard extends HookConsumerWidget {
                             ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            GoRouter.of(context).push(
-                              '/user/${book.user.id}',
-                              extra: book.user,
-                            );
+                            if (book.user.id ==
+                                ref.read(authenticationProvider)?.id) {
+                              GoRouter.of(context).go(
+                                "/profile/authenticated",
+                              );
+                            } else {
+                              GoRouter.of(context).push(
+                                "/profile/${book.user.id}",
+                              );
+                            }
                           },
                       ),
                     ],

@@ -20,7 +20,11 @@ final routes = {
     "path": "/library",
     "icon": Icons.library_books_outlined
   },
-  {"label": "Profile", "path": "/profile", "icon": Icons.person_outline_rounded}
+  {
+    "label": "Profile",
+    "path": "/profile/authenticated",
+    "icon": Icons.person_outline_rounded
+  }
 };
 
 class Shell extends HookConsumerWidget {

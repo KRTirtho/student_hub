@@ -70,10 +70,10 @@ final routerConfig = Provider((ref) {
             ],
           ),
           GoRoute(
-            path: '/profile',
+            path: '/profile/:id',
             parentNavigatorKey: shellNavigatorKey,
-            pageBuilder: (context, state) => const MaterialPage(
-              child: ProfilePage(),
+            pageBuilder: (context, state) => MaterialPage(
+              child: ProfilePage(userId: state.params['id']!),
             ),
           ),
           GoRoute(

@@ -2,10 +2,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/models/post.dart';
+import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/utils/number_ending_type.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -24,7 +26,7 @@ final chipOfType = {
   },
 };
 
-class PostCard extends StatefulWidget {
+class PostCard extends ConsumerStatefulWidget {
   final Post post;
   final bool expanded;
   const PostCard({
@@ -34,10 +36,10 @@ class PostCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<PostCard> createState() => _PostCardState();
+  ConsumerState<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _PostCardState extends ConsumerState<PostCard> {
   late final CarouselController carouselController;
 
   @override
@@ -66,13 +68,27 @@ class _PostCardState extends State<PostCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.post.user?.name ??
-                            widget.post.user?.username ??
-                            '',
-                        style: Theme.of(context).textTheme.titleSmall,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
+                      InkWell(
+                        onTap: () {
+                          if (widget.post.user?.id ==
+                              ref.read(authenticationProvider)?.id) {
+                            GoRouter.of(context).go(
+                              "/profile/authenticated",
+                            );
+                          } else {
+                            GoRouter.of(context).push(
+                              "/profile/${widget.post.user?.id}",
+                            );
+                          }
+                        },
+                        child: Text(
+                          widget.post.user?.name ??
+                              widget.post.user?.username ??
+                              '',
+                          style: Theme.of(context).textTheme.titleSmall,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Text(
                         widget.post.user?.isMaster == true
