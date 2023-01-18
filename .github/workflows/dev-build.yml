@@ -14,11 +14,14 @@ jobs:
         with:
           cache: true
           channel: "stable"
-      - run: |
+
+      - name: Install dependencies
+        run: |
           sudo apt-get update -y
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev make python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot
 
-      - run: |
+      - name: Generate nightly version and Build APK
+        run: |
           curl -sS https://webi.sh/yq | sh
           yq -i '.version |= sub("\+\d+", "-nightly-")' pubspec.yaml
           yq -i '.version += strenv(GITHUB_RUN_NUMBER)' pubspec.yaml
@@ -27,21 +30,26 @@ jobs:
           flutter pub get
           flutter build apk
           mv build/app/outputs/apk/release/app-release.apk build/Eusc-freaks-all-arch.apk
-      - uses: actions/upload-artifact@v2
+
+      - name: Upload built apk
+        uses: actions/upload-artifact@v2
         with:
           name: Android
           path: |
             build/Eusc-freaks-all-arch.apk
-      - uses: ncipollo/release-action@v1
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: v0.0.0
-          omitBodyDuringUpdate: true
-          omitNameDuringUpdate: true
-          omitPrereleaseDuringUpdate: true
-          allowUpdates: true
-          artifacts: build/Eusc-freaks-all-arch.apk
-      - name: Setup upterm session
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/Eusc-freaks-all-arch.apk
+          asset_name: Eusc-freaks-all-arch.apk
+          tag: refs/tags/v0.0.0
+          overwrite: true
+          body: Nightly build no. ${{ github.run_number }} of eusc-freaks
+          
+
+      - name: Setup upterm session (incase of failure)
         if: ${{ failure() }}
         uses: lhotari/action-upterm@v1
         with:
