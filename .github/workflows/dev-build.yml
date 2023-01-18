@@ -41,7 +41,7 @@ jobs:
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.ACCESS_TOKEN }}
           file: build/Eusc-freaks-all-arch.apk
           asset_name: Eusc-freaks-all-arch.apk
           tag: refs/tags/v0.0.0
