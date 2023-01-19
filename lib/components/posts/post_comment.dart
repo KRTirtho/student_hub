@@ -1,9 +1,13 @@
+import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_brightness_value.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:eusc_freaks/queries/posts.dart';
+import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -24,16 +28,25 @@ class PostComment extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final urls = comment.getMediaURL(const Size(0, 100));
-    final fullLengthUrls = comment.getMediaURL();
+    final isOwner = ref.watch(authenticationProvider)?.id == comment.user?.id;
+
+    final editMode = useState(false);
+    final controller = useTextEditingController(text: comment.comment);
 
     final color = useBrightnessValue(
-        Colors.green[100], Colors.green[900]?.withOpacity(.5));
+      Colors.green[100],
+      Colors.green[900]?.withOpacity(.5),
+    );
 
     final badgeColor = useBrightnessValue(
       Colors.green[600],
       Colors.green[300],
     );
+
+    final urls = comment.getMediaURL(const Size(0, 100));
+    final fullLengthUrls = comment.getMediaURL();
+
+    final queryBowl = QueryBowl.of(context);
 
     Widget child = Card(
       color: comment.solve ? color : null,
@@ -79,15 +92,12 @@ class PostComment extends HookConsumerWidget {
                   onSelected: (value) {
                     switch (value) {
                       case "solve":
-                        {
-                          onSolveToggle?.call(true);
-                          break;
-                        }
                       case "unsolve":
-                        {
-                          onSolveToggle?.call(false);
-                          break;
-                        }
+                        onSolveToggle?.call(value == "solve");
+                        break;
+                      case "edit":
+                        editMode.value = true;
+                        break;
                       case "report":
                         break;
                       default:
@@ -96,36 +106,41 @@ class PostComment extends HookConsumerWidget {
                   itemBuilder: (context) {
                     return [
                       if (isSolvable)
-                        PopupMenuItem(
+                        const PopupMenuItem(
                           value: "solve",
-                          child: Row(
-                            children: const [
-                              Icon(
-                                Icons.check_circle_outline,
-                                color: Colors.green,
-                              ),
-                              Gap(5),
-                              Text("Solve"),
-                            ],
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.green,
+                            ),
+                            title: Text("Solve"),
                           ),
                         ),
                       if (comment.solve)
-                        PopupMenuItem(
+                        const PopupMenuItem(
                           value: "unsolve",
-                          child: Row(
-                            children: const [
-                              Icon(
-                                Icons.check_circle_outline,
-                                color: Colors.red,
-                              ),
-                              Gap(5),
-                              Text("Unsolve"),
-                            ],
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.red,
+                            ),
+                            title: Text("Unsolve"),
+                          ),
+                        ),
+                      if (isOwner)
+                        const PopupMenuItem(
+                          value: "edit",
+                          child: ListTile(
+                            leading: Icon(Icons.edit_outlined),
+                            title: Text("Edit"),
                           ),
                         ),
                       const PopupMenuItem(
                         value: "report",
-                        child: Text("Report"),
+                        child: ListTile(
+                          leading: Icon(Icons.report_outlined),
+                          title: Text("Report"),
+                        ),
                       ),
                     ];
                   },
@@ -133,17 +148,66 @@ class PostComment extends HookConsumerWidget {
               ],
             ),
             const Gap(10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: ReadMoreText(
-                "${comment.comment} ",
-                trimMode: TrimMode.Line,
-                trimLines: 3,
-                style: Theme.of(context).textTheme.bodyMedium,
-                lessStyle: Theme.of(context).textTheme.caption,
-                moreStyle: Theme.of(context).textTheme.caption,
+            if (editMode.value)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: TextFormField(
+                      controller: controller,
+                      keyboardType: TextInputType.multiline,
+                      style: const TextStyle(fontSize: 14),
+                      minLines: 1,
+                      maxLines: 10,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: "Edit Comment",
+                        isDense: true,
+                        contentPadding: const EdgeInsets.all(8),
+                        suffix: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            editMode.value = false;
+                            controller.text = comment.comment;
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(10),
+                  ElevatedButton(
+                    child: const Icon(Icons.save_outlined),
+                    onPressed: () async {
+                      final record = await pb.collection("comments").update(
+                        comment.id,
+                        body: {
+                          "comment": controller.text,
+                        },
+                      );
+                      await queryBowl
+                          .getInfiniteQuery(
+                            postCommentsInfiniteQueryJob(record.data["post"])
+                                .queryKey,
+                          )
+                          ?.refetch();
+                      editMode.value = false;
+                      controller.text = record.data["comment"];
+                    },
+                  )
+                ],
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: ReadMoreText(
+                  "${comment.comment} ",
+                  trimMode: TrimMode.Line,
+                  trimLines: 3,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  lessStyle: Theme.of(context).textTheme.caption,
+                  moreStyle: Theme.of(context).textTheme.caption,
+                ),
               ),
-            ),
             const Gap(10),
             Row(
               children: [

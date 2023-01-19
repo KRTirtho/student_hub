@@ -27,6 +27,8 @@ class PostPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final user = ref.watch(authenticationProvider);
+
     final controller = useScrollController();
 
     final postQuery = useQuery(
@@ -209,7 +211,8 @@ class PostPage extends HookConsumerWidget {
                       return PostComment(
                         isSolvable: postQuery.data?.type == PostType.question &&
                             !comment.solve &&
-                            !isAlreadySolved,
+                            !isAlreadySolved &&
+                            postQuery.data?.user?.id == user?.id,
                         comment: comment,
                         onSolveToggle: (solved) async {
                           await pb.collection("comments").update(
