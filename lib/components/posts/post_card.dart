@@ -52,6 +52,9 @@ class _PostCardState extends ConsumerState<PostCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isAuthor =
+        widget.post.user?.id == ref.watch(authenticationProvider)?.id;
+
     final chipThrills = chipOfType[widget.post.type]!;
     final session = widget.post.user?.currentSession;
     final medias = widget.post.getMediaURL(const Size(0, 200));
@@ -184,9 +187,51 @@ class _PostCardState extends ConsumerState<PostCard> {
                     ],
                   ),
                 ),
-                Text(
-                  timeago.format(DateTime.parse(widget.post.created)),
-                  style: Theme.of(context).textTheme.caption,
+                Column(
+                  children: [
+                    PopupMenuButton(
+                      icon: const Icon(Icons.more_horiz),
+                      onSelected: (value) {
+                        switch (value) {
+                          case "edit":
+                            GoRouter.of(context)
+                                .push("/new?isEdit=true", extra: widget.post);
+                            break;
+                          case "share":
+                          case "report":
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) {
+                        return [
+                          if (isAuthor)
+                            const PopupMenuItem(
+                                value: "edit",
+                                child: ListTile(
+                                  leading: Icon(Icons.edit),
+                                  title: Text("Edit"),
+                                )),
+                          const PopupMenuItem(
+                              value: "share",
+                              child: ListTile(
+                                leading: Icon(Icons.share),
+                                title: Text("Share"),
+                              )),
+                          const PopupMenuItem(
+                            value: "report",
+                            child: ListTile(
+                              leading: Icon(Icons.report),
+                              title: Text("Report"),
+                            ),
+                          ),
+                        ];
+                      },
+                    ),
+                    Text(
+                      timeago.format(DateTime.parse(widget.post.created)),
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ],
                 ),
               ],
             ),

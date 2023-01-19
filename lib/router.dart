@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/collections/env.dart';
+import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/pages/library/book_new.dart';
 import 'package:eusc_freaks/pages/library/library.dart';
 import 'package:eusc_freaks/pages/media/image.dart';
@@ -64,7 +65,10 @@ final routerConfig = Provider((ref) {
                 path: 'new',
                 parentNavigatorKey: navigatorKey,
                 pageBuilder: (context, state) => MaterialPage(
-                  child: PostNewPage(type: state.queryParams["type"]),
+                  child: PostNewPage(
+                    type: state.queryParams["type"],
+                    post: state.extra as Post?,
+                  ),
                 ),
               ),
             ],

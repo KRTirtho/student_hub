@@ -1,5 +1,6 @@
 import 'package:eusc_freaks/collections/math_symbols_collection.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_force_update.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -16,36 +17,50 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' hide ClientException;
 import 'package:http_parser/http_parser.dart';
 import 'package:markdown_editable_textinput/markdown_text_input.dart';
+import 'package:path/path.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class PostNewPage extends HookConsumerWidget {
   final String type;
+  final Post? post;
   PostNewPage({
     Key? key,
     String? type,
-  })  : type = type ?? "${PostType.question.name},${PostType.informative.name}",
+    this.post,
+  })  : assert(
+          type == null || post == null,
+          "Both type and post cannot be set",
+        ),
+        type = post?.type.name ??
+            type ??
+            "${PostType.question.name},${PostType.informative.name}",
         super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
-    final titleController = useTextEditingController();
+    final titleController = useTextEditingController(text: post?.title);
 
     final forceUpdate = useForceUpdate();
     final mounted = useIsMounted();
 
     final error = useState<String?>(null);
     final updating = useState(false);
-    final media = useState<List<PlatformFile>>([]);
+    final media = useState<List<String>>([
+      ...?post?.getMediaURL().map((e) => e.toString()),
+    ]);
+    final deletingMedias = useState<List<String>>([]);
 
-    final description = useRef<String>("");
+    final description = useRef<String>(post?.description ?? "");
 
     final formKey = GlobalKey<FormState>();
     final types = type.split(",");
     final typeOfPost = useState(types.first);
 
+    final isEditMode = post != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("New ${typeOfPost.value}"),
+        title: Text(isEditMode ? "Edit Post" : "New ${typeOfPost.value}"),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.close_outlined),
@@ -82,7 +97,7 @@ class PostNewPage extends HookConsumerWidget {
                     );
                   },
                 ),
-                if (types.length > 1) ...[
+                ...[
                   const Gap(20),
                   const Text("Type of post"),
                   DropdownButtonFormField<String>(
@@ -94,9 +109,11 @@ class PostNewPage extends HookConsumerWidget {
                           child: Text(type),
                         ),
                     ],
-                    onChanged: (value) {
-                      if (value != null) typeOfPost.value = value;
-                    },
+                    onChanged: isEditMode || types.length == 1
+                        ? null
+                        : (value) {
+                            if (value != null) typeOfPost.value = value;
+                          },
                   )
                 ],
                 const Gap(20),
@@ -120,8 +137,8 @@ class PostNewPage extends HookConsumerWidget {
                             width: 100,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.memory(
-                                file.bytes!,
+                              child: UniversalImage(
+                                path: file,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -135,6 +152,12 @@ class PostNewPage extends HookConsumerWidget {
                                 media.value = media.value
                                     .where((element) => element != file)
                                     .toList();
+                                if (isEditMode) {
+                                  deletingMedias.value = [
+                                    ...deletingMedias.value,
+                                    basename(file),
+                                  ];
+                                }
                               },
                               style: IconButton.styleFrom(
                                 backgroundColor: Colors.white54,
@@ -168,7 +191,6 @@ class PostNewPage extends HookConsumerWidget {
                                   allowMultiple: true,
                                   dialogTitle: "Select post media",
                                   type: FileType.image,
-                                  withData: true,
                                 );
                                 if (files == null) return;
                                 if ((files.count + media.value.length) > 6) {
@@ -177,12 +199,16 @@ class PostNewPage extends HookConsumerWidget {
                                   media.value = [
                                     ...media.value,
                                     ...files.files
-                                        .sublist(0, 6 - media.value.length),
+                                        .sublist(0, 6 - media.value.length)
+                                        .map((e) => e.path)
+                                        .whereType<String>()
                                   ];
                                 } else {
                                   media.value = [
                                     ...media.value,
                                     ...files.files
+                                        .map((e) => e.path)
+                                        .whereType<String>()
                                   ];
                                 }
                               },
@@ -214,34 +240,73 @@ class PostNewPage extends HookConsumerWidget {
                                 media.value.length <= 6) {
                               final userID =
                                   ref.read(authenticationProvider)?.id;
-                              final post = Post.fromRecord(
-                                await pb.collection("posts").create(
-                                  body: {
-                                    "title": titleController.text,
-                                    "description": description.value,
-                                    "user": userID,
-                                    "type": typeOfPost.value,
-                                  },
-                                  files: media.value
-                                      .map(
-                                        (e) => MultipartFile.fromBytes(
-                                          'media',
-                                          e.bytes!,
-                                          filename: e.name,
-                                          contentType: MediaType(
-                                            'image',
-                                            e.extension!,
+
+                              final body = {
+                                "title": titleController.text,
+                                "description": description.value,
+                                if (!isEditMode) "user": userID,
+                                if (!isEditMode) "type": typeOfPost.value,
+                              };
+
+                              RecordModel rec;
+                              if (!isEditMode) {
+                                rec = await pb.collection("posts").create(
+                                      body: body,
+                                      files: await Future.wait(
+                                        media.value.map(
+                                          (e) async =>
+                                              await MultipartFile.fromPath(
+                                            'media',
+                                            e,
+                                            filename: basename(e),
+                                            contentType: MediaType(
+                                                'image', extension(e)),
                                           ),
                                         ),
-                                      )
-                                      .toList(),
-                                ),
-                              );
+                                      ),
+                                    );
+                              } else {
+                                final newMedias = media.value
+                                    .where((e) => !e.startsWith("http"));
+                                rec = await pb.collection("posts").update(
+                                      post!.id,
+                                      body: {
+                                        ...body,
+                                        if (deletingMedias.value.isNotEmpty &&
+                                            newMedias.isEmpty)
+                                          "media-": deletingMedias.value,
+                                      },
+                                      files: await Future.wait(
+                                        newMedias.map(
+                                          (e) => MultipartFile.fromPath(
+                                            'media',
+                                            e,
+                                            filename: basename(e),
+                                            contentType: MediaType(
+                                              'image',
+                                              extension(e),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                if (deletingMedias.value.isNotEmpty &&
+                                    newMedias.isNotEmpty) {
+                                  rec = await pb.collection("posts").update(
+                                    post!.id,
+                                    body: {
+                                      "media-": deletingMedias.value,
+                                    },
+                                  );
+                                }
+                              }
+
                               formKey.currentState?.reset();
                               error.value = null;
                               media.value = [];
+                              deletingMedias.value = [];
                               if (mounted()) {
-                                GoRouter.of(context).go("/posts/${post.id}");
+                                GoRouter.of(context).go("/posts/${rec.id}");
                                 QueryBowl.of(context)
                                     .getInfiniteQuery(
                                       postsInfiniteQueryJob(type).queryKey,
@@ -255,7 +320,7 @@ class PostNewPage extends HookConsumerWidget {
                             updating.value = false;
                           }
                         },
-                  child: const Text("Submit"),
+                  child: Text(isEditMode ? "Update" : "Submit"),
                 ),
                 const Gap(100),
               ],
