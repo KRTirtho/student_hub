@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' hide ClientException;
 import 'package:http_parser/http_parser.dart';
+import 'package:markdown_editable_textinput/markdown_text_input.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class PostNewPage extends HookConsumerWidget {
@@ -25,6 +26,7 @@ class PostNewPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final titleController = useTextEditingController();
+
     final descriptionController = useTextEditingController();
     final formKey = GlobalKey<FormState>();
     final error = useState<String?>(null);
@@ -56,17 +58,21 @@ class PostNewPage extends HookConsumerWidget {
               ),
             ),
             const Gap(10),
-            TextFormField(
-              maxLines: 5,
-              controller: descriptionController,
-              validator: ValidationBuilder()
-                  .required("Description is required")
-                  .build(),
-              decoration: const InputDecoration(
-                labelText: "Description",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-              ),
-            ),
+            HookBuilder(builder: (context) {
+              final description = useState<String>(descriptionController.text);
+              return MarkdownTextInput(
+                (value) {
+                  description.value = value;
+                  descriptionController.text = value;
+                },
+                description.value,
+                maxLines: 5,
+                validators: ValidationBuilder()
+                    .required("Description is required")
+                    .build(),
+                label: "Description",
+              );
+            }),
             if (types.length > 1) ...[
               const Gap(20),
               const Text("Type of post"),
@@ -190,7 +196,7 @@ class PostNewPage extends HookConsumerWidget {
                   : () async {
                       updating.value = true;
                       try {
-                        if (formKey.currentState!.validate() &&
+                        if (formKey.currentState?.validate() == true &&
                             media.value.length <= 6) {
                           final userID = ref.read(authenticationProvider)?.id;
                           final post = Post.fromRecord(

@@ -5,11 +5,13 @@ import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/utils/number_ending_type.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:readmore/readmore.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:url_launcher/url_launcher_string.dart';
 
 final chipOfType = {
   PostType.question: {
@@ -26,7 +28,7 @@ final chipOfType = {
   },
 };
 
-class PostCard extends ConsumerStatefulWidget {
+class PostCard extends StatefulHookConsumerWidget {
   final Post post;
   final bool expanded;
   const PostCard({
@@ -54,6 +56,62 @@ class _PostCardState extends ConsumerState<PostCard> {
     final session = widget.post.user?.currentSession;
     final medias = widget.post.getMediaURL(const Size(0, 200));
     final fullLengthMedia = widget.post.getMediaURL();
+
+    final isLengthy = widget.post.description.split("\n").length > 6;
+    final isLong = widget.post.description.length > 200;
+    final isHide = useState(true);
+    final description = isLengthy && isHide.value && !widget.expanded
+        ? "${widget.post.description.split("\n").sublist(0, 6).join("\n")}..."
+        : isLong && !isLengthy && isHide.value && !widget.expanded
+            ? "${widget.post.description.substring(0, 200)} ..."
+            : widget.post.description;
+
+    final markdownConfig = MarkdownConfig(
+      configs: [
+        if (Theme.of(context).brightness == Brightness.dark) ...[
+          HrConfig.darkConfig,
+          H1Config.darkConfig,
+          H2Config.darkConfig,
+          H3Config.darkConfig,
+          H4Config.darkConfig,
+          H5Config.darkConfig,
+          H6Config.darkConfig,
+          PreConfig.darkConfig,
+          PConfig.darkConfig,
+          CodeConfig.darkConfig,
+        ],
+        ImgConfig(builder: (_, attr) {
+          return GestureDetector(
+            onTap: () {
+              if (attr['src']?.isNotEmpty == true &&
+                  Uri.tryParse(attr['src']!) != null) {
+                launchUrlString(
+                  attr['src']!,
+                  mode: LaunchMode.externalApplication,
+                );
+              }
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.image_outlined,
+                  color: Colors.blue[800],
+                  size: 16,
+                ),
+                Text(
+                  attr['alt'] ?? '[Image URL]',
+                  style: TextStyle(
+                    color: Colors.blue[800],
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
 
     return Card(
       child: Padding(
@@ -136,12 +194,32 @@ class _PostCardState extends ConsumerState<PostCard> {
             Text(widget.post.title,
                 style: Theme.of(context).textTheme.titleSmall),
             const Gap(20),
-            ReadMoreText(
-              "${widget.post.description} ",
-              moreStyle: Theme.of(context).textTheme.caption,
-              lessStyle: Theme.of(context).textTheme.caption,
-              trimMode: TrimMode.Line,
-              trimLines: 6,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MarkdownWidget(
+                  padding: EdgeInsets.zero,
+                  data: description,
+                  config: markdownConfig,
+                  selectable: true,
+                  shrinkWrap: true,
+                ),
+                if ((isLengthy || isLong) && !widget.expanded)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: InkWell(
+                      onTap: () {
+                        isHide.value = !isHide.value;
+                      },
+                      child: Text(
+                        !isHide.value ? "... Show Less" : "... Show More",
+                        style: Theme.of(context).textTheme.caption?.copyWith(
+                              color: isHide.value ? Colors.purple[600] : null,
+                            ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const Gap(20),
             if (medias.isNotEmpty)
