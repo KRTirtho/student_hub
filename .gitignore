@@ -48,3 +48,5 @@ app.*.map.json
 /*.env
 
 /lib/collections/env.g.dart
+
+**/key.properties

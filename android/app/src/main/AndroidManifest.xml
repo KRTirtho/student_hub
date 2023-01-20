@@ -4,7 +4,7 @@
   <uses-permission android:name="android.permission.INTERNET" />
 
   <application
-    android:label="eusc_freaks"
+    android:label="EUSC Freaks"
     android:name="${applicationName}"
     android:icon="@mipmap/ic_launcher">
     <activity

@@ -67,20 +67,20 @@ flutter:
     - prod.env
 
 flutter_native_splash:
-  color: '#ffffff'
+  color: '#000000'
   color_dark: '#000000'
-  image: assets/logo.png
-  image_dark: assets/logo.png
+  image: assets/logo_foreground.png
+  image_dark: assets/logo_foreground.png
   android_12:
-    color: '#ffffff'
+    color: '#000000'
     color_dark: '#000000'
-    image: assets/logo.png
-    image_dark: assets/logo.png
+    image: assets/logo_foreground.png
+    image_dark: assets/logo_foreground.png
 
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/logo.png"
   adaptive_icon_background: "#000000"
-  adaptive_icon_foreground: "assets/logo.png"
+  adaptive_icon_foreground: "assets/logo_foreground.png"
   remove_alpha_ios: true

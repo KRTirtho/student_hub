@@ -10,7 +10,13 @@ class RooAppBar extends AppBar {
           primary: true,
           title: const Text("Eusc Freaks"),
           centerTitle: false,
-          leading: const UniversalImage(path: "assets/logo.png", height: 40),
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: const UniversalImage(path: "assets/logo.png"),
+            ),
+          ),
           actions: actions ??
               [
                 Builder(builder: (context) {
