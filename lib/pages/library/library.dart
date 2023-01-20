@@ -5,6 +5,7 @@ import 'package:eusc_freaks/models/book.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:eusc_freaks/queries/books.dart';
@@ -38,11 +39,12 @@ class LibraryPage extends HookConsumerWidget {
           onRefresh: () async {
             await booksQuery.refetch();
           },
-          child: ListView.builder(
+          child: ListView.separated(
             controller: controller,
             padding: const EdgeInsets.all(8),
             itemCount: books.length,
             physics: const AlwaysScrollableScrollPhysics(),
+            separatorBuilder: (context, index) => const Gap(10),
             itemBuilder: (context, index) {
               final book = books[index];
               return BookCard(book: book);

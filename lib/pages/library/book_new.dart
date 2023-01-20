@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' hide ClientException;
 import 'package:http_parser/http_parser.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -29,7 +30,7 @@ class BookNewPage extends HookConsumerWidget {
     final authorController = useTextEditingController();
     final externalUrlController = useTextEditingController();
 
-    final selectedTags = useState<Set<BookTag>>({});
+    final selectedTags = useRef<List<BookTag>>([]);
     final media = useState<PlatformFile?>(null);
     final updating = useState(false);
     final error = useState<String?>(null);
@@ -37,9 +38,6 @@ class BookNewPage extends HookConsumerWidget {
     final mounted = useIsMounted();
 
     final formKey = GlobalKey<FormState>();
-
-    final unselectedTags =
-        bookTags.data?.where((e) => !selectedTags.value.contains(e));
 
     return Scaffold(
       appBar: AppBar(
@@ -158,7 +156,6 @@ class BookNewPage extends HookConsumerWidget {
                               child: CircularProgressIndicator(),
                             );
                           }
-                          print("Size ${snapshot.data!.bytes.length}");
                           return Image.memory(
                             snapshot.data!.bytes,
                             fit: BoxFit.contain,
@@ -186,7 +183,7 @@ class BookNewPage extends HookConsumerWidget {
             ],
             const Gap(20),
             Text(
-              "Tags",
+              "Tags #",
               style: Theme.of(context).textTheme.subtitle1,
             ),
             const Gap(10),
@@ -195,41 +192,28 @@ class BookNewPage extends HookConsumerWidget {
                 child: CircularProgressIndicator(),
               )
             else
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final tag in selectedTags.value)
-                    Chip(
-                      label: Text(tag.tag),
-                      onDeleted: () {
-                        selectedTags.value = {
-                          ...selectedTags.value,
-                        }..remove(tag);
-                      },
-                    ),
-                  PopupMenuButton(
-                    itemBuilder: (context) {
-                      return [
-                        for (final tag in unselectedTags)
-                          PopupMenuItem(
-                            value: tag,
-                            child: Chip(
-                              label: Text(tag.tag),
-                            ),
-                          ),
-                      ];
-                    },
-                    enabled: unselectedTags!.isNotEmpty,
-                    onSelected: (tag) {
-                      selectedTags.value = {
-                        ...selectedTags.value,
-                        tag,
-                      };
-                    },
-                    icon: const Icon(Icons.tag_outlined),
-                  ),
-                ],
+              MultiSelectBottomSheetField(
+                onConfirm: (selection) {
+                  selectedTags.value = selection.cast<BookTag>();
+                },
+                listType: MultiSelectListType.CHIP,
+                searchable: true,
+                validator: (values) {
+                  if (values == null || values.isEmpty) {
+                    return "Please select at least one tag";
+                  }
+                  return null;
+                },
+                separateSelectedItems: true,
+                buttonText: Text(
+                  "Select Tags",
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                buttonIcon: const Icon(Icons.tag_outlined),
+                items: bookTags.data?.map((e) {
+                      return MultiSelectItem(e, e.tag);
+                    }).toList() ??
+                    [],
               ),
             if (error.value != null) ...[
               const Gap(10),
