@@ -1,10 +1,13 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
+import 'package:eusc_freaks/components/library/book_card.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:eusc_freaks/queries/books.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:eusc_freaks/queries/user.dart';
+import 'package:eusc_freaks/utils/change_notifier_listenable_builder.dart';
 import 'package:eusc_freaks/utils/snackbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
@@ -84,11 +87,22 @@ class ProfilePage extends HookConsumerWidget {
       body: !userQuery.hasData
           ? const Center(child: CircularProgressIndicator())
           : HookBuilder(builder: (context) {
+              final tabController = useTabController(initialLength: 2);
+
               final userPostsQuery = useInfiniteQuery(
                 job: userPostsInfiniteQueryJob(userQuery.data!.id),
                 externalData: null,
               );
+              final userBooksQuery = useInfiniteQuery(
+                job: userBooksInfiniteQueryJob(userQuery.data!.id),
+                externalData: null,
+              );
               final posts = userPostsQuery.pages
+                  .map((page) => page?.items ?? [])
+                  .expand((element) => element)
+                  .toList();
+
+              final books = userBooksQuery.pages
                   .map((page) => page?.items ?? [])
                   .expand((element) => element)
                   .toList();
@@ -103,221 +117,264 @@ class ProfilePage extends HookConsumerWidget {
                 },
                 child: RefreshIndicator(
                   onRefresh: userPostsQuery.refetchPages,
-                  child: ListView(
+                  child: SingleChildScrollView(
                     controller: controller,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
-                    children: [
-                      const Gap(50),
-                      Stack(
-                        children: [
-                          Center(
-                            child: Avatar(
-                              user: userQuery.data!,
-                              radius: 50,
-                              tag: avatarURL,
-                              onTap: () {
-                                GoRouter.of(context).push(
-                                  '/media/image',
-                                  extra: [avatarURL],
-                                );
-                              },
-                            ),
-                          ),
-                          if (isOwner)
-                            Positioned.fill(
-                              child: Align(
-                                alignment: Alignment.bottomRight,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.image_outlined),
-                                      color: Colors.black,
-                                      style: IconButton.styleFrom(
-                                        backgroundColor: Colors.white60,
-                                      ),
-                                      onPressed: updateProfilePicture,
-                                    ),
-                                    const Gap(5),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline),
-                                      color: Colors.red[400],
-                                      style: IconButton.styleFrom(
-                                        backgroundColor: Colors.white60,
-                                      ),
-                                      onPressed: () async {
-                                        await pb.collection('users').update(
-                                          userQuery.data!.id,
-                                          body: {
-                                            'avatar': null,
-                                          },
-                                        );
-                                        await ref
-                                            .read(
-                                                authenticationProvider.notifier)
-                                            .refetch();
-                                        if (mounted()) {
-                                          showSnackbar(
-                                            context,
-                                            'Profile picture removed. Restart the app to see the changes',
-                                            backgroundColor: Colors.red[400],
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const Gap(20),
-                      if (userQuery.data!.name != null)
-                        Center(
-                          child: Text(
-                            userQuery.data!.name!,
-                            style: Theme.of(context).textTheme.headline6,
-                          ),
-                        ),
-                      const Gap(70),
-                      Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
+                      children: [
+                        const Gap(50),
+                        Stack(
                           children: [
-                            ListTile(
-                              title: const Text('Email'),
-                              subtitle: Text(userQuery.data!.email),
+                            Center(
+                              child: Avatar(
+                                user: userQuery.data!,
+                                radius: 50,
+                                tag: avatarURL,
+                                onTap: () {
+                                  GoRouter.of(context).push(
+                                    '/media/image',
+                                    extra: [avatarURL],
+                                  );
+                                },
+                              ),
                             ),
-                            ListTile(
-                              title: const Text('Username'),
-                              subtitle: Text(userQuery.data!.username),
-                            ),
-                            if (!userQuery.data!.isMaster) ...[
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16),
-                                child: Text(
-                                  'Sessions',
-                                  style: Theme.of(context).textTheme.bodyLarge,
+                            if (isOwner)
+                              Positioned.fill(
+                                child: Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.image_outlined),
+                                        color: Colors.black,
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.white60,
+                                        ),
+                                        onPressed: updateProfilePicture,
+                                      ),
+                                      const Gap(5),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline),
+                                        color: Colors.red[400],
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.white60,
+                                        ),
+                                        onPressed: () async {
+                                          await pb.collection('users').update(
+                                            userQuery.data!.id,
+                                            body: {
+                                              'avatar': null,
+                                            },
+                                          );
+                                          await ref
+                                              .read(authenticationProvider
+                                                  .notifier)
+                                              .refetch();
+                                          if (mounted()) {
+                                            showSnackbar(
+                                              context,
+                                              'Profile picture removed. Restart the app to see the changes',
+                                              backgroundColor: Colors.red[400],
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Table(
-                                  children: [
-                                    TableRow(
-                                      children: [
-                                        TableCell(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              'Year',
-                                              style: tableHeaderStyle,
-                                            ),
-                                          ),
-                                        ),
-                                        TableCell(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              'Class',
-                                              style: tableHeaderStyle,
-                                            ),
-                                          ),
-                                        ),
-                                        TableCell(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              'Roll',
-                                              style: tableHeaderStyle,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    ...userQuery.data!.sessionObjects
-                                        .map((session) {
-                                      return TableRow(children: [
-                                        TableCell(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              session.year.toString(),
-                                              style: tableStyle,
-                                            ),
-                                          ),
-                                        ),
-                                        TableCell(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              session.standard.toString(),
-                                              style: tableStyle,
-                                            ),
-                                          ),
-                                        ),
-                                        TableCell(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              session.serial.toString(),
-                                              style: tableStyle,
-                                            ),
-                                          ),
-                                        ),
-                                      ]);
-                                    }).toList(),
-                                  ],
-                                ),
-                              ),
-                            ] else ...[
-                              ListTile(
-                                title: const Text('Subject'),
-                                subtitle: Text(
-                                  userQuery.data!.currentSession?.subject
-                                          ?.formattedName ??
-                                      "",
-                                ),
-                              ),
-                              ListTile(
-                                title: const Text('Joining Year'),
-                                subtitle: Text(
-                                  userQuery.data!.currentSession?.year
-                                          .toString() ??
-                                      "",
-                                ),
-                              ),
-                              ListTile(
-                                title: const Text('ID No.'),
-                                subtitle: Text(
-                                  userQuery.data!.currentSession?.serial
-                                          .toString() ??
-                                      "",
-                                ),
-                              ),
-                            ]
                           ],
                         ),
-                      ),
-                      const Gap(10),
-                      Text(
-                        isOwner
-                            ? "Your Posts"
-                            : "${userQuery.data!.name}'s Posts",
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption
-                            ?.copyWith(fontSize: 18),
-                      ),
-                      ...posts.map(
-                        (post) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: PostCard(post: post),
-                          );
-                        },
-                      )
-                    ],
+                        const Gap(20),
+                        if (userQuery.data!.name != null)
+                          Center(
+                            child: Text(
+                              userQuery.data!.name!,
+                              style: Theme.of(context).textTheme.headline6,
+                            ),
+                          ),
+                        const Gap(70),
+                        Card(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                title: const Text('Email'),
+                                subtitle: Text(userQuery.data!.email),
+                              ),
+                              ListTile(
+                                title: const Text('Username'),
+                                subtitle: Text(userQuery.data!.username),
+                              ),
+                              if (!userQuery.data!.isMaster) ...[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: Text(
+                                    'Sessions',
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Table(
+                                    children: [
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                'Year',
+                                                style: tableHeaderStyle,
+                                              ),
+                                            ),
+                                          ),
+                                          TableCell(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                'Class',
+                                                style: tableHeaderStyle,
+                                              ),
+                                            ),
+                                          ),
+                                          TableCell(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                'Roll',
+                                                style: tableHeaderStyle,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      ...userQuery.data!.sessionObjects
+                                          .map((session) {
+                                        return TableRow(children: [
+                                          TableCell(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                session.year.toString(),
+                                                style: tableStyle,
+                                              ),
+                                            ),
+                                          ),
+                                          TableCell(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                session.standard.toString(),
+                                                style: tableStyle,
+                                              ),
+                                            ),
+                                          ),
+                                          TableCell(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                session.serial.toString(),
+                                                style: tableStyle,
+                                              ),
+                                            ),
+                                          ),
+                                        ]);
+                                      }).toList(),
+                                    ],
+                                  ),
+                                ),
+                              ] else ...[
+                                ListTile(
+                                  title: const Text('Subject'),
+                                  subtitle: Text(
+                                    userQuery.data!.currentSession?.subject
+                                            ?.formattedName ??
+                                        "",
+                                  ),
+                                ),
+                                ListTile(
+                                  title: const Text('Joining Year'),
+                                  subtitle: Text(
+                                    userQuery.data!.currentSession?.year
+                                            .toString() ??
+                                        "",
+                                  ),
+                                ),
+                                ListTile(
+                                  title: const Text('ID No.'),
+                                  subtitle: Text(
+                                    userQuery.data!.currentSession?.serial
+                                            .toString() ??
+                                        "",
+                                  ),
+                                ),
+                              ]
+                            ],
+                          ),
+                        ),
+                        const Gap(10),
+                        TabBar(
+                          controller: tabController,
+                          tabs: const [
+                            Tab(text: "Posts"),
+                            Tab(text: "Books"),
+                          ],
+                        ),
+                        const Gap(10),
+                        ChangeNotifierListenableBuilder(
+                          notifier: tabController,
+                          builder: (context, tabController) {
+                            return AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 250),
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                return SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(1, 0),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: [
+                                ListView.separated(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemCount: posts.length,
+                                  separatorBuilder: (context, index) =>
+                                      const Gap(10),
+                                  itemBuilder: (context, index) {
+                                    return PostCard(post: posts[index]);
+                                  },
+                                ),
+                                ListView.separated(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemCount: books.length,
+                                  separatorBuilder: (context, index) =>
+                                      const Gap(10),
+                                  itemBuilder: (context, index) {
+                                    return BookCard(book: books[index]);
+                                  },
+                                ),
+                              ][tabController.index],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

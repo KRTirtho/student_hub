@@ -1,6 +1,7 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/components/posts/hazard_prompt_dialog.dart';
 import 'package:eusc_freaks/components/posts/post_comment_media.dart';
 import 'package:eusc_freaks/hooks/use_brightness_value.dart';
 import 'package:eusc_freaks/models/comment.dart';
@@ -20,11 +21,13 @@ import 'package:timeago/timeago.dart';
 class PostComment extends HookConsumerWidget {
   final Comment comment;
   final bool isSolvable;
+  final String postId;
   final ValueChanged<bool>? onSolveToggle;
   const PostComment({
     Key? key,
     required this.comment,
     required this.isSolvable,
+    required this.postId,
     this.onSolveToggle,
   }) : super(key: key);
 
@@ -94,7 +97,7 @@ class PostComment extends HookConsumerWidget {
                 const Spacer(),
                 PopupMenuButton(
                   icon: const Icon(Icons.more_horiz_outlined),
-                  onSelected: (value) {
+                  onSelected: (value) async {
                     switch (value) {
                       case "solve":
                       case "unsolve":
@@ -103,11 +106,26 @@ class PostComment extends HookConsumerWidget {
                       case "edit":
                         isEditMode.value = true;
                         break;
+                      case "delete":
+                        final hasConfirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) =>
+                              const HazardPromptDialog(type: 'comment'),
+                        );
+                        if (hasConfirmed == true) {
+                          await pb.collection("comments").delete(comment.id);
+                          await queryBowl
+                              .getInfiniteQuery(
+                                  postCommentsInfiniteQueryJob(postId).queryKey)
+                              ?.refetchPages();
+                        }
+                        break;
                       case "report":
                         break;
                       default:
                     }
                   },
+                  enabled: !updating.value && !isEditMode.value,
                   itemBuilder: (context) {
                     return [
                       if (isSolvable)
@@ -132,7 +150,7 @@ class PostComment extends HookConsumerWidget {
                             title: Text("Unsolve"),
                           ),
                         ),
-                      if (isOwner)
+                      if (isOwner) ...[
                         const PopupMenuItem(
                           value: "edit",
                           child: ListTile(
@@ -140,6 +158,15 @@ class PostComment extends HookConsumerWidget {
                             title: Text("Edit"),
                           ),
                         ),
+                        const PopupMenuItem(
+                          value: "delete",
+                          child: ListTile(
+                            leading: Icon(Icons.delete_forever_outlined),
+                            iconColor: Colors.red,
+                            title: Text("Delete"),
+                          ),
+                        ),
+                      ],
                       const PopupMenuItem(
                         value: "report",
                         child: ListTile(

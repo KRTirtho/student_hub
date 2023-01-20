@@ -1,9 +1,12 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/components/posts/hazard_prompt_dialog.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/utils/number_ending_type.dart';
+import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -116,6 +119,8 @@ class _PostCardState extends ConsumerState<PostCard> {
       ],
     );
 
+    final queryBowl = QueryBowl.of(context);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -192,11 +197,36 @@ class _PostCardState extends ConsumerState<PostCard> {
                   children: [
                     PopupMenuButton(
                       icon: const Icon(Icons.more_horiz),
-                      onSelected: (value) {
+                      onSelected: (value) async {
                         switch (value) {
                           case "edit":
                             GoRouter.of(context)
                                 .push("/new?isEdit=true", extra: widget.post);
+                            break;
+                          case "delete":
+                            final hasConfirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (_) =>
+                                  const HazardPromptDialog(type: "post"),
+                            );
+                            if (hasConfirmed == true) {
+                              await pb
+                                  .collection("posts")
+                                  .delete(widget.post.id);
+                              await Future.wait(
+                                queryBowl.cache.infiniteQueries
+                                    .where(
+                                      (element) => element.queryKey
+                                          .startsWith("posts-query"),
+                                    )
+                                    .map(
+                                      (e) => Future.delayed(
+                                        const Duration(milliseconds: 300),
+                                        e.refetchPages,
+                                      ),
+                                    ),
+                              );
+                            }
                             break;
                           case "share":
                           case "report":
@@ -207,17 +237,29 @@ class _PostCardState extends ConsumerState<PostCard> {
                         return [
                           if (isAuthor)
                             const PopupMenuItem(
-                                value: "edit",
-                                child: ListTile(
-                                  leading: Icon(Icons.edit),
-                                  title: Text("Edit"),
-                                )),
-                          const PopupMenuItem(
-                              value: "share",
+                              value: "edit",
                               child: ListTile(
-                                leading: Icon(Icons.share),
-                                title: Text("Share"),
-                              )),
+                                leading: Icon(Icons.edit),
+                                title: Text("Edit"),
+                              ),
+                            ),
+                          const PopupMenuItem(
+                            value: "share",
+                            child: ListTile(
+                              leading: Icon(Icons.share),
+                              title: Text("Share"),
+                            ),
+                          ),
+                          if (isAuthor)
+                            PopupMenuItem(
+                              value: "delete",
+                              child: ListTile(
+                                iconColor: Colors.red[400],
+                                leading:
+                                    const Icon(Icons.delete_forever_outlined),
+                                title: const Text("Delete"),
+                              ),
+                            ),
                           const PopupMenuItem(
                             value: "report",
                             child: ListTile(

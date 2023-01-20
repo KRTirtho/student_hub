@@ -166,198 +166,194 @@ class PostPage extends HookConsumerWidget {
         title: const Text("Post"),
         centerTitle: true,
       ),
-      body: Stack(
-        children: [
-          Waypoint(
-            controller: controller,
-            onTouchEdge: () {
-              if (commentsQuery.hasNextPage) commentsQuery.fetchNextPage();
-            },
-            child: RefreshIndicator(
-              onRefresh: () async {
-                await Future.wait([
-                  postQuery.refetch(),
-                  commentsQuery.refetchPages(),
-                ]);
+      extendBody: true,
+      bottomNavigationBar: HookBuilder(
+        builder: (context) {
+          final medias = useState<List<LOLFile>>([]);
+          final updating = useState(false);
+
+          final commentController = useTextEditingController();
+          void comment() async {
+            if (commentController.text.isEmpty) return;
+            updating.value = true;
+
+            await pb.collection("comments").create(
+              body: {
+                "comment": commentController.text.trim(),
+                "post": postId,
+                "user": ref.read(authenticationProvider)?.id,
               },
-              child: ListView(
-                padding: const EdgeInsets.all(8),
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: controller,
+              files: await Future.wait(
+                medias.value.map(
+                  (e) {
+                    return e.toMultipartFile("media");
+                  },
+                ),
+              ),
+            );
+            await commentsQuery.refetchPages();
+            medias.value = [];
+            commentController.clear();
+            updating.value = false;
+          }
+
+          final focusNode = useFocusNode(
+            onKey: (node, event) {
+              if (kIsDesktop &&
+                  event.isKeyPressed(LogicalKeyboardKey.enter) &&
+                  event.isShiftPressed) {
+                comment();
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+          );
+
+          final addMedia = updating.value
+              ? null
+              : () async {
+                  final files = await FilePicker.platform.pickFiles(
+                    allowMultiple: true,
+                    dialogTitle: "Select post media",
+                    type: FileType.image,
+                    withData: true,
+                  );
+                  if (files == null) return;
+                  if ((files.count + medias.value.length) > 3) {
+                    medias.value = [
+                      ...medias.value,
+                      ...files.files
+                          .sublist(0, 3 - medias.value.length)
+                          .map((e) => LOLFile.fromPlatformFile(e, "image"))
+                    ];
+                  } else {
+                    medias.value = [
+                      ...medias.value,
+                      ...files.files
+                          .map((e) => LOLFile.fromPlatformFile(e, "image"))
+                    ];
+                  }
+                };
+          return Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(.3),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (postQuery.hasData && !postQuery.hasError) ...[
-                    PostCard(post: postQuery.data!, expanded: true),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        postQuery.data!.type == PostType.question
-                            ? "Solutions"
-                            : "Comments",
-                        style: Theme.of(context).textTheme.caption,
+                  if (medias.value.isNotEmpty) ...[
+                    const Gap(10),
+                    PostCommentMedia(
+                      medias: medias.value,
+                      enabled: !updating.value,
+                      onChanged: (value) {
+                        medias.value = value;
+                      },
+                    ),
+                    const Gap(10),
+                  ],
+                  TextField(
+                    focusNode: focusNode,
+                    controller: commentController,
+                    minLines: 1,
+                    maxLines: 2,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.transparent,
+                      isDense: true,
+                      labelText: postQuery.data?.type == PostType.question
+                          ? 'Answer'
+                          : 'Comment',
+                      suffix: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (medias.value.isEmpty)
+                            IconButton(
+                              icon: const Icon(
+                                  Icons.add_photo_alternate_outlined),
+                              onPressed: addMedia,
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: updating.value ? null : comment,
+                          ),
+                        ],
                       ),
                     ),
-                  ] else if (postQuery.hasError &&
-                      postQuery.error is ClientException)
-                    Center(
-                      child: Text(
-                        (postQuery.error as ClientException)
-                            .response["message"],
-                      ),
-                    )
-                  else
-                    const Center(child: CircularProgressIndicator.adaptive()),
-                  ...comments.map(
-                    (comment) {
-                      return PostComment(
-                        isSolvable: postQuery.data?.type == PostType.question &&
-                            !comment.solve &&
-                            !isAlreadySolved &&
-                            postQuery.data?.user?.id == user?.id,
-                        comment: comment,
-                        onSolveToggle: (solved) async {
-                          await pb.collection("comments").update(
-                            comment.id,
-                            body: {
-                              "solve": solved,
-                            },
-                          );
-                          await commentsQuery.refetchPages();
-                        },
-                      );
-                    },
                   ),
-                  const Gap(80),
                 ],
               ),
             ),
-          ),
-          HookBuilder(builder: (context) {
-            final medias = useState<List<LOLFile>>([]);
-            final updating = useState(false);
-
-            final commentController = useTextEditingController();
-            void comment() async {
-              if (commentController.text.isEmpty) return;
-              updating.value = true;
-
-              await pb.collection("comments").create(
-                body: {
-                  "comment": commentController.text.trim(),
-                  "post": postId,
-                  "user": ref.read(authenticationProvider)?.id,
-                },
-                files: await Future.wait(
-                  medias.value.map(
-                    (e) {
-                      return e.toMultipartFile("media");
+          );
+        },
+      ),
+      body: Waypoint(
+        controller: controller,
+        onTouchEdge: () {
+          if (commentsQuery.hasNextPage) commentsQuery.fetchNextPage();
+        },
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await Future.wait([
+              postQuery.refetch(),
+              commentsQuery.refetchPages(),
+            ]);
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(8),
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: controller,
+            children: [
+              if (postQuery.hasData && !postQuery.hasError) ...[
+                PostCard(post: postQuery.data!, expanded: true),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    postQuery.data!.type == PostType.question
+                        ? "Solutions"
+                        : "Comments",
+                    style: Theme.of(context).textTheme.caption,
+                  ),
+                ),
+              ] else if (postQuery.hasError &&
+                  postQuery.error is ClientException)
+                Center(
+                  child: Text(
+                    (postQuery.error as ClientException).response["message"],
+                  ),
+                )
+              else
+                const Center(child: CircularProgressIndicator.adaptive()),
+              ...comments.map(
+                (comment) {
+                  return PostComment(
+                    isSolvable: postQuery.data?.type == PostType.question &&
+                        !comment.solve &&
+                        !isAlreadySolved &&
+                        postQuery.data?.user?.id == user?.id,
+                    postId: postId,
+                    comment: comment,
+                    onSolveToggle: (solved) async {
+                      await pb.collection("comments").update(
+                        comment.id,
+                        body: {
+                          "solve": solved,
+                        },
+                      );
+                      await commentsQuery.refetchPages();
                     },
-                  ),
-                ),
-              );
-              await commentsQuery.refetchPages();
-              medias.value = [];
-              commentController.clear();
-              updating.value = false;
-            }
-
-            final focusNode = useFocusNode(
-              onKey: (node, event) {
-                if (kIsDesktop &&
-                    event.isKeyPressed(LogicalKeyboardKey.enter) &&
-                    event.isShiftPressed) {
-                  comment();
-                  return KeyEventResult.handled;
-                }
-                return KeyEventResult.ignored;
-              },
-            );
-
-            final addMedia = updating.value
-                ? null
-                : () async {
-                    final files = await FilePicker.platform.pickFiles(
-                      allowMultiple: true,
-                      dialogTitle: "Select post media",
-                      type: FileType.image,
-                      withData: true,
-                    );
-                    if (files == null) return;
-                    if ((files.count + medias.value.length) > 3) {
-                      medias.value = [
-                        ...medias.value,
-                        ...files.files
-                            .sublist(0, 3 - medias.value.length)
-                            .map((e) => LOLFile.fromPlatformFile(e, "image"))
-                      ];
-                    } else {
-                      medias.value = [
-                        ...medias.value,
-                        ...files.files
-                            .map((e) => LOLFile.fromPlatformFile(e, "image"))
-                      ];
-                    }
-                  };
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                decoration: BoxDecoration(
-                  color:
-                      Theme.of(context).scaffoldBackgroundColor.withOpacity(.3),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (medias.value.isNotEmpty) ...[
-                        const Gap(10),
-                        PostCommentMedia(
-                          medias: medias.value,
-                          enabled: !updating.value,
-                          onChanged: (value) {
-                            medias.value = value;
-                          },
-                        ),
-                        const Gap(10),
-                      ],
-                      TextField(
-                        focusNode: focusNode,
-                        controller: commentController,
-                        minLines: 1,
-                        maxLines: 2,
-                        keyboardType: TextInputType.multiline,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.transparent,
-                          isDense: true,
-                          labelText: postQuery.data?.type == PostType.question
-                              ? 'Answer'
-                              : 'Comment',
-                          suffix: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (medias.value.isEmpty)
-                                IconButton(
-                                  icon: const Icon(
-                                      Icons.add_photo_alternate_outlined),
-                                  onPressed: addMedia,
-                                ),
-                              IconButton(
-                                icon: const Icon(Icons.send),
-                                onPressed: updating.value ? null : comment,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                  );
+                },
               ),
-            );
-          }),
-        ],
+              const Gap(80),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,8 +1,12 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/components/posts/hazard_prompt_dialog.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:eusc_freaks/queries/books.dart';
+import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -24,6 +28,7 @@ class BookCard extends HookConsumerWidget {
 
     final isOwner = ref.watch(authenticationProvider)?.id == book.user.id;
 
+    final queryBowl = QueryBowl.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -48,13 +53,28 @@ class BookCard extends HookConsumerWidget {
                   children: [
                     PopupMenuButton(
                       icon: const Icon(Icons.more_horiz),
-                      onSelected: (value) {
+                      onSelected: (value) async {
                         switch (value) {
                           case "edit":
                             GoRouter.of(context).push(
                               "/library/new",
                               extra: book,
                             );
+                            break;
+                          case "delete":
+                            final hasConfirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) =>
+                                  const HazardPromptDialog(type: 'book'),
+                            );
+                            if (hasConfirmed == true) {
+                              await pb.collection("books").delete(book.id);
+                              await queryBowl
+                                  .getInfiniteQuery(
+                                    booksInfiniteQueryJob.queryKey,
+                                  )
+                                  ?.refetchPages();
+                            }
                             break;
                           case "share":
                           case "report":
@@ -78,6 +98,15 @@ class BookCard extends HookConsumerWidget {
                               title: Text("Share"),
                             ),
                           ),
+                          if (isOwner)
+                            const PopupMenuItem(
+                              value: "delete",
+                              child: ListTile(
+                                leading: Icon(Icons.delete_forever_outlined),
+                                iconColor: Colors.red,
+                                title: Text("Delete"),
+                              ),
+                            ),
                           const PopupMenuItem(
                             value: "report",
                             child: ListTile(
