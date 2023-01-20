@@ -75,6 +75,15 @@ final routerConfig = Provider((ref) {
             ],
           ),
           GoRoute(
+            path: '/announcement',
+            parentNavigatorKey: shellNavigatorKey,
+            pageBuilder: (context, state) => MaterialPage(
+              child: SizedBox(
+                child: PostsPage(type: PostType.announcement.name),
+              ),
+            ),
+          ),
+          GoRoute(
             path: '/profile/:id',
             parentNavigatorKey: shellNavigatorKey,
             pageBuilder: (context, state) => MaterialPage(

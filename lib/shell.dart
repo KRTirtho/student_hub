@@ -12,7 +12,7 @@ final routes = {
   },
   {
     "label": "Announces",
-    "path": "/?type=${PostType.announcement.name}",
+    "path": "/${PostType.announcement.name}",
     "icon": Icons.campaign_outlined
   },
   {

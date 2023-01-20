@@ -44,6 +44,7 @@ class BookCard extends HookConsumerWidget {
                 ),
                 const Gap(10),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     PopupMenuButton(
                       icon: const Icon(Icons.more_horiz),
