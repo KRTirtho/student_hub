@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/collections/env.dart';
+import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/pages/library/book_new.dart';
 import 'package:eusc_freaks/pages/library/library.dart';
@@ -90,8 +91,10 @@ final routerConfig = Provider((ref) {
               GoRoute(
                 path: 'new',
                 parentNavigatorKey: navigatorKey,
-                pageBuilder: (context, state) => const MaterialPage(
-                  child: BookNewPage(),
+                pageBuilder: (context, state) => MaterialPage(
+                  child: BookNewPage(
+                    book: state.extra as Book?,
+                  ),
                 ),
               ),
             ],

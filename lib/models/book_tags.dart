@@ -24,4 +24,23 @@ class BookTag extends RecordModel {
 
   @override
   Map<String, dynamic> toJson() => _$BookTagToJson(this);
+
+  @override
+  operator ==(Object other) =>
+      identical(this, other) ||
+      other is BookTag &&
+          runtimeType == other.runtimeType &&
+          tag == other.tag &&
+          user == other.user &&
+          id == other.id &&
+          created == other.created &&
+          updated == other.updated;
+
+  @override
+  int get hashCode =>
+      tag.hashCode ^
+      user.hashCode ^
+      id.hashCode ^
+      created.hashCode ^
+      updated.hashCode;
 }

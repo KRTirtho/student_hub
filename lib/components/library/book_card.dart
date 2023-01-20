@@ -22,6 +22,8 @@ class BookCard extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final mediaUrl = book.getMediaURL().toString();
 
+    final isOwner = ref.watch(authenticationProvider)?.id == book.user.id;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -41,11 +43,57 @@ class BookCard extends HookConsumerWidget {
                   ),
                 ),
                 const Gap(10),
-                Text(
-                  format(
-                    DateTime.parse(book.created),
-                  ),
-                  style: Theme.of(context).textTheme.caption,
+                Column(
+                  children: [
+                    PopupMenuButton(
+                      icon: const Icon(Icons.more_horiz),
+                      onSelected: (value) {
+                        switch (value) {
+                          case "edit":
+                            GoRouter.of(context).push(
+                              "/library/new",
+                              extra: book,
+                            );
+                            break;
+                          case "share":
+                          case "report":
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) {
+                        return [
+                          if (isOwner)
+                            const PopupMenuItem(
+                              value: "edit",
+                              child: ListTile(
+                                leading: Icon(Icons.edit_outlined),
+                                title: Text("Edit"),
+                              ),
+                            ),
+                          const PopupMenuItem(
+                            value: "share",
+                            child: ListTile(
+                              leading: Icon(Icons.share_outlined),
+                              title: Text("Share"),
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: "report",
+                            child: ListTile(
+                              leading: Icon(Icons.report_outlined),
+                              title: Text("Report"),
+                            ),
+                          ),
+                        ];
+                      },
+                    ),
+                    Text(
+                      format(
+                        DateTime.parse(book.created),
+                      ),
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ],
                 ),
               ],
             ),

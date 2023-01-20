@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_pdf_thumbnail.dart';
+import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/books.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
@@ -15,23 +21,109 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' hide ClientException;
 import 'package:http_parser/http_parser.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:path/path.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:pocketbase/pocketbase.dart';
 
+class LOLFile {
+  final String name;
+  final String? path;
+  final Uint8List? bytes;
+  final String type;
+
+  LOLFile({
+    required this.type,
+    String? name,
+    this.path,
+    this.bytes,
+  })  : assert(
+          (name != null && bytes != null) || path != null,
+          "Either name and bytes or path must be provided",
+        ),
+        name = name ?? basename(path!).split("?").first;
+
+  factory LOLFile.fromPlatformFile(PlatformFile file, String type) => LOLFile(
+        name: file.name,
+        path: !kIsWeb ? file.path : null,
+        bytes: file.bytes,
+        type: type,
+      );
+
+  factory LOLFile.fromUri(Uri uri, String type) => LOLFile(
+        name: basename(uri.path),
+        path: uri.toString(),
+        type: type,
+      );
+
+  PlatformFile toPlatformFile() => PlatformFile(
+        name: name,
+        path: path,
+        bytes: bytes,
+        size: bytes?.length ?? 0,
+      );
+
+  Uri toUri() => Uri.parse(path!);
+
+  FutureOr<MultipartFile> toMultiPartFile(String field) async {
+    if (bytes != null) {
+      return MultipartFile.fromBytes(
+        field,
+        bytes!,
+        filename: name,
+        contentType: MediaType(type, extension(path ?? name).substring(1)),
+      );
+    } else {
+      final file = await DefaultCacheManager().getSingleFile(path!);
+      return MultipartFile.fromBytes(
+        field,
+        await file.readAsBytes(),
+        filename: name,
+        contentType: MediaType(type, extension(path!).substring(1)),
+      );
+    }
+  }
+
+  MediaType get mimeType =>
+      MediaType(type, extension(path ?? name).substring(1));
+
+  @override
+  operator ==(Object other) =>
+      identical(this, other) ||
+      other is LOLFile &&
+          other.name == name &&
+          other.path == path &&
+          other.bytes == bytes &&
+          other.type == type;
+
+  @override
+  int get hashCode =>
+      name.hashCode ^ path.hashCode ^ bytes.hashCode ^ type.hashCode;
+}
+
 class BookNewPage extends HookConsumerWidget {
-  const BookNewPage({Key? key}) : super(key: key);
+  final Book? book;
+  const BookNewPage({
+    Key? key,
+    this.book,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
     final bookTags = useQuery(job: bookTagsQueryJob, externalData: null);
 
-    final titleController = useTextEditingController();
-    final bioController = useTextEditingController();
-    final authorController = useTextEditingController();
-    final externalUrlController = useTextEditingController();
+    final titleController = useTextEditingController(text: book?.title);
+    final bioController = useTextEditingController(text: book?.bio);
+    final authorController = useTextEditingController(text: book?.author);
+    final externalUrlController =
+        useTextEditingController(text: book?.externalUrl);
 
-    final selectedTags = useRef<List<BookTag>>([]);
-    final media = useState<PlatformFile?>(null);
+    final selectedTags = useRef<List<BookTag>>([
+      ...?book?.tags,
+    ]);
+    final initialMedia = book != null
+        ? LOLFile.fromUri(book!.getMediaURL(), "application")
+        : null;
+    final media = useState<LOLFile?>(initialMedia);
     final updating = useState(false);
     final error = useState<String?>(null);
 
@@ -39,9 +131,11 @@ class BookNewPage extends HookConsumerWidget {
 
     final formKey = GlobalKey<FormState>();
 
+    final isEditMode = book != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("New Book"),
+        title: Text(isEditMode ? "Edit Book" : "New Book"),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.close_outlined),
@@ -92,7 +186,68 @@ class BookNewPage extends HookConsumerWidget {
               style: Theme.of(context).textTheme.subtitle1,
             ),
             const Gap(5),
-            if (media.value == null)
+            if (media.value != null) ...[
+              HookBuilder(builder: (context) {
+                final document = useMemoized(
+                  () => (isEditMode && media.value == initialMedia) ||
+                          media.value == null
+                      ? null
+                      : PdfDocument.openData(media.value!.bytes!),
+                  [media],
+                );
+
+                final thumbnail = usePdfThumbnail(
+                  isEditMode && media.value == initialMedia ? null : document,
+                );
+                return SizedBox(
+                  height: 200,
+                  child: InkWell(
+                    onTap: () {
+                      GoRouter.of(context).push(
+                        "/media/pdf",
+                        extra: document ?? initialMedia,
+                      );
+                    },
+                    child: isEditMode && media.value == initialMedia
+                        ? UniversalImage(
+                            path: book!
+                                .getThumbnailURL(const Size(0, 200))
+                                .toString(),
+                            fit: BoxFit.contain,
+                          )
+                        : FutureBuilder<PdfPageImage?>(
+                            future: thumbnail,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return Image.memory(
+                                snapshot.data!.bytes,
+                                fit: BoxFit.contain,
+                              );
+                            }),
+                  ),
+                );
+              }),
+              const Gap(10),
+              Row(
+                children: [
+                  Text(
+                    media.value?.name ?? "",
+                    style: Theme.of(context).textTheme.caption,
+                    textAlign: TextAlign.center,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => media.value = null,
+                    color: Colors.red[400],
+                    icon: const Icon(Icons.delete_outline_rounded),
+                  ),
+                ],
+              ),
+            ] else
               SizedBox(
                 height: 100,
                 child: MaterialButton(
@@ -121,66 +276,17 @@ class BookNewPage extends HookConsumerWidget {
                             error.value = "File size must be less than 40MB";
                             return;
                           }
-                          media.value = files.files.first;
+                          media.value = LOLFile.fromPlatformFile(
+                            files.files.first,
+                            "application",
+                          );
                         },
                   child: const Icon(
                     Icons.file_present_outlined,
                     size: 40,
                   ),
                 ),
-              )
-            else ...[
-              HookBuilder(builder: (context) {
-                final document = useMemoized(
-                  () => media.value?.bytes != null
-                      ? PdfDocument.openData(media.value!.bytes!)
-                      : null,
-                  [media],
-                );
-
-                final thumbnail = usePdfThumbnail(document);
-                return SizedBox(
-                  height: 200,
-                  child: InkWell(
-                    onTap: () {
-                      GoRouter.of(context).push(
-                        "/media/pdf",
-                        extra: document,
-                      );
-                    },
-                    child: FutureBuilder<PdfPageImage?>(
-                        future: thumbnail,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          return Image.memory(
-                            snapshot.data!.bytes,
-                            fit: BoxFit.contain,
-                          );
-                        }),
-                  ),
-                );
-              }),
-              const Gap(10),
-              Row(
-                children: [
-                  Text(
-                    media.value!.name,
-                    style: Theme.of(context).textTheme.caption,
-                    textAlign: TextAlign.center,
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => media.value = null,
-                    color: Colors.red[400],
-                    icon: const Icon(Icons.delete_outline_rounded),
-                  ),
-                ],
               ),
-            ],
             const Gap(20),
             Text(
               "Tags #",
@@ -198,6 +304,7 @@ class BookNewPage extends HookConsumerWidget {
                 },
                 listType: MultiSelectListType.CHIP,
                 searchable: true,
+                initialValue: selectedTags.value,
                 validator: (values) {
                   if (values == null || values.isEmpty) {
                     return "Please select at least one tag";
@@ -239,48 +346,83 @@ class BookNewPage extends HookConsumerWidget {
                         return;
                       }
                       updating.value = true;
-                      final thumb = await getPdfThumbnail(
-                        PdfDocument.openData(media.value!.bytes!),
-                      );
                       try {
-                        final book = await pb.collection("books").create(
-                          body: {
-                            "title": titleController.text,
-                            "bio": bioController.text,
-                            "author": authorController.text,
-                            "external_url": externalUrlController.text,
-                            "tags": selectedTags.value.first.id,
-                            "user": ref.read(authenticationProvider)?.id,
-                          },
-                          files: [
-                            MultipartFile.fromBytes(
-                              "media",
-                              media.value!.bytes!,
-                              filename: media.value!.name,
-                              contentType: MediaType("application", "pdf"),
-                            ),
-                            MultipartFile.fromBytes(
-                              "thumbnail",
-                              thumb!.bytes,
-                              filename:
-                                  "${media.value!.name}.thumbnail.${thumb.format.name}",
-                              contentType:
-                                  MediaType("image", thumb.format.name),
-                            ),
-                          ],
-                        );
-                        // Workaround for a bug in the backend
-                        if (selectedTags.value.length > 1) {
+                        final body = {
+                          "title": titleController.text,
+                          "bio": bioController.text,
+                          "author": authorController.text,
+                          "external_url": externalUrlController.text,
+                        };
+
+                        final hasChangeMedia =
+                            (isEditMode && media.value != initialMedia) ||
+                                !isEditMode;
+                        final thumb = hasChangeMedia
+                            ? await getPdfThumbnail(
+                                PdfDocument.openData(media.value!.bytes!),
+                              )
+                            : null;
+
+                        if (isEditMode) {
                           await pb.collection("books").update(
-                            book.id,
-                            body: {
-                              "tags": [
-                                ...book.data["tags"],
-                                ...selectedTags.value.map((e) => e.id),
-                              ]
-                            },
+                                book!.id,
+                                body: {
+                                  ...body,
+                                  "tags": selectedTags.value
+                                      .map((e) => e.id)
+                                      .toList(),
+                                },
+                                files: hasChangeMedia
+                                    ? [
+                                        await media.value!
+                                            .toMultiPartFile("media"),
+                                        MultipartFile.fromBytes(
+                                          "thumbnail",
+                                          thumb!.bytes,
+                                          filename:
+                                              "${basename(media.value!.name)}.thumbnail.${thumb.format.name}",
+                                          contentType: MediaType(
+                                              "image", thumb.format.name),
+                                        ),
+                                      ]
+                                    : [],
+                              );
+                        } else {
+                          final bookRec = Book.fromRecord(
+                            await pb.collection("books").create(
+                              body: {
+                                ...body,
+                                "user": ref.read(authenticationProvider)?.id,
+                                "tags": selectedTags.value.first.id
+                              },
+                              files: [
+                                await media.value!.toMultiPartFile("media"),
+                                MultipartFile.fromBytes(
+                                  "thumbnail",
+                                  thumb!.bytes,
+                                  filename:
+                                      "${basename(media.value!.name)}.thumbnail.${thumb.format.name}",
+                                  contentType:
+                                      MediaType("image", thumb.format.name),
+                                ),
+                              ],
+                              expand: ["user", "tags"].join(","),
+                            ),
                           );
+                          // Workaround for a bug in the backend
+                          if (selectedTags.value.length > 1) {
+                            await pb.collection("books").update(
+                              bookRec.id,
+                              body: {
+                                "tags": [
+                                  ...bookRec.data["tags"],
+                                  ...selectedTags.value.map((e) => e.id),
+                                ]
+                              },
+                            );
+                          }
                         }
+
                         formKey.currentState?.reset();
                         media.value = null;
                         error.value = null;
@@ -304,7 +446,7 @@ class BookNewPage extends HookConsumerWidget {
                         color: Colors.grey[600],
                       ),
                     )
-                  : const Text("Publish"),
+                  : Text(isEditMode ? "Update" : "Publish"),
             ),
           ],
         ),
