@@ -1,18 +1,15 @@
-import 'dart:async';
-
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_pdf_thumbnail.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
+import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/books.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:fl_query_hooks/fl_query_hooks.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
@@ -24,81 +21,6 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:path/path.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:pocketbase/pocketbase.dart';
-
-class LOLFile {
-  final String name;
-  final String? path;
-  final Uint8List? bytes;
-  final String type;
-
-  LOLFile({
-    required this.type,
-    String? name,
-    this.path,
-    this.bytes,
-  })  : assert(
-          (name != null && bytes != null) || path != null,
-          "Either name and bytes or path must be provided",
-        ),
-        name = name ?? basename(path!).split("?").first;
-
-  factory LOLFile.fromPlatformFile(PlatformFile file, String type) => LOLFile(
-        name: file.name,
-        path: !kIsWeb ? file.path : null,
-        bytes: file.bytes,
-        type: type,
-      );
-
-  factory LOLFile.fromUri(Uri uri, String type) => LOLFile(
-        name: basename(uri.path),
-        path: uri.toString(),
-        type: type,
-      );
-
-  PlatformFile toPlatformFile() => PlatformFile(
-        name: name,
-        path: path,
-        bytes: bytes,
-        size: bytes?.length ?? 0,
-      );
-
-  Uri toUri() => Uri.parse(path!);
-
-  FutureOr<MultipartFile> toMultiPartFile(String field) async {
-    if (bytes != null) {
-      return MultipartFile.fromBytes(
-        field,
-        bytes!,
-        filename: name,
-        contentType: MediaType(type, extension(path ?? name).substring(1)),
-      );
-    } else {
-      final file = await DefaultCacheManager().getSingleFile(path!);
-      return MultipartFile.fromBytes(
-        field,
-        await file.readAsBytes(),
-        filename: name,
-        contentType: MediaType(type, extension(path!).substring(1)),
-      );
-    }
-  }
-
-  MediaType get mimeType =>
-      MediaType(type, extension(path ?? name).substring(1));
-
-  @override
-  operator ==(Object other) =>
-      identical(this, other) ||
-      other is LOLFile &&
-          other.name == name &&
-          other.path == path &&
-          other.bytes == bytes &&
-          other.type == type;
-
-  @override
-  int get hashCode =>
-      name.hashCode ^ path.hashCode ^ bytes.hashCode ^ type.hashCode;
-}
 
 class BookNewPage extends HookConsumerWidget {
   final Book? book;
@@ -375,7 +297,7 @@ class BookNewPage extends HookConsumerWidget {
                                 files: hasChangeMedia
                                     ? [
                                         await media.value!
-                                            .toMultiPartFile("media"),
+                                            .toMultipartFile("media"),
                                         MultipartFile.fromBytes(
                                           "thumbnail",
                                           thumb!.bytes,
@@ -396,7 +318,7 @@ class BookNewPage extends HookConsumerWidget {
                                 "tags": selectedTags.value.first.id
                               },
                               files: [
-                                await media.value!.toMultiPartFile("media"),
+                                await media.value!.toMultipartFile("media"),
                                 MultipartFile.fromBytes(
                                   "thumbnail",
                                   thumb!.bytes,

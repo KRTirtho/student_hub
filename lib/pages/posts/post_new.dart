@@ -2,6 +2,7 @@ import 'package:eusc_freaks/collections/math_symbols_collection.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_force_update.dart';
+import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
@@ -14,10 +15,7 @@ import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:http/http.dart' hide ClientException;
-import 'package:http_parser/http_parser.dart';
 import 'package:markdown_editable_textinput/markdown_text_input.dart';
-import 'package:path/path.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class PostNewPage extends HookConsumerWidget {
@@ -45,8 +43,9 @@ class PostNewPage extends HookConsumerWidget {
 
     final error = useState<String?>(null);
     final updating = useState(false);
-    final initialMedia = post?.getMediaURL().map((e) => e.toString()).toList();
-    final media = useState<List<String>>(initialMedia ?? []);
+    final initialMedia =
+        post?.getMediaURL().map((e) => LOLFile.fromUri(e, "image")).toList();
+    final media = useState<List<LOLFile>>(initialMedia ?? []);
 
     final description = useRef<String>(post?.description ?? "");
 
@@ -136,7 +135,7 @@ class PostNewPage extends HookConsumerWidget {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: UniversalImage(
-                                path: file,
+                                path: file.universalPath,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -183,6 +182,7 @@ class PostNewPage extends HookConsumerWidget {
                                   allowMultiple: true,
                                   dialogTitle: "Select post media",
                                   type: FileType.image,
+                                  withData: true,
                                 );
                                 if (files == null) return;
                                 if ((files.count + media.value.length) > 6) {
@@ -192,15 +192,22 @@ class PostNewPage extends HookConsumerWidget {
                                     ...media.value,
                                     ...files.files
                                         .sublist(0, 6 - media.value.length)
-                                        .map((e) => e.path)
-                                        .whereType<String>()
+                                        .map(
+                                          (e) => LOLFile.fromPlatformFile(
+                                            e,
+                                            "image",
+                                          ),
+                                        )
                                   ];
                                 } else {
                                   media.value = [
                                     ...media.value,
-                                    ...files.files
-                                        .map((e) => e.path)
-                                        .whereType<String>()
+                                    ...files.files.map(
+                                      (e) => LOLFile.fromPlatformFile(
+                                        e,
+                                        "image",
+                                      ),
+                                    )
                                   ];
                                 }
                               },
@@ -246,30 +253,17 @@ class PostNewPage extends HookConsumerWidget {
                                       body: body,
                                       files: await Future.wait(
                                         media.value.map(
-                                          (e) async =>
-                                              await MultipartFile.fromPath(
-                                            'media',
-                                            e,
-                                            filename: basename(e),
-                                            contentType: MediaType(
-                                                'image', extension(e)),
-                                          ),
+                                          (e) => e.toMultipartFile("media"),
                                         ),
                                       ),
                                     );
                               } else {
                                 final newMedias = media.value
-                                    .where(
-                                      (e) => !e.startsWith("http"),
-                                    )
+                                    .where((e) => e.bytes != null)
                                     .toList();
                                 final deletingMedias = initialMedia
-                                        ?.where(
-                                          (e) => !media.value.contains(e),
-                                        )
-                                        .map(
-                                          (e) => basename(e).split("?").first,
-                                        )
+                                        ?.where((e) => !media.value.contains(e))
+                                        .map((e) => e.name)
                                         .toList() ??
                                     [];
                                 if (deletingMedias.isNotEmpty &&
@@ -291,15 +285,7 @@ class PostNewPage extends HookConsumerWidget {
                                       },
                                       files: await Future.wait(
                                         newMedias.map(
-                                          (e) => MultipartFile.fromPath(
-                                            'media',
-                                            e,
-                                            filename: basename(e),
-                                            contentType: MediaType(
-                                              'image',
-                                              extension(e).substring(1),
-                                            ),
-                                          ),
+                                          (e) => e.toMultipartFile("media"),
                                         ),
                                       ),
                                     );
@@ -309,7 +295,7 @@ class PostNewPage extends HookConsumerWidget {
                               error.value = null;
                               media.value = Post.fromRecord(rec)
                                   .getMediaURL()
-                                  .map((e) => e.toString())
+                                  .map((e) => LOLFile.fromUri(e, "image"))
                                   .toList();
                               if (mounted()) {
                                 GoRouter.of(context).go("/posts/${rec.id}");

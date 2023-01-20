@@ -6,6 +6,7 @@ import 'package:eusc_freaks/components/posts/post_comment.dart';
 import 'package:eusc_freaks/components/posts/post_comment_media.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/comment.dart';
+import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
@@ -17,9 +18,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:http/http.dart' hide ClientException;
-import 'package:http_parser/http_parser.dart';
-import 'package:path/path.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:collection/collection.dart';
 
@@ -234,7 +232,7 @@ class PostPage extends HookConsumerWidget {
             ),
           ),
           HookBuilder(builder: (context) {
-            final medias = useState<List<String>>([]);
+            final medias = useState<List<LOLFile>>([]);
             final updating = useState(false);
 
             final commentController = useTextEditingController();
@@ -250,15 +248,9 @@ class PostPage extends HookConsumerWidget {
                 },
                 files: await Future.wait(
                   medias.value.map(
-                    (e) => MultipartFile.fromPath(
-                      'media',
-                      e,
-                      filename: basename(e),
-                      contentType: MediaType(
-                        'image',
-                        extension(e).substring(1),
-                      ),
-                    ),
+                    (e) {
+                      return e.toMultipartFile("media");
+                    },
                   ),
                 ),
               );
@@ -287,6 +279,7 @@ class PostPage extends HookConsumerWidget {
                       allowMultiple: true,
                       dialogTitle: "Select post media",
                       type: FileType.image,
+                      withData: true,
                     );
                     if (files == null) return;
                     if ((files.count + medias.value.length) > 3) {
@@ -294,12 +287,13 @@ class PostPage extends HookConsumerWidget {
                         ...medias.value,
                         ...files.files
                             .sublist(0, 3 - medias.value.length)
-                            .map((e) => e.path!)
+                            .map((e) => LOLFile.fromPlatformFile(e, "image"))
                       ];
                     } else {
                       medias.value = [
                         ...medias.value,
-                        ...files.files.map((e) => e.path!)
+                        ...files.files
+                            .map((e) => LOLFile.fromPlatformFile(e, "image"))
                       ];
                     }
                   };
@@ -330,6 +324,7 @@ class PostPage extends HookConsumerWidget {
                       TextField(
                         focusNode: focusNode,
                         controller: commentController,
+                        minLines: 1,
                         maxLines: 2,
                         keyboardType: TextInputType.multiline,
                         decoration: InputDecoration(

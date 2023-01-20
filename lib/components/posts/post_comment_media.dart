@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -6,9 +7,9 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class PostCommentMedia extends HookConsumerWidget {
-  final List<String> medias;
+  final List<LOLFile> medias;
   final bool enabled;
-  final ValueChanged<List<String>> onChanged;
+  final ValueChanged<List<LOLFile>> onChanged;
   const PostCommentMedia({
     Key? key,
     required this.onChanged,
@@ -43,7 +44,8 @@ class PostCommentMedia extends HookConsumerWidget {
                         borderRadius: BorderRadius.circular(10),
                         color: Colors.white,
                         image: DecorationImage(
-                          image: UniversalImage.imageProvider(media),
+                          image:
+                              UniversalImage.imageProvider(media.universalPath),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -96,6 +98,7 @@ class PostCommentMedia extends HookConsumerWidget {
                         allowMultiple: true,
                         dialogTitle: "Select post media",
                         type: FileType.image,
+                        withData: true,
                       );
                       if (files == null) return;
                       if ((files.count + selectedMedias.value.length) > 3) {
@@ -103,12 +106,13 @@ class PostCommentMedia extends HookConsumerWidget {
                           ...selectedMedias.value,
                           ...files.files
                               .sublist(0, 3 - selectedMedias.value.length)
-                              .map((e) => e.path!),
+                              .map((e) => LOLFile.fromPlatformFile(e, "image")),
                         ];
                       } else {
                         selectedMedias.value = [
                           ...selectedMedias.value,
-                          ...files.files.map((e) => e.path!)
+                          ...files.files
+                              .map((e) => LOLFile.fromPlatformFile(e, "image"))
                         ];
                       }
                       onChanged(selectedMedias.value);

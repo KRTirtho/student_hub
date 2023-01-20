@@ -1,10 +1,10 @@
-import 'package:collection/collection.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/post_comment_media.dart';
 import 'package:eusc_freaks/hooks/use_brightness_value.dart';
 import 'package:eusc_freaks/models/comment.dart';
+import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:fl_query/fl_query.dart';
@@ -13,9 +13,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:path/path.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart';
@@ -50,8 +47,8 @@ class PostComment extends HookConsumerWidget {
     );
 
     final urls = comment.getMediaURL(const Size(0, 100));
-    final initialMedia = urls.map((e) => e.toString()).toList();
-    final selectedMedia = useState<List<String>>(initialMedia);
+    final initialMedia = urls.map((e) => LOLFile.fromUri(e, "image")).toList();
+    final medias = useState<List<LOLFile>>(initialMedia);
     final fullLengthUrls = comment.getMediaURL();
 
     final queryBowl = QueryBowl.of(context);
@@ -177,7 +174,7 @@ class PostComment extends HookConsumerWidget {
                           onPressed: () {
                             isEditMode.value = false;
                             controller.text = comment.comment;
-                            selectedMedia.value = initialMedia;
+                            medias.value = initialMedia;
                           },
                         ),
                       ),
@@ -190,29 +187,17 @@ class PostComment extends HookConsumerWidget {
                         : () async {
                             updating.value = true;
                             try {
-                              final newMedia = selectedMedia.value
-                                  .where(
-                                    (e) => !e.startsWith("http"),
-                                  )
+                              final newMedia = medias.value
+                                  .where((e) => e.bytes != null)
                                   .toList();
                               final deletedMedia = initialMedia
-                                  .where(
-                                    (e) => !selectedMedia.value.contains(e),
-                                  )
-                                  .map((e) => basename(e).split("?").first)
+                                  .where((e) => !medias.value.contains(e))
+                                  .map((e) => e.name)
                                   .toList();
 
                               final files = await Future.wait(
                                 newMedia.map((e) {
-                                  return MultipartFile.fromPath(
-                                    "media",
-                                    e,
-                                    filename: basename(e),
-                                    contentType: MediaType(
-                                      "image",
-                                      extension(e).substring(1),
-                                    ),
-                                  );
+                                  return e.toMultipartFile("media");
                                 }),
                               );
 
@@ -247,9 +232,9 @@ class PostComment extends HookConsumerWidget {
                                   ?.refetch();
                               isEditMode.value = false;
                               controller.text = record.data["comment"];
-                              selectedMedia.value = Comment.fromRecord(record)
+                              medias.value = Comment.fromRecord(record)
                                   .getMediaURL(const Size(0, 100))
-                                  .map((e) => e.toString())
+                                  .map((e) => LOLFile.fromUri(e, "image"))
                                   .toList();
                             } finally {
                               updating.value = false;
@@ -274,49 +259,48 @@ class PostComment extends HookConsumerWidget {
             const Gap(10),
             if (isEditMode.value)
               PostCommentMedia(
-                medias: selectedMedia.value,
+                medias: medias.value,
                 enabled: !updating.value,
                 onChanged: (value) {
-                  selectedMedia.value = value;
+                  medias.value = value;
                 },
               )
             else
               Row(
                 children: [
-                  ...selectedMedia.value.mapIndexed(
-                    (index, url) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: ClipRRect(
+                  for (final url in medias.value.asMap().entries)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: InkWell(
+                          onTap: () {
+                            GoRouter.of(context).push(
+                              "/media/image?initialPage=${url.key}",
+                              extra: fullLengthUrls,
+                            );
+                          },
                           borderRadius: BorderRadius.circular(10),
-                          child: InkWell(
-                            onTap: () {
-                              GoRouter.of(context).push(
-                                "/media/image?initialPage=$index",
-                                extra: fullLengthUrls,
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(10),
-                            child: SizedBox(
-                              height: 100,
-                              width: 100,
-                              child: Hero(
-                                tag: fullLengthUrls[index],
-                                transitionOnUserGestures: true,
-                                child: UniversalImage(
-                                  path: url.toString(),
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator.adaptive(),
-                                  ),
+                          child: SizedBox(
+                            height: 100,
+                            width: 100,
+                            child: Hero(
+                              tag: fullLengthUrls.isNotEmpty
+                                  ? fullLengthUrls[url.key]
+                                  : url.value.name,
+                              transitionOnUserGestures: true,
+                              child: UniversalImage(
+                                path: url.value.universalPath,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator.adaptive(),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    )
                 ],
               ),
           ],
