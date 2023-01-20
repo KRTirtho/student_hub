@@ -34,7 +34,10 @@ class HazardPromptDialog extends HookConsumerWidget {
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(true),
-          style: ElevatedButton.styleFrom(foregroundColor: Colors.red),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red[400],
+            foregroundColor: Colors.white,
+          ),
           child: const Text('Delete'),
         ),
       ],

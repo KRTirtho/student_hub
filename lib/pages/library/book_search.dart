@@ -96,6 +96,10 @@ class BookSearchPage extends HookConsumerWidget {
       return null;
     }, [searchTextDebounced, isSearch]);
 
+    final sortedTags = tagsQuery.data
+            ?.map((e) => MultiSelectItem<BookTag?>(e, e.tag))
+            .sortedBy((e) => e.value!.tag) ??
+        [];
     return Scaffold(
       appBar: AppBar(
         title: AnimatedSwitcher(
@@ -116,10 +120,10 @@ class BookSearchPage extends HookConsumerWidget {
                   onChanged: (value) {
                     searchText.value = value;
                   },
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: "Search...",
-                    filled: true,
-                    fillColor: Theme.of(context).backgroundColor,
+                    border: UnderlineInputBorder(),
+                    enabledBorder: UnderlineInputBorder(),
                   ),
                 )
               : const Text(
@@ -138,7 +142,7 @@ class BookSearchPage extends HookConsumerWidget {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(70),
+          preferredSize: Size.fromHeight(isSearch.value ? 0 : 50),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: isSearch.value
@@ -176,14 +180,15 @@ class BookSearchPage extends HookConsumerWidget {
                               .textTheme
                               .bodyText1!
                               .copyWith(color: Theme.of(context).cardColor),
-                          items: tagsQuery.data!
-                              .map((e) => MultiSelectItem<BookTag?>(e, e.tag))
-                              .sortedBy((e) => e.value!.tag)
-                              .sortedBy<num>((e) =>
-                                  selectedTags.value.contains(e.value!)
+                          items: selectedTags.value.length == 1 &&
+                                  initialTags != null &&
+                                  selectedTags.value == initialTags
+                              ? sortedTags.sortedBy<num>(
+                                  (e) => selectedTags.value.contains(e.value)
                                       ? -1
-                                      : 1)
-                              .toList(),
+                                      : 1,
+                                )
+                              : sortedTags,
                         ),
                       ),
           ),

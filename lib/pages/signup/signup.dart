@@ -95,8 +95,7 @@ class SignupPage extends HookConsumerWidget {
             Row(
               children: [
                 ConstrainedBox(
-                  constraints:
-                      BoxConstraints(maxWidth: isMaster.value ? 120 : 65),
+                  constraints: const BoxConstraints(maxWidth: 120),
                   child: DropdownButtonFormField<int>(
                     validator: (v) => v == null ? "Year is required" : null,
                     isExpanded: false,
@@ -122,7 +121,7 @@ class SignupPage extends HookConsumerWidget {
                 if (!isMaster.value) ...[
                   const Spacer(),
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 60),
+                    constraints: const BoxConstraints(maxWidth: 90),
                     child: DropdownButtonFormField<int>(
                       isExpanded: false,
                       validator: (v) => v == null ? "Class is required" : null,
@@ -164,8 +163,8 @@ class SignupPage extends HookConsumerWidget {
                 ),
               ],
             ),
-            if (isMaster.value) ...[
-              const Gap(10),
+            const Gap(10),
+            if (isMaster.value)
               DropdownButtonFormField<Subject>(
                 isExpanded: false,
                 validator: (v) => v == null ? "Subject is required" : null,
@@ -185,8 +184,7 @@ class SignupPage extends HookConsumerWidget {
                       child: Center(child: Text(subject.formattedName)),
                     ),
                 ],
-              )
-            ],
+              ),
             const Gap(10),
             TextFormField(
               controller: usernameController,
@@ -202,6 +200,7 @@ class SignupPage extends HookConsumerWidget {
                 label: Text("Username"),
               ),
             ),
+            const Gap(10),
             TextFormField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
@@ -213,7 +212,7 @@ class SignupPage extends HookConsumerWidget {
                 label: Text("Email"),
               ),
             ),
-            const Gap(10),
+            const Gap(20),
             TextFormField(
               controller: passwordController,
               obscureText: !visibility.value,
@@ -235,6 +234,7 @@ class SignupPage extends HookConsumerWidget {
                 ),
               ),
             ),
+            const Gap(10),
             TextFormField(
               controller: confirmPasswordController,
               obscureText: !visibility.value,
@@ -312,8 +312,8 @@ class SignupPage extends HookConsumerWidget {
               child: const Text("Signup"),
             ),
             const Gap(10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(
                     40), // fromHeight use double.infinity as width and 40 is the height
               ),

@@ -23,72 +23,140 @@ class EuscFreaks extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final theme = ThemeData(
       useMaterial3: true,
-      primaryColor: Colors.black,
-      primarySwatch: Colors.grey,
       backgroundColor: Colors.white,
+      primaryColor: Colors.black87,
+      colorScheme: ColorScheme.light(
+        primary: Colors.black87,
+        secondary: Colors.black87,
+        background: Colors.white,
+        onBackground: Colors.black87,
+        error: Colors.red[400]!,
+        inversePrimary: Colors.white,
+        onPrimary: Colors.white,
+        onError: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: Colors.grey[800]!,
+        surface: Colors.grey[50]!,
+      ),
+      tabBarTheme: TabBarTheme(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.grey[800],
+        labelPadding: const EdgeInsets.symmetric(horizontal: 40),
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.black87,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black87,
+            foregroundColor: Colors.white,
+            elevation: 0),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        filled: true,
+      ),
+      listTileTheme: ListTileThemeData(
+        minLeadingWidth: 5,
+        iconColor: Colors.grey[800]!,
+      ),
+      cardTheme: const CardTheme(
+        elevation: 0.5,
+      ),
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
       ),
-      colorScheme: const ColorScheme.light(secondary: Colors.black),
-      scaffoldBackgroundColor: Colors.white,
-      cardColor: Colors.grey[200],
-      errorColor: Colors.red[400],
-      primaryColorDark: Colors.black,
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.white,
+      navigationBarTheme: const NavigationBarThemeData(
         elevation: 0,
         height: 55,
-        iconTheme: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return const IconThemeData(color: Colors.white);
-          }
-          return const IconThemeData(color: Colors.black);
-        }),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       ),
-      listTileTheme: const ListTileThemeData(
-        iconColor: Colors.black,
-        minLeadingWidth: 5,
-      ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
       ),
       popupMenuTheme: PopupMenuThemeData(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );
 
     final darkTheme = ThemeData(
       useMaterial3: true,
-      primarySwatch: Colors.grey,
-      snackBarTheme: const SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-      ),
-      primaryColorDark: Colors.grey[100],
-      primaryColor: Colors.white,
-      colorScheme: const ColorScheme.dark(secondary: Colors.white),
       backgroundColor: Colors.black,
+      primaryColor: Colors.grey[100]!,
       scaffoldBackgroundColor: Colors.black,
-      cardColor: Colors.grey[900],
-      errorColor: Colors.red[400],
-      navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        height: 55,
-        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+      colorScheme: ColorScheme.dark(
+        primary: Colors.grey[100]!,
+        secondary: Colors.grey[100]!,
+        background: Colors.black,
+        onBackground: Colors.grey[100]!,
+        error: Colors.red[400]!,
+        inversePrimary: Colors.black,
+        onPrimary: Colors.black,
+        onError: Colors.grey[100]!,
+        onSecondary: Colors.black,
+        onSurface: Colors.grey[100]!,
+        surface: Colors.grey[900]!,
+      ),
+      tabBarTheme: TabBarTheme(
+        labelColor: Colors.grey[800]!,
+        unselectedLabelColor: Colors.grey[100]!,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 40),
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.grey[100]!,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[100]!,
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        filled: true,
+      ),
+      listTileTheme: ListTileThemeData(
+        minLeadingWidth: 5,
+        iconColor: Colors.grey[100]!,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
         elevation: 0,
         titleSpacing: 0,
       ),
+      cardTheme: const CardTheme(elevation: 0),
+      navigationBarTheme: const NavigationBarThemeData(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        height: 55,
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+      ),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+      ),
       popupMenuTheme: PopupMenuThemeData(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );

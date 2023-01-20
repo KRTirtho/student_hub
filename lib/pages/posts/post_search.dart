@@ -39,11 +39,11 @@ class PostSearchPage extends HookConsumerWidget {
           },
           controller: searchController,
           autofocus: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: "Search Posts...",
-            filled: true,
-            fillColor: Theme.of(context).backgroundColor,
-            prefixIcon: const Icon(Icons.search),
+            prefixIcon: Icon(Icons.search),
+            border: UnderlineInputBorder(),
+            enabledBorder: UnderlineInputBorder(),
           ),
         ),
         bottom: PreferredSize(

@@ -196,6 +196,16 @@ class ProfilePage extends HookConsumerWidget {
                           ),
                         const Gap(70),
                         Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.7),
+                              width: 1.5,
+                            ),
+                          ),
+                          elevation: 0,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -322,12 +332,20 @@ class ProfilePage extends HookConsumerWidget {
                           ),
                         ),
                         const Gap(10),
-                        TabBar(
-                          controller: tabController,
-                          tabs: const [
-                            Tab(text: "Posts"),
-                            Tab(text: "Books"),
-                          ],
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: TabBar(
+                              controller: tabController,
+                              isScrollable: true,
+                              tabs: const [
+                                Tab(text: "Posts"),
+                                Tab(text: "Books"),
+                              ],
+                            ),
+                          ),
                         ),
                         const Gap(10),
                         ChangeNotifierListenableBuilder(

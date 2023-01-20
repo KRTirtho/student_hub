@@ -239,34 +239,31 @@ class BookCard extends HookConsumerWidget {
             const Gap(10),
             const Text("Tags#"),
             const Gap(5),
-            Row(
+            Wrap(
+              spacing: 5,
+              runSpacing: 5,
               children: [
-                Wrap(
-                  spacing: 5,
-                  children: [
-                    for (final tag in book.tags)
-                      MaterialButton(
-                        elevation: 0,
-                        focusElevation: 0,
-                        hoverElevation: 0,
-                        highlightElevation: 0,
-                        disabledElevation: 0,
-                        color: Theme.of(context).cardColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        height: 30,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        onPressed: () {
-                          GoRouter.of(context).push(
-                            "/library/search",
-                            extra: [tag],
-                          );
-                        },
-                        child: Text(tag.tag),
-                      ),
-                  ],
-                ),
+                for (final tag in book.tags)
+                  MaterialButton(
+                    elevation: 0,
+                    focusElevation: 0,
+                    hoverElevation: 0,
+                    highlightElevation: 0,
+                    disabledElevation: 0,
+                    color: Theme.of(context).cardColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    height: 30,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    onPressed: () {
+                      GoRouter.of(context).push(
+                        "/library/search",
+                        extra: [tag],
+                      );
+                    },
+                    child: Text(tag.tag),
+                  ),
               ],
             ),
           ],

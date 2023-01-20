@@ -56,6 +56,7 @@ class LoginPage extends HookConsumerWidget {
                   label: Text("Email"),
                 ),
               ),
+              const Gap(10),
               TextFormField(
                 controller: passwordController,
                 obscureText: !visibility.value,
@@ -67,6 +68,7 @@ class LoginPage extends HookConsumerWidget {
                     .build(),
                 decoration: InputDecoration(
                   label: const Text("Password"),
+                  isDense: true,
                   suffix: IconButton(
                     icon: Icon(
                       !visibility.value
@@ -114,8 +116,8 @@ class LoginPage extends HookConsumerWidget {
                 child: const Text("Login"),
               ),
               const Gap(10),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(
                     40,
                   ), // fromHeight use double.infinity as width and 40 is the height
