@@ -169,7 +169,7 @@ class EuscFreaks extends HookConsumerWidget {
         initial: AdaptiveThemeMode.system,
         builder: (light, dark) => MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Eusc Freaks',
+          title: 'EUSC Hub',
           theme: light,
           darkTheme: dark,
           routerConfig: ref.watch(routerConfig),

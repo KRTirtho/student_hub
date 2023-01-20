@@ -31,21 +31,21 @@ jobs:
           echo '${{ secrets.KEYSTORE }}' | base64 --decode > android/app/upload-keystore.jks
           echo '${{ secrets.KEY_PROPERTIES }}' > android/key.properties
           flutter build apk
-          mv build/app/outputs/apk/release/app-release.apk build/Eusc-freaks-all-arch.apk
+          mv build/app/outputs/apk/release/app-release.apk build/Eusc-hub-all-arch.apk
 
       - name: Upload built apk
         uses: actions/upload-artifact@v2
         with:
           name: Android
           path: |
-            build/Eusc-freaks-all-arch.apk
+            build/Eusc-hub-all-arch.apk
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.ACCESS_TOKEN }}
-          file: build/Eusc-freaks-all-arch.apk
-          asset_name: Eusc-freaks-all-arch.apk
+          file: build/Eusc-hub-all-arch.apk
+          asset_name: Eusc-hub-all-arch.apk
           tag: refs/tags/v0.0.0
           overwrite: true
           body: Nightly build no. ${{ github.run_number }} of eusc-freaks

@@ -45,10 +45,10 @@ class ProfilePage extends HookConsumerWidget {
 
     Future<void> updateProfilePicture() async {
       final file = await FilePicker.platform.pickFiles(
-        dialogTitle: "Select an profile picture",
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'png', 'jpeg'],
-      );
+          dialogTitle: "Select an profile picture",
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'png', 'jpeg'],
+          withData: true);
       if (file == null || file.files.isEmpty) {
         return;
       }
@@ -56,9 +56,9 @@ class ProfilePage extends HookConsumerWidget {
       await pb.collection('users').update(
         userQuery.data!.id,
         files: [
-          await MultipartFile.fromPath(
+          MultipartFile.fromBytes(
             'avatar',
-            file.files.first.path!,
+            file.files.first.bytes!,
             filename: file.files.first.name,
             contentType: MediaType(
               'image',

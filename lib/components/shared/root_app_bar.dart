@@ -8,7 +8,7 @@ class RooAppBar extends AppBar {
     super.key,
   }) : super(
           primary: true,
-          title: const Text("Eusc Freaks"),
+          title: const Text("EUSC Hub"),
           centerTitle: false,
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
