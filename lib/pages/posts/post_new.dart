@@ -45,10 +45,8 @@ class PostNewPage extends HookConsumerWidget {
 
     final error = useState<String?>(null);
     final updating = useState(false);
-    final media = useState<List<String>>([
-      ...?post?.getMediaURL().map((e) => e.toString()),
-    ]);
-    final deletingMedias = useState<List<String>>([]);
+    final initialMedia = post?.getMediaURL().map((e) => e.toString()).toList();
+    final media = useState<List<String>>(initialMedia ?? []);
 
     final description = useRef<String>(post?.description ?? "");
 
@@ -152,12 +150,6 @@ class PostNewPage extends HookConsumerWidget {
                                 media.value = media.value
                                     .where((element) => element != file)
                                     .toList();
-                                if (isEditMode) {
-                                  deletingMedias.value = [
-                                    ...deletingMedias.value,
-                                    basename(file),
-                                  ];
-                                }
                               },
                               style: IconButton.styleFrom(
                                 backgroundColor: Colors.white54,
@@ -267,14 +259,35 @@ class PostNewPage extends HookConsumerWidget {
                                     );
                               } else {
                                 final newMedias = media.value
-                                    .where((e) => !e.startsWith("http"));
+                                    .where(
+                                      (e) => !e.startsWith("http"),
+                                    )
+                                    .toList();
+                                final deletingMedias = initialMedia
+                                        ?.where(
+                                          (e) => !media.value.contains(e),
+                                        )
+                                        .map(
+                                          (e) => basename(e).split("?").first,
+                                        )
+                                        .toList() ??
+                                    [];
+                                if (deletingMedias.isNotEmpty &&
+                                    newMedias.isNotEmpty) {
+                                  rec = await pb.collection("posts").update(
+                                    post!.id,
+                                    body: {
+                                      "media-": deletingMedias,
+                                    },
+                                  );
+                                }
                                 rec = await pb.collection("posts").update(
                                       post!.id,
                                       body: {
                                         ...body,
-                                        if (deletingMedias.value.isNotEmpty &&
+                                        if (deletingMedias.isNotEmpty &&
                                             newMedias.isEmpty)
-                                          "media-": deletingMedias.value,
+                                          "media-": deletingMedias,
                                       },
                                       files: await Future.wait(
                                         newMedias.map(
@@ -284,27 +297,20 @@ class PostNewPage extends HookConsumerWidget {
                                             filename: basename(e),
                                             contentType: MediaType(
                                               'image',
-                                              extension(e),
+                                              extension(e).substring(1),
                                             ),
                                           ),
                                         ),
                                       ),
                                     );
-                                if (deletingMedias.value.isNotEmpty &&
-                                    newMedias.isNotEmpty) {
-                                  rec = await pb.collection("posts").update(
-                                    post!.id,
-                                    body: {
-                                      "media-": deletingMedias.value,
-                                    },
-                                  );
-                                }
                               }
 
                               formKey.currentState?.reset();
                               error.value = null;
-                              media.value = [];
-                              deletingMedias.value = [];
+                              media.value = Post.fromRecord(rec)
+                                  .getMediaURL()
+                                  .map((e) => e.toString())
+                                  .toList();
                               if (mounted()) {
                                 GoRouter.of(context).go("/posts/${rec.id}");
                                 QueryBowl.of(context)

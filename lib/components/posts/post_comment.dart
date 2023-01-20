@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/components/posts/post_comment_media.dart';
 import 'package:eusc_freaks/hooks/use_brightness_value.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -11,9 +13,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart';
-import 'package:collection/collection.dart';
 
 class PostComment extends HookConsumerWidget {
   final Comment comment;
@@ -30,7 +35,8 @@ class PostComment extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final isOwner = ref.watch(authenticationProvider)?.id == comment.user?.id;
 
-    final editMode = useState(false);
+    final isEditMode = useState(false);
+    final updating = useState(false);
     final controller = useTextEditingController(text: comment.comment);
 
     final color = useBrightnessValue(
@@ -44,6 +50,8 @@ class PostComment extends HookConsumerWidget {
     );
 
     final urls = comment.getMediaURL(const Size(0, 100));
+    final initialMedia = urls.map((e) => e.toString()).toList();
+    final selectedMedia = useState<List<String>>(initialMedia);
     final fullLengthUrls = comment.getMediaURL();
 
     final queryBowl = QueryBowl.of(context);
@@ -96,7 +104,7 @@ class PostComment extends HookConsumerWidget {
                         onSolveToggle?.call(value == "solve");
                         break;
                       case "edit":
-                        editMode.value = true;
+                        isEditMode.value = true;
                         break;
                       case "report":
                         break;
@@ -148,7 +156,7 @@ class PostComment extends HookConsumerWidget {
               ],
             ),
             const Gap(10),
-            if (editMode.value)
+            if (isEditMode.value)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -161,14 +169,15 @@ class PostComment extends HookConsumerWidget {
                       maxLines: 10,
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        labelText: "Edit Comment",
+                        hintText: "Edit Comment",
                         isDense: true,
                         contentPadding: const EdgeInsets.all(8),
                         suffix: IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () {
-                            editMode.value = false;
+                            isEditMode.value = false;
                             controller.text = comment.comment;
+                            selectedMedia.value = initialMedia;
                           },
                         ),
                       ),
@@ -176,23 +185,77 @@ class PostComment extends HookConsumerWidget {
                   ),
                   const Gap(10),
                   ElevatedButton(
+                    onPressed: updating.value
+                        ? null
+                        : () async {
+                            updating.value = true;
+                            try {
+                              final newMedia = selectedMedia.value
+                                  .where(
+                                    (e) => !e.startsWith("http"),
+                                  )
+                                  .toList();
+                              final deletedMedia = initialMedia
+                                  .where(
+                                    (e) => !selectedMedia.value.contains(e),
+                                  )
+                                  .map((e) => basename(e).split("?").first)
+                                  .toList();
+
+                              final files = await Future.wait(
+                                newMedia.map((e) {
+                                  return MultipartFile.fromPath(
+                                    "media",
+                                    e,
+                                    filename: basename(e),
+                                    contentType: MediaType(
+                                      "image",
+                                      extension(e).substring(1),
+                                    ),
+                                  );
+                                }),
+                              );
+
+                              RecordModel record;
+                              if (deletedMedia.isNotEmpty &&
+                                  newMedia.isNotEmpty) {
+                                record = await pb.collection("comments").update(
+                                  comment.id,
+                                  body: {
+                                    "media-": deletedMedia,
+                                  },
+                                );
+                              }
+
+                              record = await pb.collection("comments").update(
+                                    comment.id,
+                                    body: {
+                                      "comment": controller.text,
+                                      if (deletedMedia.isNotEmpty &&
+                                          newMedia.isEmpty)
+                                        "media-": deletedMedia,
+                                    },
+                                    files: files,
+                                  );
+
+                              await queryBowl
+                                  .getInfiniteQuery(
+                                    postCommentsInfiniteQueryJob(
+                                      record.data["post"],
+                                    ).queryKey,
+                                  )
+                                  ?.refetch();
+                              isEditMode.value = false;
+                              controller.text = record.data["comment"];
+                              selectedMedia.value = Comment.fromRecord(record)
+                                  .getMediaURL(const Size(0, 100))
+                                  .map((e) => e.toString())
+                                  .toList();
+                            } finally {
+                              updating.value = false;
+                            }
+                          },
                     child: const Icon(Icons.save_outlined),
-                    onPressed: () async {
-                      final record = await pb.collection("comments").update(
-                        comment.id,
-                        body: {
-                          "comment": controller.text,
-                        },
-                      );
-                      await queryBowl
-                          .getInfiniteQuery(
-                            postCommentsInfiniteQueryJob(record.data["post"])
-                                .queryKey,
-                          )
-                          ?.refetch();
-                      editMode.value = false;
-                      controller.text = record.data["comment"];
-                    },
                   )
                 ],
               )
@@ -209,44 +272,53 @@ class PostComment extends HookConsumerWidget {
                 ),
               ),
             const Gap(10),
-            Row(
-              children: [
-                ...urls.mapIndexed(
-                  (index, url) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 5),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: InkWell(
-                          onTap: () {
-                            GoRouter.of(context).push(
-                              "/media/image?initialPage=$index",
-                              extra: fullLengthUrls,
-                            );
-                          },
+            if (isEditMode.value)
+              PostCommentMedia(
+                medias: selectedMedia.value,
+                enabled: !updating.value,
+                onChanged: (value) {
+                  selectedMedia.value = value;
+                },
+              )
+            else
+              Row(
+                children: [
+                  ...selectedMedia.value.mapIndexed(
+                    (index, url) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: SizedBox(
-                            height: 100,
-                            width: 100,
-                            child: Hero(
-                              tag: fullLengthUrls[index],
-                              transitionOnUserGestures: true,
-                              child: UniversalImage(
-                                path: url.toString(),
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator.adaptive(),
+                          child: InkWell(
+                            onTap: () {
+                              GoRouter.of(context).push(
+                                "/media/image?initialPage=$index",
+                                extra: fullLengthUrls,
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(10),
+                            child: SizedBox(
+                              height: 100,
+                              width: 100,
+                              child: Hero(
+                                tag: fullLengthUrls[index],
+                                transitionOnUserGestures: true,
+                                child: UniversalImage(
+                                  path: url.toString(),
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator.adaptive(),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                      );
+                    },
+                  ),
+                ],
+              ),
           ],
         ),
       ),

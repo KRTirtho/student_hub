@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/posts/post_comment.dart';
+import 'package:eusc_freaks/components/posts/post_comment_media.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/post.dart';
@@ -18,6 +19,7 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' hide ClientException;
 import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:collection/collection.dart';
 
@@ -232,7 +234,7 @@ class PostPage extends HookConsumerWidget {
             ),
           ),
           HookBuilder(builder: (context) {
-            final medias = useState<List<PlatformFile>>([]);
+            final medias = useState<List<String>>([]);
             final updating = useState(false);
 
             final commentController = useTextEditingController();
@@ -246,19 +248,19 @@ class PostPage extends HookConsumerWidget {
                   "post": postId,
                   "user": ref.read(authenticationProvider)?.id,
                 },
-                files: medias.value
-                    .map(
-                      (e) => MultipartFile.fromBytes(
-                        'media',
-                        e.bytes!,
-                        filename: e.name,
-                        contentType: MediaType(
-                          'image',
-                          e.extension!,
-                        ),
+                files: await Future.wait(
+                  medias.value.map(
+                    (e) => MultipartFile.fromPath(
+                      'media',
+                      e,
+                      filename: basename(e),
+                      contentType: MediaType(
+                        'image',
+                        extension(e).substring(1),
                       ),
-                    )
-                    .toList(),
+                    ),
+                  ),
+                ),
               );
               await commentsQuery.refetchPages();
               medias.value = [];
@@ -285,16 +287,20 @@ class PostPage extends HookConsumerWidget {
                       allowMultiple: true,
                       dialogTitle: "Select post media",
                       type: FileType.image,
-                      withData: true,
                     );
                     if (files == null) return;
                     if ((files.count + medias.value.length) > 3) {
                       medias.value = [
                         ...medias.value,
-                        ...files.files.sublist(0, 3 - medias.value.length),
+                        ...files.files
+                            .sublist(0, 3 - medias.value.length)
+                            .map((e) => e.path!)
                       ];
                     } else {
-                      medias.value = [...medias.value, ...files.files];
+                      medias.value = [
+                        ...medias.value,
+                        ...files.files.map((e) => e.path!)
+                      ];
                     }
                   };
             return Align(
@@ -312,78 +318,12 @@ class PostPage extends HookConsumerWidget {
                     children: [
                       if (medias.value.isNotEmpty) ...[
                         const Gap(10),
-                        SizedBox(
-                          height: 70,
-                          child: Row(
-                            children: [
-                              const Gap(10),
-                              ...medias.value.map(
-                                (media) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 10),
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          height: 70,
-                                          width: 70,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            color: Colors.white,
-                                            image: DecorationImage(
-                                              image: MemoryImage(media.bytes!),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned.fill(
-                                          child: Center(
-                                            child: IconButton(
-                                              style: IconButton.styleFrom(
-                                                backgroundColor: Colors.white60,
-                                              ),
-                                              color: Colors.red[400]
-                                                  ?.withOpacity(.8),
-                                              icon: const Icon(
-                                                Icons.delete_outline_rounded,
-                                              ),
-                                              onPressed: () {
-                                                medias.value = medias.value
-                                                    .where(
-                                                      (element) =>
-                                                          element != media,
-                                                    )
-                                                    .toList();
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                              SizedBox(
-                                width: 70,
-                                child: MaterialButton(
-                                  height: 80,
-                                  color: Theme.of(context).cardColor,
-                                  elevation: 0,
-                                  focusElevation: 0,
-                                  hoverElevation: 0,
-                                  highlightElevation: 0,
-                                  disabledElevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  onPressed: addMedia,
-                                  child: const Icon(
-                                    Icons.add_photo_alternate_outlined,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        PostCommentMedia(
+                          medias: medias.value,
+                          enabled: !updating.value,
+                          onChanged: (value) {
+                            medias.value = value;
+                          },
                         ),
                         const Gap(10),
                       ],
