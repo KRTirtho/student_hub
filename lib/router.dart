@@ -11,6 +11,7 @@ import 'package:eusc_freaks/pages/login/login.dart';
 import 'package:eusc_freaks/pages/media/pdf.dart';
 import 'package:eusc_freaks/pages/posts/post.dart';
 import 'package:eusc_freaks/pages/posts/post_new.dart';
+import 'package:eusc_freaks/pages/posts/post_search.dart';
 import 'package:eusc_freaks/pages/posts/posts.dart';
 import 'package:eusc_freaks/pages/profile/profile.dart';
 import 'package:eusc_freaks/pages/settings/settings.dart';
@@ -72,6 +73,13 @@ final routerConfig = Provider((ref) {
                     type: state.queryParams["type"],
                     post: state.extra as Post?,
                   ),
+                ),
+              ),
+              GoRoute(
+                path: 'search',
+                parentNavigatorKey: shellNavigatorKey,
+                pageBuilder: (context, state) => const MaterialPage(
+                  child: PostSearchPage(),
                 ),
               ),
             ],
