@@ -257,7 +257,12 @@ class BookCard extends HookConsumerWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          GoRouter.of(context).push(
+                            "/library/search",
+                            extra: [tag],
+                          );
+                        },
                         child: Text(tag.tag),
                       ),
                   ],

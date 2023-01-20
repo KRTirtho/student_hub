@@ -25,7 +25,22 @@ class LibraryPage extends HookConsumerWidget {
         booksQuery.pages.expand<Book>((page) => page?.items ?? []).toList();
 
     return Scaffold(
-      appBar: RooAppBar(),
+      appBar: RooAppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () {
+              GoRouter.of(context).push("/library/search");
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              GoRouter.of(context).push("/settings");
+            },
+          )
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => GoRouter.of(context).push("/library/new"),
         child: const Icon(Icons.menu_book_rounded),

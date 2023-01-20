@@ -1,7 +1,9 @@
 import 'package:eusc_freaks/collections/env.dart';
 import 'package:eusc_freaks/models/book.dart';
+import 'package:eusc_freaks/models/book_tags.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/pages/library/book_new.dart';
+import 'package:eusc_freaks/pages/library/book_search.dart';
 import 'package:eusc_freaks/pages/library/library.dart';
 import 'package:eusc_freaks/pages/media/image.dart';
 import 'package:eusc_freaks/pages/login/forgot_password.dart';
@@ -103,6 +105,15 @@ final routerConfig = Provider((ref) {
                 pageBuilder: (context, state) => MaterialPage(
                   child: BookNewPage(
                     book: state.extra as Book?,
+                  ),
+                ),
+              ),
+              GoRoute(
+                path: 'search',
+                parentNavigatorKey: shellNavigatorKey,
+                pageBuilder: (context, state) => MaterialPage(
+                  child: BookSearchPage(
+                    initialTags: state.extra as List<BookTag>?,
                   ),
                 ),
               ),
