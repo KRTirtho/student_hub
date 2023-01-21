@@ -26,7 +26,7 @@ class BookCard extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final mediaUrl = book.getMediaURL().toString();
 
-    final isOwner = ref.watch(authenticationProvider)?.id == book.user.id;
+    final isOwner = ref.watch(authenticationProvider)?.id == book.user?.id;
 
     final queryBowl = QueryBowl.of(context);
     return Card(
@@ -210,24 +210,24 @@ class BookCard extends HookConsumerWidget {
             const Gap(5),
             Row(
               children: [
-                Avatar(user: book.user, radius: 12),
+                Avatar(user: book.user!, radius: 12),
                 const Gap(5),
                 Flexible(
                   child: InkWell(
                     onTap: () {
-                      if (book.user.id ==
+                      if (book.user?.id ==
                           ref.read(authenticationProvider)?.id) {
                         GoRouter.of(context).go(
                           "/profile/authenticated",
                         );
                       } else {
                         GoRouter.of(context).push(
-                          "/profile/${book.user.id}",
+                          "/profile/${book.user?.id}",
                         );
                       }
                     },
                     child: AutoSizeText(
-                      book.user.name ?? '',
+                      book.user?.name ?? '',
                       maxLines: 2,
                       minFontSize: 14,
                       overflow: TextOverflow.ellipsis,

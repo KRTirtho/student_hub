@@ -9,7 +9,9 @@ part of 'book.dart';
 Book _$BookFromJson(Map<String, dynamic> json) => Book(
       title: json['title'] as String,
       author: json['author'] as String,
-      user: User.fromJson(json['user'] as Map<String, dynamic>),
+      user: json['user'] != null
+          ? User.fromJson(json['user'] as Map<String, dynamic>)
+          : null,
       tags: (json['tags'] as List<dynamic>)
           .map((e) => BookTag.fromJson(e as Map<String, dynamic>))
           .toList(),

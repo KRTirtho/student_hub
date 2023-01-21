@@ -34,7 +34,7 @@ class PdfViewPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final progress = useState<double>(0);
-    final media = useState<Future<PdfDocument>?>(null);
+    final media = useState<Future<PdfDocument>?>(document);
     final mounted = useIsMounted();
 
     final stream = useMemoized(

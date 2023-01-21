@@ -127,7 +127,7 @@ class BookNewPage extends HookConsumerWidget {
                     onTap: () {
                       GoRouter.of(context).push(
                         "/media/pdf",
-                        extra: document ?? initialMedia,
+                        extra: document ?? initialMedia?.path,
                       );
                     },
                     child: isEditMode && media.value == initialMedia
@@ -328,7 +328,7 @@ class BookNewPage extends HookConsumerWidget {
                                       MediaType("image", thumb.format.name),
                                 ),
                               ],
-                              expand: ["user", "tags"].join(","),
+                              expand: "tags",
                             ),
                           );
                           // Workaround for a bug in the backend
@@ -337,8 +337,11 @@ class BookNewPage extends HookConsumerWidget {
                               bookRec.id,
                               body: {
                                 "tags": [
-                                  ...bookRec.data["tags"],
-                                  ...selectedTags.value.map((e) => e.id),
+                                  ...bookRec.tags.map((e) => e.id).toList(),
+                                  ...selectedTags.value
+                                      .map((e) => e.id)
+                                      .toList()
+                                      .sublist(1)
                                 ]
                               },
                             );

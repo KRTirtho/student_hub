@@ -12,7 +12,7 @@ class Book extends RecordModel {
   final String title;
   final String? bio;
   final String author;
-  final User user;
+  final User? user;
   final List<BookTag> tags;
   final String media;
   @JsonKey(name: 'external_url')
