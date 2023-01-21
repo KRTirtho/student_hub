@@ -7,6 +7,7 @@ import 'package:form_validator/form_validator.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 class LoginPage extends HookConsumerWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -20,7 +21,8 @@ class LoginPage extends HookConsumerWidget {
     final authNotifier = ref.watch(authenticationProvider.notifier);
     final user = ref.watch(authenticationProvider);
     final mounted = useIsMounted();
-    final error = useState(false);
+    final error = useState<String?>(null);
+    final updating = useState(false);
 
     useRedirect("/", user != null);
 
@@ -80,9 +82,9 @@ class LoginPage extends HookConsumerWidget {
                 ),
               ),
               const Gap(10),
-              if (error.value)
+              if (error.value != null)
                 Text(
-                  "Failed to Login. User doesn't exist",
+                  error.value!,
                   style: Theme.of(context)
                       .textTheme
                       .caption
@@ -95,24 +97,32 @@ class LoginPage extends HookConsumerWidget {
                     40,
                   ), // fromHeight use double.infinity as width and 40 is the height
                 ),
-                onPressed: () async {
-                  try {
-                    if (formKey.currentState?.validate() != true) return;
-                    final user = await authNotifier.login(
-                      emailController.text,
-                      passwordController.text,
-                    );
-                    if (user == null) {
-                      error.value = true;
-                      return;
-                    }
-                    formKey.currentState?.reset();
-                    error.value = false;
-                    if (mounted()) GoRouter.of(context).go("/");
-                  } on Exception {
-                    error.value = true;
-                  }
-                },
+                onPressed: updating.value
+                    ? null
+                    : () async {
+                        try {
+                          if (formKey.currentState?.validate() != true) return;
+                          updating.value = true;
+                          final user = await authNotifier.login(
+                            emailController.text,
+                            passwordController.text,
+                          );
+                          if (user == null) {
+                            error.value = "Invalid email or password";
+                            return;
+                          }
+                          formKey.currentState?.reset();
+                          error.value = null;
+                          if (mounted()) GoRouter.of(context).go("/");
+                        } on ClientException catch (e) {
+                          error.value = e.response["message"] as String?;
+                          if (error.value == "Failed to authenticate.") {
+                            error.value = "Invalid email or password";
+                          }
+                        } finally {
+                          updating.value = false;
+                        }
+                      },
                 child: const Text("Login"),
               ),
               const Gap(10),
@@ -122,10 +132,14 @@ class LoginPage extends HookConsumerWidget {
                     40,
                   ), // fromHeight use double.infinity as width and 40 is the height
                 ),
-                onPressed: () {
-                  if (GoRouter.of(context).canPop()) GoRouter.of(context).pop();
-                  GoRouter.of(context).push("/signup");
-                },
+                onPressed: updating.value
+                    ? null
+                    : () {
+                        if (GoRouter.of(context).canPop()) {
+                          GoRouter.of(context).pop();
+                        }
+                        GoRouter.of(context).push("/signup");
+                      },
                 child: const Text("Signup"),
               ),
             ],
