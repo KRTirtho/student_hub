@@ -14,6 +14,7 @@ import 'package:eusc_freaks/pages/posts/post_new.dart';
 import 'package:eusc_freaks/pages/posts/post_search.dart';
 import 'package:eusc_freaks/pages/posts/posts.dart';
 import 'package:eusc_freaks/pages/profile/profile.dart';
+import 'package:eusc_freaks/pages/settings/about.dart';
 import 'package:eusc_freaks/pages/settings/settings.dart';
 import 'package:eusc_freaks/pages/signup/signup.dart';
 import 'package:eusc_freaks/pages/signup/verfication.dart';
@@ -163,6 +164,15 @@ final routerConfig = Provider((ref) {
         pageBuilder: (context, state) => const MaterialPage(
           child: SettingsPage(),
         ),
+        routes: [
+          GoRoute(
+            path: 'about',
+            parentNavigatorKey: navigatorKey,
+            pageBuilder: (context, state) => const MaterialPage(
+              child: AboutPage(),
+            ),
+          ),
+        ],
       ),
 
       GoRoute(

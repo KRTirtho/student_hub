@@ -53,6 +53,13 @@ class SettingsPage extends HookConsumerWidget {
                 GoRouter.of(context).go('/login');
               },
             ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text("About"),
+            onTap: () {
+              GoRouter.of(context).push('/settings/about');
+            },
+          ),
         ],
       ),
     );
