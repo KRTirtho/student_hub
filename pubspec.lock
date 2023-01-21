@@ -309,15 +309,8 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.1.0"
-  effective_dart:
-    dependency: transitive
-    description:
-      name: effective_dart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.3.2"
   expandable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: expandable
       url: "https://pub.dartlang.org"
@@ -653,13 +646,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.0.1"
-  markdown_editable_textinput:
-    dependency: "direct main"
-    description:
-      name: markdown_editable_textinput
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.0"
   markdown_widget:
     dependency: "direct main"
     description:
@@ -1093,7 +1079,7 @@ packages:
     source: hosted
     version: "1.0.0"
   translator:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: translator
       url: "https://pub.dartlang.org"

@@ -47,7 +47,8 @@ dependencies:
   path: ^1.8.2
   open_filex: ^4.3.2
   auto_size_text: ^3.0.0
-  markdown_editable_textinput: ^2.2.0
+  expandable: ^5.0.1
+  translator: ^0.1.7
   markdown_widget: ^2.0.0+1
   multi_select_flutter: ^4.1.3
 
