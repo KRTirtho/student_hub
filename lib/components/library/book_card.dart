@@ -132,7 +132,7 @@ class BookCard extends HookConsumerWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: "Writen by ",
+                    text: "Written by ",
                     style: Theme.of(context).textTheme.caption?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
