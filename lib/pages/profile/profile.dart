@@ -3,6 +3,8 @@ import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/library/book_card.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
+import 'package:eusc_freaks/pages/profile/master_user_sessions.dart';
+import 'package:eusc_freaks/pages/profile/non_master_user_sessions.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/books.dart';
 import 'package:eusc_freaks/queries/posts.dart';
@@ -37,11 +39,6 @@ class ProfilePage extends HookConsumerWidget {
     final mounted = useIsMounted();
     final isOwner =
         userId == "authenticated" || userQuery.data?.id == authUser?.id;
-
-    final tableStyle = Theme.of(context).textTheme.caption!;
-    final tableHeaderStyle = tableStyle.copyWith(
-      fontWeight: FontWeight.bold,
-    );
 
     Future<void> updateProfilePicture() async {
       final file = await FilePicker.platform.pickFiles(
@@ -217,117 +214,10 @@ class ProfilePage extends HookConsumerWidget {
                                 title: const Text('Username'),
                                 subtitle: Text(userQuery.data!.username),
                               ),
-                              if (!userQuery.data!.isMaster) ...[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: Text(
-                                    'Sessions',
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Table(
-                                    children: [
-                                      TableRow(
-                                        children: [
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                'Year',
-                                                style: tableHeaderStyle,
-                                              ),
-                                            ),
-                                          ),
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                'Class',
-                                                style: tableHeaderStyle,
-                                              ),
-                                            ),
-                                          ),
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                'Roll',
-                                                style: tableHeaderStyle,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      ...userQuery.data!.sessionObjects
-                                          .map((session) {
-                                        return TableRow(children: [
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                session.year.toString(),
-                                                style: tableStyle,
-                                              ),
-                                            ),
-                                          ),
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                session.standard.toString(),
-                                                style: tableStyle,
-                                              ),
-                                            ),
-                                          ),
-                                          TableCell(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                session.serial.toString(),
-                                                style: tableStyle,
-                                              ),
-                                            ),
-                                          ),
-                                        ]);
-                                      }).toList(),
-                                    ],
-                                  ),
-                                ),
-                              ] else ...[
-                                ListTile(
-                                  title: const Text('Subject'),
-                                  subtitle: Text(
-                                    userQuery.data!.currentSession?.subject
-                                            ?.formattedName ??
-                                        "",
-                                  ),
-                                ),
-                                ListTile(
-                                  title: const Text('Joining Year'),
-                                  subtitle: Text(
-                                    userQuery.data!.currentSession?.year
-                                            .toString() ??
-                                        "",
-                                  ),
-                                ),
-                                ListTile(
-                                  title: const Text('ID No.'),
-                                  subtitle: Text(
-                                    userQuery.data!.currentSession?.serial
-                                            .toString() ??
-                                        "",
-                                  ),
-                                ),
-                              ]
+                              if (!userQuery.data!.isMaster)
+                                NonMasterUserSessions(userQuery.data!)
+                              else
+                                MasterUserSessions(userQuery.data!),
                             ],
                           ),
                         ),

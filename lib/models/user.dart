@@ -43,10 +43,10 @@ class SessionObject {
 
   /// follows this pattern
   ///  ```regex
-  /// ^((20\d{2}-[1-12]{1,2}-[1-9][0-9]{0,3})|(20\d{2}-(bangla|english|math|
-  /// physics|chemistry|biology|ict|accounting|economics|religion|art|music
-  /// |physical_education|social_studies|bushiness_studies|agriculture)-[1-9]
-  /// [0-9]{0,3}),?)+$`
+  /// (^((20\d{2}-[1-12]{1,2}-[1-9][0-9]{0,3}),?)+$)|(^20\d{2}-(bangla|english|math
+  /// |physics|chemistry|biology|ict|accounting|economics|religion|art|music|
+  /// physical_education|social_studies|bushiness_studies|agriculture)
+  /// -[1-9][0-9]{0,3}$)
   /// ```
   SessionObject({
     required this.year,
@@ -135,7 +135,7 @@ class User extends RecordModel {
                 .split(",")
                 .map((e) => SessionObject.fromString(e))
                 .toList()
-                .sorted((a, b) => a.year.compareTo(b.year))
+                .sortedBy<num>((e) => e.year)
                 .toSet();
 
   Uri getAvatarURL([Size? size]) {

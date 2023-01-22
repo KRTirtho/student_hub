@@ -3,7 +3,7 @@ import 'package:eusc_freaks/models/user.dart';
 import 'package:fl_query/fl_query.dart';
 
 final userQueryJob = QueryJob.withVariableKey<User, User?>(
-  preQueryKey: 'user',
+  preQueryKey: 'user-query',
   refetchOnExternalDataChange: true,
   task: (queryKey, authUser) async {
     if (getVariable(queryKey) == "authenticated" && authUser != null) {
