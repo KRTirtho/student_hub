@@ -64,6 +64,9 @@ class EuscFreaks extends HookConsumerWidget {
         ),
         filled: true,
       ),
+      radioTheme: RadioThemeData(
+        fillColor: MaterialStateProperty.all(Colors.black87),
+      ),
       listTileTheme: ListTileThemeData(
         minLeadingWidth: 5,
         iconColor: Colors.grey[800]!,
@@ -134,6 +137,9 @@ class EuscFreaks extends HookConsumerWidget {
           borderSide: BorderSide(color: Colors.transparent),
         ),
         filled: true,
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: MaterialStateProperty.all(Colors.grey[100]!),
       ),
       listTileTheme: ListTileThemeData(
         minLeadingWidth: 5,

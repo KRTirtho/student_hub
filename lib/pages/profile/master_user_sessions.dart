@@ -115,7 +115,14 @@ class MasterUserSessions extends HookConsumerWidget {
                       hintText: "Roll",
                       isDense: true,
                     ),
-                  )
+                  ),
+                  if (error.value != null)
+                    Text(
+                      error.value!,
+                      style: Theme.of(context).textTheme.caption?.copyWith(
+                            color: Theme.of(context).errorColor,
+                          ),
+                    ),
                 ] else ...[
                   ListTile(
                     title: const Text('Subject'),

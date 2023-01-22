@@ -1,11 +1,12 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
+import 'package:eusc_freaks/mixins/enum_formatted_name.dart';
 import 'package:flutter/animation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:collection/collection.dart';
 import 'package:pocketbase/pocketbase.dart';
 part 'user.g.dart';
 
-enum Subject {
+enum Subject with FormattedName {
   bangla,
   english,
   math,
@@ -25,13 +26,6 @@ enum Subject {
 
   static Subject? tryFromName(String name) {
     return Subject.values.firstWhereOrNull((element) => element.name == name);
-  }
-
-  String get formattedName {
-    return name.replaceAll("_", " ").split(" ").map((e) {
-      if (e == "of") return e;
-      return e[0].toUpperCase() + e.substring(1);
-    }).join(" ");
   }
 }
 

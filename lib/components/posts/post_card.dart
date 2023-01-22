@@ -3,7 +3,9 @@ import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/hazard_prompt_dialog.dart';
+import 'package:eusc_freaks/components/report/report_dialog.dart';
 import 'package:eusc_freaks/models/post.dart';
+import 'package:eusc_freaks/models/report.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/utils/number_ending_type.dart';
 import 'package:fl_query/fl_query.dart';
@@ -230,6 +232,13 @@ class _PostCardState extends ConsumerState<PostCard> {
                             break;
                           case "share":
                           case "report":
+                            showDialog(
+                              context: context,
+                              builder: (_) => ReportDialog(
+                                collection: ReportCollection.post,
+                                recordId: widget.post.id,
+                              ),
+                            );
                             break;
                         }
                       },
@@ -260,13 +269,14 @@ class _PostCardState extends ConsumerState<PostCard> {
                                 title: const Text("Delete"),
                               ),
                             ),
-                          const PopupMenuItem(
-                            value: "report",
-                            child: ListTile(
-                              leading: Icon(Icons.report),
-                              title: Text("Report"),
+                          if (!isAuthor)
+                            const PopupMenuItem(
+                              value: "report",
+                              child: ListTile(
+                                leading: Icon(Icons.report),
+                                title: Text("Report"),
+                              ),
                             ),
-                          ),
                         ];
                       },
                     ),

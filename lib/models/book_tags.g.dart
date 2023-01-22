@@ -8,7 +8,9 @@ part of 'book_tags.dart';
 
 BookTag _$BookTagFromJson(Map<String, dynamic> json) => BookTag(
       tag: json['tag'] as String,
-      user: json['user'] != null ? User.fromJson(json['user']) : null,
+      user: json['user'] == null
+          ? null
+          : User.fromJson(json['user'] as Map<String, dynamic>),
     )
       ..id = json['id'] as String
       ..created = json['created'] as String

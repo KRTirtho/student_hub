@@ -3,9 +3,11 @@ import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/posts/hazard_prompt_dialog.dart';
 import 'package:eusc_freaks/components/posts/post_comment_media.dart';
+import 'package:eusc_freaks/components/report/report_dialog.dart';
 import 'package:eusc_freaks/hooks/use_brightness_value.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/lol_file.dart';
+import 'package:eusc_freaks/models/report.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:fl_query/fl_query.dart';
@@ -121,6 +123,13 @@ class PostComment extends HookConsumerWidget {
                         }
                         break;
                       case "report":
+                        await showDialog(
+                          context: context,
+                          builder: (context) => ReportDialog(
+                            collection: ReportCollection.comment,
+                            recordId: comment.id,
+                          ),
+                        );
                         break;
                       default:
                     }
@@ -167,13 +176,14 @@ class PostComment extends HookConsumerWidget {
                           ),
                         ),
                       ],
-                      const PopupMenuItem(
-                        value: "report",
-                        child: ListTile(
-                          leading: Icon(Icons.report_outlined),
-                          title: Text("Report"),
+                      if (!isOwner)
+                        const PopupMenuItem(
+                          value: "report",
+                          child: ListTile(
+                            leading: Icon(Icons.report_outlined),
+                            title: Text("Report"),
+                          ),
                         ),
-                      ),
                     ];
                   },
                 ),

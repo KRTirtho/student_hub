@@ -9,16 +9,16 @@ part of 'book.dart';
 Book _$BookFromJson(Map<String, dynamic> json) => Book(
       title: json['title'] as String,
       author: json['author'] as String,
-      user: json['user'] != null
-          ? User.fromJson(json['user'] as Map<String, dynamic>)
-          : null,
+      user: json['user'] == null
+          ? null
+          : User.fromJson(json['user'] as Map<String, dynamic>),
       tags: (json['tags'] as List<dynamic>)
           .map((e) => BookTag.fromJson(e as Map<String, dynamic>))
           .toList(),
       media: json['media'] as String,
+      thumbnail: json['thumbnail'] as String,
       bio: json['bio'] as String?,
       externalUrl: json['external_url'] as String?,
-      thumbnail: json['thumbnail'] as String,
     )
       ..id = json['id'] as String
       ..created = json['created'] as String
