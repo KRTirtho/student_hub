@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/components/shared/root_app_bar.dart';
 import 'package:eusc_freaks/hooks/use_redirect.dart';
@@ -83,7 +84,9 @@ class PostsPage extends HookConsumerWidget {
         },
         child: RefreshIndicator(
           onRefresh: postsQuery.refetchPages,
-          child: ListView.separated(
+          child: ConstrainedListView.separated(
+            constraints: const BoxConstraints(maxWidth: 600),
+            alignment: Alignment.center,
             physics: const AlwaysScrollableScrollPhysics(),
             controller: controller,
             separatorBuilder: (context, index) => const Gap(10),

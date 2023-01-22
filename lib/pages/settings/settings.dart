@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +17,9 @@ class SettingsPage extends HookConsumerWidget {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
-      body: ListView(
+      body: ConstrainedListView(
+        constraints: const BoxConstraints(maxWidth: 1080),
+        alignment: Alignment.center,
         children: [
           ListTile(
             leading: const Icon(Icons.dark_mode_outlined),

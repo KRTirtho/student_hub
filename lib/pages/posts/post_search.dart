@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/components/user/user_card.dart';
 import 'package:eusc_freaks/hooks/use_debounce.dart';
@@ -33,17 +34,20 @@ class PostSearchPage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         actions: const [Gap(16)],
-        title: TextField(
-          onChanged: (value) {
-            searchText.value = value;
-          },
-          controller: searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: "Search Posts...",
-            prefixIcon: Icon(Icons.search),
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(),
+        title: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: TextField(
+            onChanged: (value) {
+              searchText.value = value;
+            },
+            controller: searchController,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: "Search Posts...",
+              prefixIcon: Icon(Icons.search),
+              border: UnderlineInputBorder(),
+              enabledBorder: UnderlineInputBorder(),
+            ),
           ),
         ),
         bottom: PreferredSize(
@@ -144,8 +148,10 @@ class PostSearchPage extends HookConsumerWidget {
                         postResults.value.last.perPage) return;
                 currentPage.value = postResults.value.last.page + 1;
               },
-              child: ListView.separated(
+              child: ConstrainedListView.separated(
                 controller: controller,
+                constraints: const BoxConstraints(maxWidth: 600),
+                alignment: Alignment.center,
                 padding: const EdgeInsets.all(8),
                 itemCount: posts.length,
                 physics: const AlwaysScrollableScrollPhysics(),

@@ -111,6 +111,9 @@ class EuscFreaks extends HookConsumerWidget {
         onSurface: Colors.grey[100]!,
         surface: Colors.grey[900]!,
       ),
+      navigationRailTheme: const NavigationRailThemeData(
+        backgroundColor: Colors.black,
+      ),
       tabBarTheme: TabBarTheme(
         labelColor: Colors.grey[800]!,
         unselectedLabelColor: Colors.grey[100]!,

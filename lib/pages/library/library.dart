@@ -1,4 +1,5 @@
 import 'package:eusc_freaks/components/library/book_card.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/components/shared/root_app_bar.dart';
 import 'package:eusc_freaks/models/book.dart';
@@ -54,8 +55,10 @@ class LibraryPage extends HookConsumerWidget {
           onRefresh: () async {
             await booksQuery.refetch();
           },
-          child: ListView.separated(
+          child: ConstrainedListView.separated(
             controller: controller,
+            constraints: const BoxConstraints(maxWidth: 600),
+            alignment: Alignment.center,
             padding: const EdgeInsets.all(8),
             itemCount: books.length,
             physics: const AlwaysScrollableScrollPhysics(),

@@ -4,6 +4,7 @@ import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/posts/post_comment.dart';
 import 'package:eusc_freaks/components/posts/post_comment_media.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/lol_file.dart';
@@ -181,7 +182,9 @@ class PostPage extends HookConsumerWidget {
                   commentsQuery.refetchPages(),
                 ]);
               },
-              child: ListView(
+              child: ConstrainedListView(
+                constraints: const BoxConstraints(maxWidth: 600),
+                alignment: Alignment.center,
                 padding: const EdgeInsets.all(8),
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: controller,

@@ -1,5 +1,6 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/library/book_card.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/hooks/use_debounce.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
@@ -115,15 +116,18 @@ class BookSearchPage extends HookConsumerWidget {
             ),
           ),
           child: isSearch.value
-              ? TextField(
-                  key: const Key("search"),
-                  onChanged: (value) {
-                    searchText.value = value;
-                  },
-                  decoration: const InputDecoration(
-                    hintText: "Search...",
-                    border: UnderlineInputBorder(),
-                    enabledBorder: UnderlineInputBorder(),
+              ? ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: TextField(
+                    key: const Key("search"),
+                    onChanged: (value) {
+                      searchText.value = value;
+                    },
+                    decoration: const InputDecoration(
+                      hintText: "Search...",
+                      border: UnderlineInputBorder(),
+                      enabledBorder: UnderlineInputBorder(),
+                    ),
                   ),
                 )
               : const Text(
@@ -194,7 +198,9 @@ class BookSearchPage extends HookConsumerWidget {
           ),
         ),
       ),
-      body: ListView.separated(
+      body: ConstrainedListView.separated(
+        constraints: const BoxConstraints(maxWidth: 600),
+        alignment: Alignment.center,
         controller: controller,
         padding: const EdgeInsets.all(8),
         itemCount: books.value.length,

@@ -117,171 +117,183 @@ class ProfilePage extends HookConsumerWidget {
                   child: SingleChildScrollView(
                     controller: controller,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Column(
-                      children: [
-                        const Gap(50),
-                        Stack(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: Column(
                           children: [
-                            Center(
-                              child: Avatar(
-                                user: userQuery.data!,
-                                radius: 50,
-                                tag: avatarURL,
-                                onTap: () {
-                                  GoRouter.of(context).push(
-                                    '/media/image',
-                                    extra: [avatarURL],
-                                  );
-                                },
-                              ),
-                            ),
-                            if (isOwner)
-                              Positioned.fill(
-                                child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.image_outlined),
-                                        color: Colors.black,
-                                        style: IconButton.styleFrom(
-                                          backgroundColor: Colors.white60,
-                                        ),
-                                        onPressed: updateProfilePicture,
-                                      ),
-                                      const Gap(5),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete_outline),
-                                        color: Colors.red[400],
-                                        style: IconButton.styleFrom(
-                                          backgroundColor: Colors.white60,
-                                        ),
-                                        onPressed: () async {
-                                          await pb.collection('users').update(
-                                            userQuery.data!.id,
-                                            body: {
-                                              'avatar': null,
-                                            },
-                                          );
-                                          await ref
-                                              .read(authenticationProvider
-                                                  .notifier)
-                                              .refetch();
-                                          if (mounted()) {
-                                            showSnackbar(
-                                              context,
-                                              'Profile picture removed. Restart the app to see the changes',
-                                              backgroundColor: Colors.red[400],
-                                            );
-                                          }
-                                        },
-                                      ),
-                                    ],
+                            const Gap(50),
+                            Stack(
+                              children: [
+                                Center(
+                                  child: Avatar(
+                                    user: userQuery.data!,
+                                    radius: 50,
+                                    tag: avatarURL,
+                                    onTap: () {
+                                      GoRouter.of(context).push(
+                                        '/media/image',
+                                        extra: [avatarURL],
+                                      );
+                                    },
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                        const Gap(20),
-                        if (userQuery.data!.name != null)
-                          Center(
-                            child: Text(
-                              userQuery.data!.name!,
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-                          ),
-                        const Gap(70),
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withOpacity(0.7),
-                              width: 1.5,
-                            ),
-                          ),
-                          elevation: 0,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                title: const Text('Email'),
-                                subtitle: Text(userQuery.data!.email),
-                              ),
-                              ListTile(
-                                title: const Text('Username'),
-                                subtitle: Text(userQuery.data!.username),
-                              ),
-                              if (!userQuery.data!.isMaster)
-                                NonMasterUserSessions(userQuery.data!)
-                              else
-                                MasterUserSessions(userQuery.data!),
-                            ],
-                          ),
-                        ),
-                        const Gap(10),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: TabBar(
-                              controller: tabController,
-                              isScrollable: true,
-                              tabs: const [
-                                Tab(text: "Posts"),
-                                Tab(text: "Books"),
+                                if (isOwner)
+                                  Positioned.fill(
+                                    child: Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                                Icons.image_outlined),
+                                            color: Colors.black,
+                                            style: IconButton.styleFrom(
+                                              backgroundColor: Colors.white60,
+                                            ),
+                                            onPressed: updateProfilePicture,
+                                          ),
+                                          const Gap(5),
+                                          IconButton(
+                                            icon: const Icon(
+                                                Icons.delete_outline),
+                                            color: Colors.red[400],
+                                            style: IconButton.styleFrom(
+                                              backgroundColor: Colors.white60,
+                                            ),
+                                            onPressed: () async {
+                                              await pb
+                                                  .collection('users')
+                                                  .update(
+                                                userQuery.data!.id,
+                                                body: {
+                                                  'avatar': null,
+                                                },
+                                              );
+                                              await ref
+                                                  .read(authenticationProvider
+                                                      .notifier)
+                                                  .refetch();
+                                              if (mounted()) {
+                                                showSnackbar(
+                                                  context,
+                                                  'Profile picture removed. Restart the app to see the changes',
+                                                  backgroundColor:
+                                                      Colors.red[400],
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
-                          ),
-                        ),
-                        const Gap(10),
-                        ChangeNotifierListenableBuilder(
-                          notifier: tabController,
-                          builder: (context, tabController) {
-                            return AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 250),
-                              transitionBuilder:
-                                  (Widget child, Animation<double> animation) {
-                                return SlideTransition(
-                                  position: Tween<Offset>(
-                                    begin: const Offset(1, 0),
-                                    end: Offset.zero,
-                                  ).animate(animation),
-                                  child: FadeTransition(
-                                    opacity: animation,
-                                    child: child,
+                            const Gap(20),
+                            if (userQuery.data!.name != null)
+                              Center(
+                                child: Text(
+                                  userQuery.data!.name!,
+                                  style: Theme.of(context).textTheme.headline6,
+                                ),
+                              ),
+                            const Gap(70),
+                            Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(
+                                  color: Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.7),
+                                  width: 1.5,
+                                ),
+                              ),
+                              elevation: 0,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ListTile(
+                                    title: const Text('Email'),
+                                    subtitle: Text(userQuery.data!.email),
                                   ),
+                                  ListTile(
+                                    title: const Text('Username'),
+                                    subtitle: Text(userQuery.data!.username),
+                                  ),
+                                  if (!userQuery.data!.isMaster)
+                                    NonMasterUserSessions(userQuery.data!)
+                                  else
+                                    MasterUserSessions(userQuery.data!),
+                                ],
+                              ),
+                            ),
+                            const Gap(10),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: TabBar(
+                                  controller: tabController,
+                                  isScrollable: true,
+                                  tabs: const [
+                                    Tab(text: "Posts"),
+                                    Tab(text: "Books"),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const Gap(10),
+                            ChangeNotifierListenableBuilder(
+                              notifier: tabController,
+                              builder: (context, tabController) {
+                                return AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 250),
+                                  transitionBuilder: (Widget child,
+                                      Animation<double> animation) {
+                                    return SlideTransition(
+                                      position: Tween<Offset>(
+                                        begin: const Offset(1, 0),
+                                        end: Offset.zero,
+                                      ).animate(animation),
+                                      child: FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: [
+                                    ListView.separated(
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true,
+                                      itemCount: posts.length,
+                                      separatorBuilder: (context, index) =>
+                                          const Gap(10),
+                                      itemBuilder: (context, index) {
+                                        return PostCard(post: posts[index]);
+                                      },
+                                    ),
+                                    ListView.separated(
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true,
+                                      itemCount: books.length,
+                                      separatorBuilder: (context, index) =>
+                                          const Gap(10),
+                                      itemBuilder: (context, index) {
+                                        return BookCard(book: books[index]);
+                                      },
+                                    ),
+                                  ][tabController.index],
                                 );
                               },
-                              child: [
-                                ListView.separated(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemCount: posts.length,
-                                  separatorBuilder: (context, index) =>
-                                      const Gap(10),
-                                  itemBuilder: (context, index) {
-                                    return PostCard(post: posts[index]);
-                                  },
-                                ),
-                                ListView.separated(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemCount: books.length,
-                                  separatorBuilder: (context, index) =>
-                                      const Gap(10),
-                                  itemBuilder: (context, index) {
-                                    return BookCard(book: books[index]);
-                                  },
-                                ),
-                              ][tabController.index],
-                            );
-                          },
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

@@ -3,6 +3,7 @@ import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/markdown/format_markdown.dart';
 import 'package:eusc_freaks/components/markdown/markdown_input.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -56,6 +57,8 @@ class PostNewPage extends HookConsumerWidget {
 
     final isEditMode = post != null;
 
+    final controller = useScrollController();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditMode ? "Edit Post" : "New ${typeOfPost.value}"),
@@ -66,8 +69,11 @@ class PostNewPage extends HookConsumerWidget {
       ),
       body: Form(
         key: formKey,
-        child: ListView(
+        child: ConstrainedListView(
           padding: const EdgeInsets.all(16),
+          controller: controller,
+          constraints: const BoxConstraints(maxWidth: 600),
+          alignment: Alignment.center,
           children: [
             TextFormField(
               controller: titleController,

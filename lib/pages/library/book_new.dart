@@ -1,5 +1,6 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/hooks/use_pdf_thumbnail.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
@@ -38,6 +39,7 @@ class BookNewPage extends HookConsumerWidget {
     final authorController = useTextEditingController(text: book?.author);
     final externalUrlController =
         useTextEditingController(text: book?.externalUrl);
+    final controller = useScrollController();
 
     final selectedTags = useRef<List<BookTag>>([
       ...?book?.tags,
@@ -65,7 +67,10 @@ class BookNewPage extends HookConsumerWidget {
       ),
       body: Form(
         key: formKey,
-        child: ListView(
+        child: ConstrainedListView(
+          controller: controller,
+          constraints: const BoxConstraints(maxWidth: 600),
+          alignment: Alignment.center,
           padding: const EdgeInsets.all(16),
           children: [
             TextFormField(
