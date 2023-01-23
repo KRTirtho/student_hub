@@ -47,6 +47,9 @@ class EuscFreaks extends HookConsumerWidget {
           color: Colors.black87,
         ),
       ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: MaterialStateProperty.all(Colors.black87),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
             backgroundColor: Colors.black87,
@@ -113,6 +116,9 @@ class EuscFreaks extends HookConsumerWidget {
       ),
       navigationRailTheme: const NavigationRailThemeData(
         backgroundColor: Colors.black,
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: MaterialStateProperty.all(Colors.grey[100]!),
       ),
       tabBarTheme: TabBarTheme(
         labelColor: Colors.grey[800]!,

@@ -2,6 +2,7 @@ import 'package:eusc_freaks/collections/env.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
 import 'package:eusc_freaks/models/post.dart';
+import 'package:eusc_freaks/pages/banned/banned.dart';
 import 'package:eusc_freaks/pages/library/book_new.dart';
 import 'package:eusc_freaks/pages/library/book_search.dart';
 import 'package:eusc_freaks/pages/library/library.dart';
@@ -51,10 +52,14 @@ final routerConfig = Provider((ref) {
               final user = ref.read(authenticationProvider);
               if (!auth.isLoggedIn) {
                 return "/login";
-              } else if (auth.isLoggedIn &&
+              }
+              if (auth.isLoggedIn &&
                   user?.verified != true &&
                   Env.verifyEmail) {
                 return "/verification";
+              }
+              if (auth.isLoggedIn && user!.isBanned) {
+                return "/banned";
               }
               return null;
             },
@@ -133,6 +138,20 @@ final routerConfig = Provider((ref) {
 
       //? ============ Outside of Shell ==================== ?//
       GoRoute(
+        path: "/banned",
+        pageBuilder: (context, state) => const MaterialPage(
+          child: BannedPage(),
+        ),
+        redirect: (context, state) {
+          final auth = ref.read(authenticationProvider.notifier);
+          final user = ref.read(authenticationProvider);
+          if (auth.isLoggedIn && !user!.isBanned) {
+            return "/";
+          }
+          return null;
+        },
+      ),
+      GoRoute(
         path: '/media/image',
         parentNavigatorKey: navigatorKey,
         pageBuilder: (context, state) => MaterialTransparentPage(
@@ -193,6 +212,10 @@ final routerConfig = Provider((ref) {
         redirect: (context, state) {
           final auth = ref.read(authenticationProvider.notifier);
           if (auth.isLoggedIn) {
+            final user = ref.read(authenticationProvider);
+            if (user!.isBanned) {
+              return "/banned";
+            }
             return "/";
           }
           return null;
@@ -210,6 +233,9 @@ final routerConfig = Provider((ref) {
             final user = ref.read(authenticationProvider);
             if (!user!.verified && Env.verifyEmail) {
               return "/verification";
+            }
+            if (user.isBanned) {
+              return "/banned";
             }
             return "/";
           }

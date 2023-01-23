@@ -55,6 +55,7 @@ class ReportDialog extends HookConsumerWidget {
     return SimpleDialog(
       title: const Text('Report'),
       contentPadding: const EdgeInsets.all(16),
+      insetPadding: const EdgeInsets.all(16),
       children: [
         Text(
           'Why do you want to report this ${collection.name}?',

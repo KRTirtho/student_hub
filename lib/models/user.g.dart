@@ -14,6 +14,11 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       isMaster: json['isMaster'] as bool,
       sessions: json['sessions'] as String,
       avatar: json['avatar'] as String,
+      bannedUntil: DateTime.tryParse(json['ban_until'] as String),
+      banReason: (json['ban_reason'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$UserBanReasonEnumMap, e))
+              .toList() ??
+          const [],
       name: json['name'] as String?,
     )
       ..id = json['id'] as String
@@ -36,4 +41,16 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'isMaster': instance.isMaster,
       'sessions': instance.sessions,
       'avatar': instance.avatar,
+      'ban_until': instance.bannedUntil?.toIso8601String(),
+      'ban_reason':
+          instance.banReason.map((e) => _$UserBanReasonEnumMap[e]!).toList(),
     };
+
+const _$UserBanReasonEnumMap = {
+  UserBanReason.hate_speech: 'hate_speech',
+  UserBanReason.violence: 'violence',
+  UserBanReason.nudity: 'nudity',
+  UserBanReason.harassment: 'harassment',
+  UserBanReason.spam: 'spam',
+  UserBanReason.fake: 'fake',
+};

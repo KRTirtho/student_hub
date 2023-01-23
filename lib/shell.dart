@@ -56,6 +56,7 @@ class Shell extends HookConsumerWidget {
         GoRouter.of(context).go(path);
       },
       useDrawer: false,
+      internalAnimations: false,
       leadingExtendedNavRail: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

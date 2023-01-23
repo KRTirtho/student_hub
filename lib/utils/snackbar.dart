@@ -16,6 +16,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackbar(
       content: Text(message),
       duration: const Duration(seconds: 3),
       backgroundColor: backgroundColor,
+      width: 350,
       action: isDismissible
           ? SnackBarAction(
               label: 'Dismiss',

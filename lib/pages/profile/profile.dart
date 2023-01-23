@@ -2,7 +2,10 @@ import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/avatar.dart';
 import 'package:eusc_freaks/components/library/book_card.dart';
 import 'package:eusc_freaks/components/posts/post_card.dart';
+import 'package:eusc_freaks/components/report/report_dialog.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
+import 'package:eusc_freaks/components/user/ban_dialog.dart';
+import 'package:eusc_freaks/models/report.dart';
 import 'package:eusc_freaks/pages/profile/master_user_sessions.dart';
 import 'package:eusc_freaks/pages/profile/non_master_user_sessions.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -78,6 +81,57 @@ class ProfilePage extends HookConsumerWidget {
           ? AppBar(
               backgroundColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
+              actions: [
+                PopupMenuButton(
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'report':
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return ReportDialog(
+                              collection: ReportCollection.user,
+                              recordId: userQuery.data!.id,
+                            );
+                          },
+                        );
+                        break;
+                      case 'ban':
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return BanDialog(
+                              user: userQuery.data!,
+                            );
+                          },
+                        );
+                        break;
+                      default:
+                    }
+                  },
+                  itemBuilder: (context) {
+                    return [
+                      const PopupMenuItem(
+                        value: 'report',
+                        child: ListTile(
+                          leading: Icon(Icons.report),
+                          title: Text('Report'),
+                        ),
+                      ),
+                      if (userQuery.data?.isMaster != true &&
+                          authUser?.isMaster == true)
+                        const PopupMenuItem(
+                          value: 'ban',
+                          child: ListTile(
+                            leading: Icon(Icons.block_outlined),
+                            iconColor: Colors.deepOrange,
+                            title: Text("Ban user"),
+                          ),
+                        )
+                    ];
+                  },
+                ),
+              ],
             )
           : null,
       extendBodyBehindAppBar: true,
@@ -200,6 +254,18 @@ class ProfilePage extends HookConsumerWidget {
                                 ),
                               ),
                             const Gap(70),
+                            if (userQuery.data!.isBanned) ...[
+                              Text(
+                                'This user is banned for ${userQuery.data!.banReason.map((e) => e.formattedName).join(', ')} for ${userQuery.data!.bannedUntil!.difference(DateTime.now()).inDays} days',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    ?.copyWith(
+                                      color: Colors.red[400],
+                                    ),
+                              ),
+                              const Gap(10),
+                            ],
                             Card(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),

@@ -29,6 +29,25 @@ enum Subject with FormattedName {
   }
 }
 
+enum UserBanReason with FormattedName {
+  @JsonValue('hate_speech')
+  hate_speech,
+  @JsonValue('violence')
+  violence,
+  @JsonValue('nudity')
+  nudity,
+  @JsonValue('harassment')
+  harassment,
+  @JsonValue('spam')
+  spam,
+  @JsonValue('fake')
+  fake;
+
+  factory UserBanReason.fromName(String value) {
+    return UserBanReason.values.firstWhere((e) => e.toString() == value);
+  }
+}
+
 class SessionObject {
   final int year;
   final int? standard;
@@ -102,6 +121,13 @@ class User extends RecordModel {
   final String sessions;
   @JsonKey()
   final String avatar;
+  @JsonKey(
+    name: 'ban_until',
+    fromJson: DateTime.tryParse,
+  )
+  final DateTime? bannedUntil;
+  @JsonKey(name: 'ban_reason')
+  final List<UserBanReason> banReason;
 
   @JsonKey(ignore: true)
   final Set<SessionObject> sessionObjects;
@@ -122,6 +148,8 @@ class User extends RecordModel {
     required this.isMaster,
     required this.sessions,
     required this.avatar,
+    this.bannedUntil,
+    this.banReason = const [],
     this.name,
   }) : sessionObjects = sessions.isEmpty
             ? {}
@@ -144,6 +172,9 @@ class User extends RecordModel {
           size != null ? "${size.width.toInt()}x${size.height.toInt()}" : null,
     );
   }
+
+  bool get isBanned =>
+      bannedUntil != null && bannedUntil!.isAfter(DateTime.now());
 
   factory User.fromRecord(RecordModel record) => User.fromJson(record.toJson());
 
