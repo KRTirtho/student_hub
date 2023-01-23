@@ -11,6 +11,8 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+
+	"github.com/KRTirtho/eusc-freaks/pb/lib/src/notifications"
 )
 
 func main() {
@@ -77,6 +79,26 @@ func main() {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDir), indexFallback))
+		return nil
+	})
+
+	app.OnRecordAfterCreateRequest().Add(func(e *core.RecordCreateEvent) error {
+		switch e.Record.Collection().Name {
+		case "comments":
+			return notifications.OnCommentCreation(app, e)
+		case "posts":
+			return notifications.OnPostCreation(app, e)
+		}
+		return nil
+	})
+
+	app.OnRecordAfterUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
+		switch e.Record.Collection().Name {
+		case "comments":
+			return notifications.OnCommentUpdate(app, e)
+		case "posts":
+			return notifications.OnPostUpdate(app, e)
+		}
 		return nil
 	})
 

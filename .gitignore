@@ -50,3 +50,5 @@ app.*.map.json
 /lib/collections/env.g.dart
 
 **/key.properties
+
+**/__debug_bin
