@@ -16,11 +16,7 @@ import (
 )
 
 func main() {
-	app := pocketbase.NewWithConfig(
-		&pocketbase.Config{
-			DefaultDataDir: "../pb_data",
-		},
-	)
+	app := pocketbase.New()
 
 	// ---------------------------------------------------------------
 	// Optional plugin flags:

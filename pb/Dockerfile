@@ -9,7 +9,7 @@ RUN apk add --no-cache \
 
 COPY ./pb/lib /pb/lib
 RUN cd /pb/lib && \
-    go build -o /pb/pocketbase src/main.go && \
+    CGO_ENABLED=0 go build -o /pb/pocketbase src/main.go && \
     rm -rf /pb/lib
 
 # Copy migration files
