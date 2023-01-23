@@ -1,5 +1,6 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/models/user.dart';
+import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/user.dart';
 import 'package:eusc_freaks/utils/snackbar.dart';
 import 'package:fl_query/fl_query.dart';
@@ -237,6 +238,7 @@ class BanDialog extends HookConsumerWidget {
                             "ban_reason": selectedReasons.value
                                 .map((e) => e.name)
                                 .toList(),
+                            "banned_by": ref.read(authenticationProvider)?.id,
                           },
                         );
                         if (mounted()) {

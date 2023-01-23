@@ -128,6 +128,8 @@ class User extends RecordModel {
   final DateTime? bannedUntil;
   @JsonKey(name: 'ban_reason')
   final List<UserBanReason> banReason;
+  @JsonKey(name: 'banned_by')
+  final String? bannedBy;
 
   @JsonKey(ignore: true)
   final Set<SessionObject> sessionObjects;
@@ -149,6 +151,7 @@ class User extends RecordModel {
     required this.sessions,
     required this.avatar,
     this.bannedUntil,
+    this.bannedBy,
     this.banReason = const [],
     this.name,
   }) : sessionObjects = sessions.isEmpty
