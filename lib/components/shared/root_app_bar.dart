@@ -1,7 +1,12 @@
 import 'package:eusc_freaks/components/image/universal_image.dart';
+import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:eusc_freaks/queries/notifications.dart';
+import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
+import 'package:badges/badges.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class RooAppBar extends AppBar {
   RooAppBar({
@@ -76,6 +81,32 @@ class RooAppBar extends AppBar {
                     },
                   );
                 }),
+                HookConsumer(
+                  builder: (context, ref, _) {
+                    final notifications = useInfiniteQuery(
+                      job: notificationsQueryJob,
+                      externalData: ref.watch(authenticationProvider)?.id,
+                    );
+                    final unreadNotifications = notifications.pages
+                        .expand((element) => element?.items.toList() ?? [])
+                        .where((element) => !element.viewed)
+                        .toList()
+                        .length;
+                    return IconButton(
+                      onPressed: () {
+                        GoRouter.of(context).push("/notifications");
+                      },
+                      icon: Badge(
+                        showBadge: unreadNotifications > 0,
+                        badgeContent: Text(
+                          unreadNotifications.toString(),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        child: const Icon(Icons.notifications_outlined),
+                      ),
+                    );
+                  },
+                ),
                 Builder(builder: (context) {
                   return IconButton(
                     icon: const Icon(Icons.settings_outlined),

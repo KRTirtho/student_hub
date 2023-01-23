@@ -10,6 +10,7 @@ import 'package:eusc_freaks/pages/media/image.dart';
 import 'package:eusc_freaks/pages/login/forgot_password.dart';
 import 'package:eusc_freaks/pages/login/login.dart';
 import 'package:eusc_freaks/pages/media/pdf.dart';
+import 'package:eusc_freaks/pages/notifications/notifications.dart';
 import 'package:eusc_freaks/pages/posts/post.dart';
 import 'package:eusc_freaks/pages/posts/post_new.dart';
 import 'package:eusc_freaks/pages/posts/post_search.dart';
@@ -94,9 +95,14 @@ final routerConfig = Provider((ref) {
             path: '/announcement',
             parentNavigatorKey: shellNavigatorKey,
             pageBuilder: (context, state) => MaterialPage(
-              child: SizedBox(
-                child: PostsPage(type: PostType.announcement.name),
-              ),
+              child: PostsPage(type: PostType.announcement.name),
+            ),
+          ),
+          GoRoute(
+            path: '/notifications',
+            parentNavigatorKey: shellNavigatorKey,
+            pageBuilder: (context, state) => const MaterialPage(
+              child: NotificationsPage(),
             ),
           ),
           GoRoute(
