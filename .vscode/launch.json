@@ -5,12 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Go Debug",
+      "name": "PB Launch",
       "type": "go",
       "request": "launch",
-      "mode": "debug",
-      "args": ["serve"],
+      "mode": "auto",
+      "args": [
+        "serve",
+        "--dir",
+        "${workspaceFolder}/pb/pb_data"
+      ],
       "program": "${workspaceFolder}/pb/lib/src",
+      "console": "integratedTerminal"
     },
     {
       "name": "eusc-freaks",

@@ -20,7 +20,13 @@ Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
       ..created = json['created'] as String
       ..updated = json['updated'] as String
       ..collectionId = json['collectionId'] as String
-      ..collectionName = json['collectionName'] as String;
+      ..collectionName = json['collectionName'] as String
+      ..post = json['post'] == null
+          ? null
+          : Post.fromJson(json['post'] as Map<String, dynamic>)
+      ..comment = json['comment'] == null
+          ? null
+          : Comment.fromJson(json['comment'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$NotificationToJson(Notification instance) =>
     <String, dynamic>{
@@ -34,6 +40,8 @@ Map<String, dynamic> _$NotificationToJson(Notification instance) =>
       'message': instance.message,
       'user': instance.user,
       'viewed': instance.viewed,
+      'post': instance.post,
+      'comment': instance.comment,
     };
 
 const _$NotificationCollectionEnumMap = {

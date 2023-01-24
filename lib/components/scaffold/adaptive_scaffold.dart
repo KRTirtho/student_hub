@@ -307,17 +307,22 @@ class AdaptiveScaffold extends StatefulWidget {
     ValueChanged<int>? onDestinationSelected,
   }) {
     return Builder(
-      builder: (_) {
-        return NavigationBar(
-          destinations: [
-            for (final NavigationDestination destination in destinations)
-              NavigationDestination(
-                icon: destination.icon,
-                label: destination.label,
-              ),
-          ],
-          selectedIndex: currentIndex,
-          onDestinationSelected: onDestinationSelected,
+      builder: (context) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: Theme.of(context).navigationBarTheme.height ?? 56,
+          ),
+          child: NavigationBar(
+            destinations: [
+              for (final NavigationDestination destination in destinations)
+                NavigationDestination(
+                  icon: destination.icon,
+                  label: destination.label,
+                ),
+            ],
+            selectedIndex: currentIndex,
+            onDestinationSelected: onDestinationSelected,
+          ),
         );
       },
     );

@@ -25,12 +25,14 @@ class PostComment extends HookConsumerWidget {
   final bool isSolvable;
   final String postId;
   final ValueChanged<bool>? onSolveToggle;
+  final bool isHighlighted;
   const PostComment({
     Key? key,
     required this.comment,
     required this.isSolvable,
     required this.postId,
     this.onSolveToggle,
+    this.isHighlighted = false,
   }) : super(key: key);
 
   @override
@@ -58,8 +60,22 @@ class PostComment extends HookConsumerWidget {
 
     final queryBowl = QueryBowl.of(context);
 
+    final highlightColor = useBrightnessValue(
+      Colors.yellow[100],
+      Colors.yellow[900]?.withOpacity(.5),
+    );
     Widget child = Card(
-      color: comment.solve ? color : null,
+      color: comment.solve
+          ? color
+          : isHighlighted
+              ? highlightColor
+              : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: isHighlighted
+            ? const BorderSide(color: Colors.yellow, width: 2)
+            : BorderSide.none,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(

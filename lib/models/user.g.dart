@@ -14,7 +14,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       isMaster: json['isMaster'] as bool,
       sessions: json['sessions'] as String,
       avatar: json['avatar'] as String,
-      bannedUntil: DateTime.tryParse(json['ban_until'] as String),
+      bannedUntil: parseDate(json['ban_until'] as String?),
       bannedBy: json['banned_by'] as String?,
       banReason: (json['ban_reason'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$UserBanReasonEnumMap, e))

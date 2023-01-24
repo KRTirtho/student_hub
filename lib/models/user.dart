@@ -103,6 +103,8 @@ class SessionObject {
       year.hashCode ^ standard.hashCode ^ serial.hashCode ^ subject.hashCode;
 }
 
+DateTime? parseDate(String? v) => DateTime.tryParse(v ?? "");
+
 @JsonSerializable(explicitToJson: true)
 class User extends RecordModel {
   @JsonKey()
@@ -121,11 +123,9 @@ class User extends RecordModel {
   final String sessions;
   @JsonKey()
   final String avatar;
-  @JsonKey(
-    name: 'ban_until',
-    fromJson: DateTime.tryParse,
-  )
+  @JsonKey(name: 'ban_until', fromJson: parseDate)
   final DateTime? bannedUntil;
+
   @JsonKey(name: 'ban_reason')
   final List<UserBanReason> banReason;
   @JsonKey(name: 'banned_by')

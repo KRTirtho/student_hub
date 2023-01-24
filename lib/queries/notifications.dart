@@ -21,7 +21,24 @@ final notificationsQueryJob =
         );
 
     return ResultList(
-      items: res.items.map((e) => Notification.fromRecord(e)).toList(),
+      items: await Future.wait(res.items.map((e) async {
+        switch (NotificationCollection.fromName(e.data["collection"])) {
+          case NotificationCollection.comments:
+            e.expand["comment"] = [
+              await pb
+                  .collection("comments")
+                  .getOne(e.data["record"], expand: "post,post.user")
+            ];
+            break;
+          case NotificationCollection.posts:
+            e.expand["post"] = [
+              await pb.collection("posts").getOne(e.data["record"])
+            ];
+            break;
+          default:
+        }
+        return Notification.fromRecord(e);
+      })),
       page: res.page,
       perPage: res.perPage,
       totalItems: res.totalItems,

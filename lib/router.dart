@@ -69,7 +69,10 @@ final routerConfig = Provider((ref) {
                 path: 'posts/:id',
                 parentNavigatorKey: navigatorKey,
                 pageBuilder: (context, state) => MaterialPage(
-                  child: PostPage(postId: state.params['id']!),
+                  child: PostPage(
+                    postId: state.params['id']!,
+                    highlightComment: state.queryParams["comment"],
+                  ),
                 ),
               ),
               GoRoute(

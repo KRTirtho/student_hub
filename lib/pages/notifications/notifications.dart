@@ -1,3 +1,4 @@
+import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/hooks/use_brightness_value.dart';
@@ -8,6 +9,7 @@ import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:timeago/timeago.dart';
 
@@ -32,6 +34,23 @@ class NotificationsPage extends HookConsumerWidget {
         notifications.where((notification) => !notification.viewed).toList();
     final cardActiveColor =
         useBrightnessValue(Colors.blue[100], Colors.lightBlue[900]);
+
+    final commentIconColor = {
+      "announcement": {
+        "fg": Colors.orange[200],
+        "bg": Colors.red[400],
+      },
+      "comment-add": {
+        "fg": Colors.indigo,
+        "bg": Colors.blue[200],
+      },
+      "comment-solved": {
+        "fg": Colors.green[900],
+        "bg": Colors.green[100],
+      }
+    };
+
+    final GoRouter router = GoRouter.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -70,24 +89,87 @@ class NotificationsPage extends HookConsumerWidget {
             controller: controller,
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: notifications.length,
-            constraints: const BoxConstraints(maxWidth: 400),
+            constraints: const BoxConstraints(maxWidth: 600),
             alignment: Alignment.center,
-            separatorBuilder: (context, index) => const Gap(8),
+            separatorBuilder: (context, index) => const Gap(5),
             padding: const EdgeInsets.all(8),
             itemBuilder: (context, index) {
               final notification = notifications[index];
 
+              Widget leading;
+
+              switch (notification.collection) {
+                case NotificationCollection.comments:
+                  if (notification.comment?.post?.user?.id ==
+                      ref.read(authenticationProvider)?.id) {
+                    leading = CircleAvatar(
+                      backgroundColor: commentIconColor["comment-add"]?["bg"],
+                      child: Icon(
+                        Icons.add_comment_outlined,
+                        color: commentIconColor["comment-add"]?["fg"],
+                      ),
+                    );
+                    break;
+                  }
+                  leading = CircleAvatar(
+                    backgroundColor: commentIconColor["comment-solved"]?["bg"],
+                    child: Icon(
+                      Icons.check_circle_outline,
+                      color: commentIconColor["comment-solved"]?["fg"],
+                    ),
+                  );
+                  break;
+                case NotificationCollection.posts:
+                  leading = CircleAvatar(
+                    backgroundColor: commentIconColor["announcement"]?["bg"],
+                    child: Icon(
+                      Icons.campaign_outlined,
+                      color: commentIconColor["announcement"]?["fg"],
+                    ),
+                  );
+                  break;
+                default:
+                  leading = const Icon(Icons.info);
+              }
+
               return Card(
-                color: notification.viewed
-                    ? Theme.of(context).cardColor
-                    : cardActiveColor,
+                color: notification.viewed ? null : cardActiveColor,
                 child: ListTile(
+                  leading: leading,
                   title: Text(
                     notification.message,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   dense: true,
-                  subtitle: Text(format(DateTime.parse(notification.created))),
+                  onTap: () async {
+                    final rec = await pb.collection("notifications").update(
+                      notification.id,
+                      body: {
+                        "viewed": true,
+                      },
+                    );
+
+                    if (rec.data["viewed"] != true) return;
+                    await notificationsQuery.refetchPages();
+
+                    switch (notification.collection) {
+                      case NotificationCollection.comments:
+                        router.push(
+                          '/posts/${notification.comment?.post?.id}?comment=${notification.comment?.id}',
+                        );
+                        break;
+                      case NotificationCollection.posts:
+                        router.push(
+                          '/posts/${notification.post?.id}',
+                        );
+                        break;
+                      default:
+                    }
+                  },
+                  subtitle: Text(
+                    format(DateTime.parse(notification.created)),
+                    textAlign: TextAlign.end,
+                  ),
                 ),
               );
             },

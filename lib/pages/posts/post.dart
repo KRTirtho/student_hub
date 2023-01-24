@@ -6,6 +6,7 @@ import 'package:eusc_freaks/components/posts/post_comment.dart';
 import 'package:eusc_freaks/components/posts/post_comment_media.dart';
 import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
+import 'package:eusc_freaks/hooks/use_auto_scroll_controller.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:eusc_freaks/models/post.dart';
@@ -21,16 +22,22 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:collection/collection.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class PostPage extends HookConsumerWidget {
   final String postId;
-  const PostPage({Key? key, required this.postId}) : super(key: key);
+  final String? highlightComment;
+  const PostPage({
+    Key? key,
+    required this.postId,
+    this.highlightComment,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
     final user = ref.watch(authenticationProvider);
 
-    final controller = useScrollController();
+    final controller = useAutoScrollController();
 
     final postQuery = useQuery(
       job: postQueryJob(postId),
@@ -45,6 +52,44 @@ class PostPage extends HookConsumerWidget {
         .map((page) => page?.items ?? [])
         .expand((element) => element)
         .toList();
+
+    useEffect(() {
+      if (highlightComment == null || commentsQuery.pages.first == null) {
+        return null;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        final index =
+            comments.indexWhere((element) => element.id == highlightComment);
+        if (index > -1) {
+          await controller.scrollToIndex(
+            index,
+            preferPosition: AutoScrollPosition.begin,
+          );
+          return;
+        }
+        final comment = await pb
+            .collection("comments")
+            .getOne(highlightComment!, expand: "user");
+        commentsQuery.setQueryData(
+          (oldData) => {
+            ...?oldData,
+            commentsQuery.pageParams.first: ResultList(
+              items: [
+                ...?oldData?[commentsQuery.pageParams.first]?.items,
+                Comment.fromRecord(comment),
+              ],
+              page: oldData?[commentsQuery.pageParams.first]?.page ?? 1,
+              perPage: oldData?[commentsQuery.pageParams.first]?.perPage ?? 10,
+              totalItems:
+                  oldData?[commentsQuery.pageParams.first]?.totalItems ?? 10,
+              totalPages:
+                  oldData?[commentsQuery.pageParams.first]?.totalPages ?? 1,
+            ),
+          },
+        );
+      });
+      return null;
+    }, [highlightComment, comments, commentsQuery.pages]);
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
@@ -210,24 +255,31 @@ class PostPage extends HookConsumerWidget {
                     )
                   else
                     const Center(child: CircularProgressIndicator.adaptive()),
-                  ...comments.map(
-                    (comment) {
-                      return PostComment(
-                        isSolvable: postQuery.data?.type == PostType.question &&
-                            !comment.solve &&
-                            !isAlreadySolved &&
-                            postQuery.data?.user?.id == user?.id,
-                        postId: postId,
-                        comment: comment,
-                        onSolveToggle: (solved) async {
-                          await pb.collection("comments").update(
-                            comment.id,
-                            body: {
-                              "solve": solved,
-                            },
-                          );
-                          await commentsQuery.refetchPages();
-                        },
+                  ...comments.mapIndexed(
+                    (index, comment) {
+                      return AutoScrollTag(
+                        controller: controller,
+                        index: index,
+                        key: ValueKey(comment.id),
+                        child: PostComment(
+                          isSolvable:
+                              postQuery.data?.type == PostType.question &&
+                                  !comment.solve &&
+                                  !isAlreadySolved &&
+                                  postQuery.data?.user?.id == user?.id,
+                          postId: postId,
+                          comment: comment,
+                          isHighlighted: comment.id == highlightComment,
+                          onSolveToggle: (solved) async {
+                            await pb.collection("comments").update(
+                              comment.id,
+                              body: {
+                                "solve": solved,
+                              },
+                            );
+                            await commentsQuery.refetchPages();
+                          },
+                        ),
                       );
                     },
                   ),

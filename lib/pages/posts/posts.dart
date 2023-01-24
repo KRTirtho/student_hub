@@ -7,7 +7,7 @@ import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:eusc_freaks/utils/platform.dart';
-import 'package:fl_query_hooks/fl_query_hooks.dart';
+import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -26,31 +26,10 @@ class PostsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final controller = useScrollController();
-    final postsQuery = useInfiniteQuery(
-      job: postsInfiniteQueryJob(type),
-      externalData: null,
-    );
+
     final user = ref.watch(authenticationProvider);
 
-    final posts =
-        postsQuery.pages.expand<Post>((page) => page?.items.toList() ?? []);
-
     useRedirect("/login", user == null);
-
-    useEffect(() {
-      if (postsQuery.hasError) {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (timeStamp) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(postsQuery.errors.last.toString()),
-              ),
-            );
-          },
-        );
-      }
-      return;
-    }, [postsQuery]);
 
     useEffect(() {
       if (kIsMobile) {
@@ -63,43 +42,71 @@ class PostsPage extends HookConsumerWidget {
       return;
     }, []);
 
-    return Scaffold(
-      appBar: RooAppBar(),
-      floatingActionButton:
-          (user?.isMaster != true && type != PostType.announcement.name) ||
-                  user?.isMaster == true
-              ? FloatingActionButton(
-                  onPressed: () {
-                    GoRouter.of(context).push("/new?type=$type");
+    return InfiniteQueryBuilder(
+        job: postsInfiniteQueryJob(type),
+        externalData: null,
+        builder: (context, postsQuery) {
+          final posts = postsQuery.pages
+              .expand<Post>((page) => page?.items.toList() ?? []);
+          return HookBuilder(builder: (context) {
+            useEffect(() {
+              if (postsQuery.hasError) {
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (timeStamp) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(postsQuery.errors.last.toString()),
+                      ),
+                    );
                   },
-                  child: const Icon(Icons.add),
-                )
-              : null,
-      body: Waypoint(
-        controller: controller,
-        onTouchEdge: () async {
-          if (postsQuery.hasNextPage) {
-            await postsQuery.fetchNextPage();
-          }
-        },
-        child: RefreshIndicator(
-          onRefresh: postsQuery.refetchPages,
-          child: ConstrainedListView.separated(
-            constraints: const BoxConstraints(maxWidth: 600),
-            alignment: Alignment.center,
-            physics: const AlwaysScrollableScrollPhysics(),
-            controller: controller,
-            separatorBuilder: (context, index) => const Gap(10),
-            padding: const EdgeInsets.all(8),
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              final post = posts.elementAt(index);
+                );
+              }
+              return;
+            }, [postsQuery]);
+            return Scaffold(
+              appBar: RooAppBar(),
+              floatingActionButton: (user?.isMaster != true &&
+                          type != PostType.announcement.name) ||
+                      user?.isMaster == true
+                  ? FloatingActionButton(
+                      onPressed: () {
+                        GoRouter.of(context).push("/new?type=$type");
+                      },
+                      child: const Icon(Icons.add),
+                    )
+                  : null,
+              body: Waypoint(
+                controller: controller,
+                onTouchEdge: () async {
+                  if (postsQuery.hasNextPage) {
+                    await postsQuery.fetchNextPage();
+                  }
+                },
+                child: InfiniteQueryBuilder(
+                    job: postsInfiniteQueryJob(type),
+                    externalData: null,
+                    builder: (context, query) {
+                      return RefreshIndicator(
+                        onRefresh: postsQuery.refetchPages,
+                        child: ConstrainedListView.separated(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          alignment: Alignment.center,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          controller: controller,
+                          separatorBuilder: (context, index) => const Gap(10),
+                          padding: const EdgeInsets.all(8),
+                          itemCount: posts.length,
+                          itemBuilder: (context, index) {
+                            final post = posts.elementAt(index);
 
-              return PostCard(post: post);
-            },
-          ),
-        ),
-      ),
-    );
+                            return PostCard(post: post);
+                          },
+                        ),
+                      );
+                    }),
+              ),
+            );
+          });
+        });
   }
 }

@@ -1,4 +1,6 @@
 import 'package:eusc_freaks/mixins/enum_formatted_name.dart';
+import 'package:eusc_freaks/models/comment.dart';
+import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/models/user.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -22,6 +24,9 @@ class Notification extends RecordModel {
   User? user;
   bool viewed;
 
+  Post? post;
+  Comment? comment;
+
   Notification({
     required this.record,
     required this.collection,
@@ -34,7 +39,12 @@ class Notification extends RecordModel {
       Notification.fromJson(record.toJson());
 
   factory Notification.fromJson(Map<String, dynamic> json) =>
-      _$NotificationFromJson({...json, 'user': json['expand']?['user']});
+      _$NotificationFromJson({
+        ...json,
+        'user': json['expand']?['user'],
+        'post': json['expand']?['post']?.first,
+        'comment': json['expand']?['comment']?.first,
+      });
 
   @override
   Map<String, dynamic> toJson() => _$NotificationToJson(this);
