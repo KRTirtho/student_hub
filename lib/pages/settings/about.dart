@@ -65,7 +65,7 @@ class AboutPage extends HookConsumerWidget {
                           style: ListTileStyle.drawer,
                           leading: CircleAvatar(
                             backgroundImage: UniversalImage.imageProvider(
-                              "https://avatars.githubusercontent.com/u/61944859?v=4",
+                              "assets/creators/tirtho.jpg",
                             ),
                           ),
                           onTap: () {
@@ -84,7 +84,7 @@ class AboutPage extends HookConsumerWidget {
                           style: ListTileStyle.drawer,
                           leading: CircleAvatar(
                             backgroundImage: UniversalImage.imageProvider(
-                              "https://user-images.githubusercontent.com/61944859/213881084-6d0bc852-e972-451d-b21b-846e037175bd.png",
+                              "assets/creators/farabi.png",
                             ),
                           ),
                           onTap: () {
@@ -104,7 +104,7 @@ class AboutPage extends HookConsumerWidget {
                           style: ListTileStyle.drawer,
                           leading: CircleAvatar(
                             backgroundImage: UniversalImage.imageProvider(
-                              "https://user-images.githubusercontent.com/61944859/213881256-37e3868a-b910-4702-83ff-e2d0df91d9bb.png",
+                              "assets/creators/souad.png",
                             ),
                           ),
                           onTap: () {

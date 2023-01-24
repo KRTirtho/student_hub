@@ -67,6 +67,7 @@ flutter:
 
   assets:
     - assets/
+    - assets/creators/
     - dev.env
     - prod.env
 
