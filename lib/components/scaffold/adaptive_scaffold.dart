@@ -300,7 +300,7 @@ class AdaptiveScaffold extends StatefulWidget {
 
   /// Public helper method to be used for creating a [BottomNavigationBar] from
   /// a list of [NavigationDestination]s.
-  static Builder standardBottomNavigationBar({
+  static Builder standardNavigationBar({
     required List<NavigationDestination> destinations,
     int currentIndex = 0,
     double iconSize = 24,
@@ -308,20 +308,22 @@ class AdaptiveScaffold extends StatefulWidget {
   }) {
     return Builder(
       builder: (context) {
-        return ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: Theme.of(context).navigationBarTheme.height ?? 56,
-          ),
-          child: NavigationBar(
-            destinations: [
-              for (final NavigationDestination destination in destinations)
-                NavigationDestination(
-                  icon: destination.icon,
-                  label: destination.label,
-                ),
-            ],
-            selectedIndex: currentIndex,
-            onDestinationSelected: onDestinationSelected,
+        return MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: NavigationBar(
+              destinations: [
+                for (final NavigationDestination destination in destinations)
+                  NavigationDestination(
+                    icon: destination.icon,
+                    label: destination.label,
+                  ),
+              ],
+              selectedIndex: currentIndex,
+              onDestinationSelected: onDestinationSelected,
+            ),
           ),
         );
       },
@@ -527,22 +529,21 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               ),
             },
           ),
-          bottomNavigation:
-              !widget.drawerBreakpoint.isActive(context) || !widget.useDrawer
-                  ? SlotLayout(
-                      config: <Breakpoint, SlotLayoutConfig>{
-                        widget.smallBreakpoint: SlotLayout.from(
-                          key: const Key('bottomNavigation'),
-                          builder: (_) =>
-                              AdaptiveScaffold.standardBottomNavigationBar(
-                            currentIndex: widget.selectedIndex,
-                            destinations: widget.destinations,
-                            onDestinationSelected: widget.onSelectedIndexChange,
-                          ),
-                        ),
-                      },
-                    )
-                  : null,
+          bottomNavigation: !widget.drawerBreakpoint.isActive(context) ||
+                  !widget.useDrawer
+              ? SlotLayout(
+                  config: <Breakpoint, SlotLayoutConfig>{
+                    widget.smallBreakpoint: SlotLayout.from(
+                      key: const Key('bottomNavigation'),
+                      builder: (_) => AdaptiveScaffold.standardNavigationBar(
+                        currentIndex: widget.selectedIndex,
+                        destinations: widget.destinations,
+                        onDestinationSelected: widget.onSelectedIndexChange,
+                      ),
+                    ),
+                  },
+                )
+              : null,
           body: SlotLayout(
             config: <Breakpoint, SlotLayoutConfig?>{
               Breakpoints.standard: SlotLayout.from(

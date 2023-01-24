@@ -1,3 +1,4 @@
+import 'package:eusc_freaks/collections/logo.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -24,7 +25,7 @@ class AboutPage extends HookConsumerWidget {
             child: Column(
               children: [
                 Image.asset(
-                  "assets/logo.png",
+                  getLogoPath(context),
                   height: 200,
                   width: 200,
                 ),

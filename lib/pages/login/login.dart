@@ -1,3 +1,4 @@
+import 'package:eusc_freaks/collections/logo.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_redirect.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -38,8 +39,8 @@ class LoginPage extends HookConsumerWidget {
                 children: [
                   Container(
                     constraints: const BoxConstraints(maxHeight: 200),
-                    child: const UniversalImage(
-                      path: "assets/logo.png",
+                    child: UniversalImage(
+                      path: getLogoPath(context),
                     ),
                   ),
                   const Gap(10),
@@ -104,8 +105,9 @@ class LoginPage extends HookConsumerWidget {
                         ? null
                         : () async {
                             try {
-                              if (formKey.currentState?.validate() != true)
+                              if (formKey.currentState?.validate() != true) {
                                 return;
+                              }
                               updating.value = true;
                               final user = await authNotifier.login(
                                 emailController.text,

@@ -231,6 +231,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                             }
                             break;
                           case "share":
+                            break;
                           case "report":
                             showDialog(
                               context: context,

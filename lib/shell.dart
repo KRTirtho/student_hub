@@ -1,3 +1,4 @@
+import 'package:eusc_freaks/collections/logo.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/scaffold/adaptive_scaffold.dart';
 import 'package:eusc_freaks/models/post.dart';
@@ -65,7 +66,7 @@ class Shell extends HookConsumerWidget {
             constraints: const BoxConstraints(maxWidth: 40),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: const UniversalImage(path: "assets/logo.png"),
+              child: UniversalImage(path: getLogoPath(context)),
             ),
           ),
           const Gap(8),
@@ -83,7 +84,7 @@ class Shell extends HookConsumerWidget {
         padding: const EdgeInsets.all(8.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: const UniversalImage(path: "assets/logo.png"),
+          child: UniversalImage(path: getLogoPath(context)),
         ),
       ),
       body: (context) => child,

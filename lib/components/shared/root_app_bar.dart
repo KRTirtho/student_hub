@@ -1,3 +1,4 @@
+import 'package:eusc_freaks/collections/logo.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/notifications.dart';
@@ -52,7 +53,7 @@ class RooAppBar extends AppBar {
                     padding: const EdgeInsets.all(8.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: const UniversalImage(path: "assets/logo.png"),
+                      child: UniversalImage(path: getLogoPath(context)),
                     ),
                   );
                 },

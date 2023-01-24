@@ -79,6 +79,7 @@ class BookCard extends HookConsumerWidget {
                             }
                             break;
                           case "share":
+                            break;
                           case "report":
                             await showDialog(
                               context: context,
