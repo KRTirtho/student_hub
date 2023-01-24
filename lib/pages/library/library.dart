@@ -34,6 +34,7 @@ class LibraryPage extends HookConsumerWidget {
                     GoRouter.of(context).push("/library/search");
                   },
                 ),
+                const AppNotificationButton(),
                 IconButton(
                   icon: const Icon(Icons.settings_outlined),
                   onPressed: () {

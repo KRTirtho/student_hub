@@ -54,6 +54,7 @@ dependencies:
   flutter_adaptive_scaffold: ^0.0.8
   badges: ^2.0.3
   scroll_to_index: ^3.0.1
+  flutter_app_badger: ^1.5.0
 
 dev_dependencies:
   flutter_test:

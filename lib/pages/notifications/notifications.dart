@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
@@ -136,9 +137,14 @@ class NotificationsPage extends HookConsumerWidget {
                 color: notification.viewed ? null : cardActiveColor,
                 child: ListTile(
                   leading: leading,
-                  title: Text(
-                    notification.message,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  title: Badge(
+                    badgeColor: Colors.blue,
+                    alignment: Alignment.centerLeft,
+                    showBadge: !notification.viewed,
+                    child: Text(
+                      notification.message,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                   dense: true,
                   onTap: () async {
