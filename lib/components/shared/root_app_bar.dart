@@ -2,6 +2,7 @@ import 'package:eusc_freaks/collections/logo.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/notifications.dart';
+import 'package:eusc_freaks/utils/platform.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
@@ -115,6 +116,7 @@ class AppNotificationButton extends HookConsumerWidget {
         return HookBuilder(builder: (context) {
           useEffect(
             () {
+              if (!kIsMobile) return;
               WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
                 if (!await FlutterAppBadger.isAppBadgeSupported()) return;
                 if (unreadNotifications > 0) {
