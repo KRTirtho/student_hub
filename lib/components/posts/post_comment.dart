@@ -64,6 +64,20 @@ class PostComment extends HookConsumerWidget {
       Colors.yellow[100],
       Colors.yellow[900]?.withOpacity(.5),
     );
+
+    void navigate() {
+      if (comment.user?.id == ref.read(authenticationProvider)?.id) {
+        GoRouter.of(context).go(
+          "/profile/authenticated",
+        );
+      } else {
+        GoRouter.of(context).pop();
+        GoRouter.of(context).push(
+          "/profile/${comment.user?.id}",
+        );
+      }
+    }
+
     Widget child = Card(
       color: comment.solve
           ? color
@@ -83,24 +97,17 @@ class PostComment extends HookConsumerWidget {
           children: [
             Row(
               children: [
-                Avatar(user: comment.user!, radius: 12),
+                Avatar(
+                  user: comment.user!,
+                  radius: 12,
+                  onTap: navigate,
+                ),
                 const Gap(5),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () {
-                        if (comment.user?.id ==
-                            ref.read(authenticationProvider)?.id) {
-                          GoRouter.of(context).go(
-                            "/profile/authenticated",
-                          );
-                        } else {
-                          GoRouter.of(context).push(
-                            "/profile/${comment.user?.id}",
-                          );
-                        }
-                      },
+                      onTap: navigate,
                       child: Text(
                         comment.user!.name ?? comment.user!.username,
                         style: Theme.of(context).textTheme.labelMedium!,
