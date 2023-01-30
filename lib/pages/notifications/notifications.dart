@@ -3,10 +3,10 @@ import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/hooks/use_brightness_value.dart';
+import 'package:eusc_freaks/hooks/use_crashlytics_query.dart';
 import 'package:eusc_freaks/models/notification.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/notifications.dart';
-import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -20,7 +20,7 @@ class NotificationsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final controller = useScrollController();
-    final notificationsQuery = useInfiniteQuery(
+    final notificationsQuery = useCrashlyticsInfiniteQuery(
       job: notificationsQueryJob,
       externalData: ref.watch(authenticationProvider)?.id,
     );

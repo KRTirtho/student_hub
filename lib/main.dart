@@ -1,19 +1,45 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/collections/env.dart';
 import 'package:eusc_freaks/router.dart';
+import 'package:eusc_freaks/utils/crashlytics_handler.dart';
 import 'package:eusc_freaks/utils/platform.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   final bindings = WidgetsFlutterBinding.ensureInitialized();
-  if (kIsMobile) {
-    FlutterNativeSplash.preserve(widgetsBinding: bindings);
-  }
   await Env.configure();
-  runApp(const ProviderScope(child: EuscFreaks()));
+  if (kIsMobile) FlutterNativeSplash.preserve(widgetsBinding: bindings);
+  if (!kIsDesktop) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  CatcherOptions debugOptions = CatcherOptions(
+    SilentReportMode(),
+    [
+      ConsoleHandler(),
+      CrashlyticsHandler(),
+      SnackbarHandler(const Duration(seconds: 2)),
+    ],
+  );
+
+  CatcherOptions releaseOptions = CatcherOptions(
+    SilentReportMode(),
+    [CrashlyticsHandler()],
+  );
+
+  Catcher(
+    rootWidget: const ProviderScope(child: EuscFreaks()),
+    debugConfig: debugOptions,
+    releaseConfig: releaseOptions,
+  );
 }
 
 class EuscFreaks extends HookConsumerWidget {

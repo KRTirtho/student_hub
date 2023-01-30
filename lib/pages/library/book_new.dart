@@ -1,6 +1,8 @@
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
+import 'package:eusc_freaks/hooks/use_crashlytics_query.dart';
 import 'package:eusc_freaks/hooks/use_pdf_thumbnail.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
@@ -9,7 +11,6 @@ import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/books.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_query/fl_query.dart';
-import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_validator/form_validator.dart';
@@ -32,7 +33,8 @@ class BookNewPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final bookTags = useQuery(job: bookTagsQueryJob, externalData: null);
+    final bookTags =
+        useCrashlyticsQuery(job: bookTagsQueryJob, externalData: null);
 
     final titleController = useTextEditingController(text: book?.title);
     final bioController = useTextEditingController(text: book?.bio);
@@ -362,8 +364,9 @@ class BookNewPage extends HookConsumerWidget {
                           await query?.refetch();
                           GoRouter.of(context).pop();
                         }
-                      } on ClientException catch (e) {
+                      } on ClientException catch (e, stackTrace) {
                         error.value = e.response["message"];
+                        Catcher.reportCheckedError(error, stackTrace);
                       } finally {
                         updating.value = false;
                       }

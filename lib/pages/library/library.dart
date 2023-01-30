@@ -3,7 +3,7 @@ import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/components/shared/root_app_bar.dart';
 import 'package:eusc_freaks/models/book.dart';
-import 'package:fl_query/fl_query.dart';
+import 'package:eusc_freaks/utils/crashlytics_query_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -18,7 +18,7 @@ class LibraryPage extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final controller = useScrollController();
 
-    return InfiniteQueryBuilder(
+    return CrashlyticsInfiniteQueryBuilder(
         job: booksInfiniteQueryJob,
         externalData: null,
         builder: (context, booksQuery) {

@@ -7,6 +7,7 @@ import 'package:eusc_freaks/components/posts/post_comment_media.dart';
 import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/hooks/use_auto_scroll_controller.dart';
+import 'package:eusc_freaks/hooks/use_crashlytics_query.dart';
 import 'package:eusc_freaks/models/comment.dart';
 import 'package:eusc_freaks/models/lol_file.dart';
 import 'package:eusc_freaks/models/post.dart';
@@ -14,7 +15,6 @@ import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
 import 'package:eusc_freaks/utils/platform.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -39,11 +39,11 @@ class PostPage extends HookConsumerWidget {
 
     final controller = useAutoScrollController();
 
-    final postQuery = useQuery(
+    final postQuery = useCrashlyticsQuery(
       job: postQueryJob(postId),
       externalData: null,
     );
-    final commentsQuery = useInfiniteQuery(
+    final commentsQuery = useCrashlyticsInfiniteQuery(
       job: postCommentsInfiniteQueryJob(postId),
       externalData: null,
     );
@@ -250,7 +250,8 @@ class PostPage extends HookConsumerWidget {
                     Center(
                       child: Text(
                         (postQuery.error as ClientException)
-                            .response["message"],
+                                .response["message"] ??
+                            "",
                       ),
                     )
                   else

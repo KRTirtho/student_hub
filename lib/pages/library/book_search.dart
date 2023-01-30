@@ -1,11 +1,11 @@
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/library/book_card.dart';
 import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
+import 'package:eusc_freaks/hooks/use_crashlytics_query.dart';
 import 'package:eusc_freaks/hooks/use_debounce.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
 import 'package:eusc_freaks/queries/books.dart';
-import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -35,7 +35,8 @@ class BookSearchPage extends HookConsumerWidget {
 
     final books = useState<List<Book>>([]);
 
-    final tagsQuery = useQuery(job: bookTagsQueryJob, externalData: null);
+    final tagsQuery =
+        useCrashlyticsQuery(job: bookTagsQueryJob, externalData: null);
 
     useEffect(() {
       if (isSearch.value) return null;

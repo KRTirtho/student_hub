@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/collections/env.dart';
 import 'package:eusc_freaks/models/book.dart';
 import 'package:eusc_freaks/models/book_tags.dart';
@@ -29,7 +30,7 @@ import 'package:pdfx/pdfx.dart';
 import 'package:riverpod/riverpod.dart';
 
 final routerConfig = Provider((ref) {
-  final navigatorKey = GlobalKey<NavigatorState>();
+  final navigatorKey = Catcher.navigatorKey;
   final shellNavigatorKey = GlobalKey<NavigatorState>();
 
   return GoRouter(

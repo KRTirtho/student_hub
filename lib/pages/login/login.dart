@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/collections/logo.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_redirect.dart';
@@ -120,11 +121,12 @@ class LoginPage extends HookConsumerWidget {
                               formKey.currentState?.reset();
                               error.value = null;
                               if (mounted()) GoRouter.of(context).go("/");
-                            } on ClientException catch (e) {
+                            } on ClientException catch (e, stackTrace) {
                               error.value = e.response["message"] as String?;
                               if (error.value == "Failed to authenticate.") {
                                 error.value = "Invalid email or password";
                               }
+                              Catcher.reportCheckedError(error, stackTrace);
                             } finally {
                               updating.value = false;
                             }

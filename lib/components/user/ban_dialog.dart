@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/models/user.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -257,8 +258,9 @@ class BanDialog extends HookConsumerWidget {
                               .getQuery(userQueryJob(user.id).queryKey)
                               ?.refetch();
                         }
-                      } on ClientException catch (e) {
+                      } on ClientException catch (e, stackTrace) {
                         error.value = e.response['message'];
+                        Catcher.reportCheckedError(error, stackTrace);
                       } finally {
                         updating.value = false;
                       }

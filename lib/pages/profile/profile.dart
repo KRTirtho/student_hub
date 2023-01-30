@@ -5,6 +5,7 @@ import 'package:eusc_freaks/components/posts/post_card.dart';
 import 'package:eusc_freaks/components/report/report_dialog.dart';
 import 'package:eusc_freaks/components/scrolling/waypoint.dart';
 import 'package:eusc_freaks/components/user/ban_dialog.dart';
+import 'package:eusc_freaks/hooks/use_crashlytics_query.dart';
 import 'package:eusc_freaks/models/report.dart';
 import 'package:eusc_freaks/pages/profile/master_user_sessions.dart';
 import 'package:eusc_freaks/pages/profile/non_master_user_sessions.dart';
@@ -15,7 +16,6 @@ import 'package:eusc_freaks/queries/user.dart';
 import 'package:eusc_freaks/utils/change_notifier_listenable_builder.dart';
 import 'package:eusc_freaks/utils/snackbar.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fl_query_hooks/fl_query_hooks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -35,7 +35,7 @@ class ProfilePage extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final controller = useScrollController();
     final authUser = ref.watch(authenticationProvider);
-    final userQuery = useQuery(
+    final userQuery = useCrashlyticsQuery(
       job: userQueryJob(userId),
       externalData: authUser,
     );
@@ -140,11 +140,11 @@ class ProfilePage extends HookConsumerWidget {
           : HookBuilder(builder: (context) {
               final tabController = useTabController(initialLength: 2);
 
-              final userPostsQuery = useInfiniteQuery(
+              final userPostsQuery = useCrashlyticsInfiniteQuery(
                 job: userPostsInfiniteQueryJob(userQuery.data!.id),
                 externalData: null,
               );
-              final userBooksQuery = useInfiniteQuery(
+              final userBooksQuery = useCrashlyticsInfiniteQuery(
                 job: userBooksInfiniteQueryJob(userQuery.data!.id),
                 externalData: null,
               );

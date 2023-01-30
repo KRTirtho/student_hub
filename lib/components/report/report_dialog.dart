@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart' hide Report;
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/models/report.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
@@ -151,8 +152,9 @@ class ReportDialog extends HookConsumerWidget {
                         error.value = null;
                         descriptionController.clear();
                         if (mounted()) Navigator.of(context).pop(report);
-                      } on ClientException catch (e) {
+                      } on ClientException catch (e, stackTrace) {
                         error.value = e.response['message'];
+                        Catcher.reportCheckedError(error, stackTrace);
                       } finally {
                         updating.value = false;
                       }

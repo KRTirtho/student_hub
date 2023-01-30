@@ -6,8 +6,8 @@ import 'package:eusc_freaks/hooks/use_redirect.dart';
 import 'package:eusc_freaks/models/post.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/posts.dart';
+import 'package:eusc_freaks/utils/crashlytics_query_builder.dart';
 import 'package:eusc_freaks/utils/platform.dart';
-import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -42,7 +42,7 @@ class PostsPage extends HookConsumerWidget {
       return;
     }, []);
 
-    return InfiniteQueryBuilder(
+    return CrashlyticsInfiniteQueryBuilder(
         job: postsInfiniteQueryJob(type),
         externalData: null,
         builder: (context, postsQuery) {
@@ -82,7 +82,7 @@ class PostsPage extends HookConsumerWidget {
                     await postsQuery.fetchNextPage();
                   }
                 },
-                child: InfiniteQueryBuilder(
+                child: CrashlyticsInfiniteQueryBuilder(
                     job: postsInfiniteQueryJob(type),
                     externalData: null,
                     builder: (context, query) {

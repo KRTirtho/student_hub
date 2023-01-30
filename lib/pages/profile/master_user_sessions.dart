@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart';
 import 'package:collection/collection.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/models/user.dart';
@@ -202,8 +203,9 @@ class MasterUserSessions extends HookConsumerWidget {
                               ref
                                   .read(authenticationProvider.notifier)
                                   .refetch();
-                            } on ClientException catch (e) {
+                            } on ClientException catch (e, stack) {
                               error.value = e.response["message"];
+                              Catcher.reportCheckedError(error, stack);
                             } finally {
                               updating.value = false;
                             }

@@ -38,7 +38,6 @@ dependencies:
   carousel_slider: ^4.2.1
   photo_view: ^0.14.0
   http_parser: ^4.0.2
-  pdfx: ^2.3.0
   url_launcher: ^6.1.7
   flutter_cache_manager: ^3.3.0
   synchronized: ^3.0.1
@@ -55,6 +54,15 @@ dependencies:
   badges: ^2.0.3
   scroll_to_index: ^3.0.1
   flutter_app_badger: ^1.5.0
+  # ============== device_info_plus v8^ fix ==================
+  catcher:
+    git:
+      url: https://github.com/ThexXTURBOXx/catcher.git
+  pdfx: ^2.3.0
+  # ===========================================================
+  firebase_core: ^2.4.1
+  firebase_crashlytics: ^3.0.11
+  logging: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +70,10 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   build_runner: ^2.2.0
   flutter_launcher_icons: ^0.11.0
+  flutter_gen_runner: ^5.1.0+1
+
+dependency_overrides:
+  device_info_plus: ^8.0.0
 
 flutter:
   uses-material-design: true
@@ -71,6 +83,10 @@ flutter:
     - assets/creators/
     - dev.env
     - prod.env
+
+flutter_gen:
+  output: lib/collections/
+
 
 flutter_native_splash:
   color: '#FFFFFF'

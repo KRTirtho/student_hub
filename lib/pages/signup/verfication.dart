@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -40,8 +41,9 @@ class VerificationPage extends HookConsumerWidget {
                   await authNotifier.confirm(value);
                   error.value = null;
                   if (mounted()) GoRouter.of(context).go("/");
-                } on ClientException catch (e) {
+                } on ClientException catch (e, stack) {
                   error.value = e.response["message"];
+                  Catcher.reportCheckedError(error, stack);
                 }
               },
             ),

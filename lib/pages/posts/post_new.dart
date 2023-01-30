@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/collections/math_symbols_collection.dart';
 import 'package:eusc_freaks/collections/pocketbase.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
@@ -383,8 +384,9 @@ class PostNewPage extends HookConsumerWidget {
                                 ?.refetchPages();
                           }
                         }
-                      } on ClientException catch (e) {
+                      } on ClientException catch (e, stackTrace) {
                         error.value = e.response["message"];
+                        Catcher.reportCheckedError(error, stackTrace);
                       } finally {
                         updating.value = false;
                       }

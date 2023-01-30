@@ -1,3 +1,4 @@
+import 'package:catcher/catcher.dart';
 import 'package:eusc_freaks/collections/logo.dart';
 import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:eusc_freaks/hooks/use_redirect.dart';
@@ -312,8 +313,9 @@ class SignupPage extends HookConsumerWidget {
                             }
                             formKey.currentState?.reset();
                             if (mounted()) error.value = null;
-                          } on ClientException catch (e) {
+                          } on ClientException catch (e, stack) {
                             error.value = e.response["message"];
+                            Catcher.reportCheckedError(error, stack);
                           } finally {
                             if (mounted()) {
                               isLoading.value = false;
