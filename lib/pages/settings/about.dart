@@ -1,5 +1,5 @@
+import 'package:eusc_freaks/collections/assets.gen.dart';
 import 'package:eusc_freaks/collections/logo.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -64,9 +64,7 @@ class AboutPage extends HookConsumerWidget {
                         child: ListTile(
                           style: ListTileStyle.drawer,
                           leading: CircleAvatar(
-                            backgroundImage: UniversalImage.imageProvider(
-                              "assets/creators/tirtho.jpg",
-                            ),
+                            backgroundImage: Assets.creators.tirtho.provider(),
                           ),
                           onTap: () {
                             launchUrlString(
@@ -83,9 +81,7 @@ class AboutPage extends HookConsumerWidget {
                         child: ListTile(
                           style: ListTileStyle.drawer,
                           leading: CircleAvatar(
-                            backgroundImage: UniversalImage.imageProvider(
-                              "assets/creators/farabi.png",
-                            ),
+                            backgroundImage: Assets.creators.farabi.provider(),
                           ),
                           onTap: () {
                             launchUrlString(
@@ -103,9 +99,7 @@ class AboutPage extends HookConsumerWidget {
                         child: ListTile(
                           style: ListTileStyle.drawer,
                           leading: CircleAvatar(
-                            backgroundImage: UniversalImage.imageProvider(
-                              "assets/creators/souad.png",
-                            ),
+                            backgroundImage: Assets.creators.souad.provider(),
                           ),
                           onTap: () {
                             launchUrlString(
