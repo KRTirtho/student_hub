@@ -13,9 +13,9 @@ import firebase_crashlytics
 import flutter_app_badger
 import flutter_secure_storage_macos
 import package_info_plus
-import path_provider_macos
+import path_provider_foundation
 import pdfx
-import shared_preferences_macos
+import shared_preferences_foundation
 import sqflite
 import url_launcher_macos
 

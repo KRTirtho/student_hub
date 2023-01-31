@@ -7,7 +7,7 @@ import 'package:eusc_freaks/hooks/use_crashlytics_query.dart';
 import 'package:eusc_freaks/models/notification.dart';
 import 'package:eusc_freaks/providers/authentication_provider.dart';
 import 'package:eusc_freaks/queries/notifications.dart';
-import 'package:flutter/material.dart' hide Notification;
+import 'package:flutter/material.dart' hide Notification, Badge;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -138,8 +138,10 @@ class NotificationsPage extends HookConsumerWidget {
                 child: ListTile(
                   leading: leading,
                   title: Badge(
-                    badgeColor: Colors.blue,
-                    alignment: Alignment.centerLeft,
+                    badgeStyle: const BadgeStyle(
+                      badgeColor: Colors.blue,
+                    ),
+                    position: BadgePosition.bottomEnd(),
                     showBadge: !notification.viewed,
                     child: Text(
                       notification.message,
