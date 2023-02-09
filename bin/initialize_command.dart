@@ -11,6 +11,8 @@ import 'package:flutter_native_splash/cli_commands.dart';
 import 'package:interact/interact.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
+import 'flutterfire.dart';
+
 class InitializeCommand extends Command {
   @override
   String get description =>
@@ -216,6 +218,21 @@ class InitializeCommand extends Command {
     return reg.firstMatch(contents)!.group(1)!;
   }
 
+  void printFinalMessage() {
+    print(AnsiStyles.green('Project setup completed successfully\n\n'));
+
+    print(
+      """You can now run the following commands to run the app:
+        \$ flutter run -d chrome (for web browser. Requires Chrome to be installed)
+        or,
+        \$ flutter run -d ${Platform.operatingSystem} (for ${Platform.operatingSystem})
+        
+        In another terminal, run the following command to start the server:
+        \$ pocketbase serve pb/pb_data
+        """,
+    );
+  }
+
   @override
   void run() async {
     final Map<String, dynamic> config = {};
@@ -251,13 +268,6 @@ class InitializeCommand extends Command {
 
     config['description'] = description;
 
-    final author = Input(
-      prompt: 'Author',
-      defaultValue: 'The Academic Team',
-    ).interact();
-
-    config['author'] = author;
-
     final version = Input(
       prompt: 'Version',
       defaultValue: '0.0.1',
@@ -276,7 +286,6 @@ class InitializeCommand extends Command {
 
     pubspec.update(['name'], applicationName.split('.').last);
     pubspec.update(['description'], description);
-    pubspec.update(['author'], author);
     pubspec.update(['version'], version);
 
     pubspecFile.writeAsStringSync(pubspec.toString());
@@ -327,7 +336,7 @@ class InitializeCommand extends Command {
     config['generateImages'] = generateImages;
 
     if (config['generateImages'] == true) {
-      createIconsFromArguments([])
+      await createIconsFromArguments([])
           .then((_) => createSplash(flavor: null, path: null));
 
       print(AnsiStyles.green('Images generated successfully'));
@@ -342,14 +351,56 @@ class InitializeCommand extends Command {
     final firebaseLoginResult =
         Process.runSync('firebase', ['login:ci', "--interactive"]);
 
-    if (firebaseLoginResult.exitCode != 0) {
+    final token = (firebaseLoginResult.stdout as String)
+        .split('\n')
+        .firstWhereOrNull((element) => element.contains('1//'));
+
+    if (token == null || firebaseLoginResult.exitCode != 0) {
       print(AnsiStyles.red('Firebase login failed'));
       print(AnsiStyles.dim(firebaseLoginResult.stdout));
       print(AnsiStyles.dim(firebaseLoginResult.stderr));
       exit(1);
     }
-
     print(AnsiStyles.dim(firebaseLoginResult.stdout));
     print(AnsiStyles.green('Firebase login successful'));
+
+    await flutterFireRun(["configure", "--token", token]);
+
+    print(AnsiStyles.green('Firebase configured successfully'));
+
+    final configureGit = Confirm(
+      prompt: "Do you want to configure git?",
+      defaultValue: true,
+    ).interact();
+
+    if (!configureGit) {
+      print(AnsiStyles.blue('Skipping git configuration'));
+      printFinalMessage();
+      exit(0);
+    }
+
+    Process.runSync('flutter', ['pub', 'get']);
+
+    Process.runSync('git', ['remote', 'remove', 'origin']);
+
+    final gitUrl = Input(
+      prompt: 'Enter the github/gitlab url of your project',
+      validator: (String value) {
+        return RegExp(
+                r"^(https|git)(:\/\/|@)([^\/:]+)[\/:]([^\/:]+)\/(.+).git$")
+            .hasMatch(value);
+      },
+    ).interact();
+
+    final result = Process.runSync('git', ['remote', 'add', 'origin', gitUrl]);
+
+    if (result.exitCode != 0) {
+      print(AnsiStyles.red('Failed to add git remote'));
+      print(AnsiStyles.dim(result.stderr));
+    } else {
+      print(AnsiStyles.green('Git remote added successfully'));
+    }
+
+    printFinalMessage();
   }
 }

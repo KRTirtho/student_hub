@@ -24,7 +24,7 @@ import 'package:flutterfire_cli/src/common/utils.dart' as utils;
 import 'package:flutterfire_cli/src/flutter_app.dart';
 import 'package:flutterfire_cli/version.g.dart';
 
-Future<void> main(List<String> arguments) async {
+Future<void> flutterFireRun(List<String> arguments) async {
   if (arguments.contains('--version') || arguments.contains('-v')) {
     print(cliVersion);
     // No version checks on CIs.
