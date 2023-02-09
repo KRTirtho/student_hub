@@ -1,9 +1,9 @@
-name: eusc_freaks
-description: A new Flutter project.
+name: student_hub
+description: The true Academic Social Media
 
 publish_to: "none"
 
-version: 1.0.0+1
+version: 0.0.1
 
 environment:
   sdk: ">=2.18.4 <3.0.0"
@@ -69,9 +69,17 @@ dev_dependencies:
   build_runner: ^2.2.0
   flutter_launcher_icons: ^0.11.0
   flutter_gen_runner: ^5.1.0+1
+  # CLI packages
+  change_app_package_name: ^1.1.0
+  interact: ^2.2.0
+  args: ^2.3.2
+  flutterfire_cli: ^0.2.7
+  ansi_styles: ^0.3.2+1
+  yaml_edit: ^2.0.3
 
 dependency_overrides:
   device_info_plus: ^8.0.0
+  win32: ^3.1.3
 
 flutter:
   uses-material-design: true
@@ -113,3 +121,4 @@ flutter_icons:
     image_path: "assets/logo.png"
     background_color: "#000000"
     theme_color: "#ffffff"
+author: The Academic Team

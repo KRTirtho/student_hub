@@ -1,15 +1,15 @@
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/components/image/avatar.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/components/posts/hazard_prompt_dialog.dart';
-import 'package:eusc_freaks/components/posts/post_comment_media.dart';
-import 'package:eusc_freaks/components/report/report_dialog.dart';
-import 'package:eusc_freaks/hooks/use_brightness_value.dart';
-import 'package:eusc_freaks/models/comment.dart';
-import 'package:eusc_freaks/models/lol_file.dart';
-import 'package:eusc_freaks/models/report.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:eusc_freaks/queries/posts.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/components/image/avatar.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/components/posts/hazard_prompt_dialog.dart';
+import 'package:student_hub/components/posts/post_comment_media.dart';
+import 'package:student_hub/components/report/report_dialog.dart';
+import 'package:student_hub/hooks/use_brightness_value.dart';
+import 'package:student_hub/models/comment.dart';
+import 'package:student_hub/models/lol_file.dart';
+import 'package:student_hub/models/report.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
+import 'package:student_hub/queries/posts.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -115,7 +115,7 @@ class PostComment extends HookConsumerWidget {
                     ),
                     Text(
                       format(DateTime.parse(comment.created)),
-                      style: Theme.of(context).textTheme.caption!,
+                      style: Theme.of(context).textTheme.bodySmall!,
                     ),
                   ],
                 ),
@@ -312,8 +312,8 @@ class PostComment extends HookConsumerWidget {
                   trimMode: TrimMode.Line,
                   trimLines: 3,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  lessStyle: Theme.of(context).textTheme.caption,
-                  moreStyle: Theme.of(context).textTheme.caption,
+                  lessStyle: Theme.of(context).textTheme.bodySmall,
+                  moreStyle: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             const Gap(10),

@@ -1,8 +1,8 @@
 import 'package:catcher/catcher.dart';
-import 'package:eusc_freaks/collections/logo.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/hooks/use_redirect.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:student_hub/collections/logo.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/hooks/use_redirect.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_validator/form_validator.dart';

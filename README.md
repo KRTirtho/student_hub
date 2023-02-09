@@ -1,4 +1,4 @@
-# eusc_freaks
+# student_hub
 
 A new Flutter project.
 

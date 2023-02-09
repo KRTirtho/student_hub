@@ -1,9 +1,9 @@
 import 'package:catcher/catcher.dart';
-import 'package:eusc_freaks/collections/logo.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/hooks/use_redirect.dart';
-import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:student_hub/collections/logo.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/hooks/use_redirect.dart';
+import 'package:student_hub/models/user.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -58,7 +58,7 @@ class SignupPage extends HookConsumerWidget {
                 Center(
                   child: Text(
                     "Sign Up",
-                    style: Theme.of(context).textTheme.headline3,
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                 ),
                 const Gap(20),
@@ -276,7 +276,7 @@ class SignupPage extends HookConsumerWidget {
                     error.value!,
                     style: Theme.of(context)
                         .textTheme
-                        .caption
+                        .bodySmall
                         ?.copyWith(color: Colors.red),
                   ),
                 const Gap(20),

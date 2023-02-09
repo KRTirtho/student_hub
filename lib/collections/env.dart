@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 abstract class Env {
+  static const applicationDisplayName = "EUSC hub";
   static final String pocketbaseUrl = dotenv.get(
     'POCKETBASE_URL',
     fallback: 'http://127.0.0.1:8090',

@@ -1,15 +1,15 @@
-import 'package:eusc_freaks/components/library/book_card.dart';
-import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
-import 'package:eusc_freaks/components/scrolling/waypoint.dart';
-import 'package:eusc_freaks/components/shared/root_app_bar.dart';
-import 'package:eusc_freaks/models/book.dart';
-import 'package:eusc_freaks/utils/crashlytics_query_builder.dart';
+import 'package:student_hub/components/library/book_card.dart';
+import 'package:student_hub/components/scrolling/constrained_list_view.dart';
+import 'package:student_hub/components/scrolling/waypoint.dart';
+import 'package:student_hub/components/shared/root_app_bar.dart';
+import 'package:student_hub/models/book.dart';
+import 'package:student_hub/utils/crashlytics_query_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:eusc_freaks/queries/books.dart';
+import 'package:student_hub/queries/books.dart';
 
 class LibraryPage extends HookConsumerWidget {
   const LibraryPage({Key? key}) : super(key: key);

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:eusc_freaks/components/markdown/format_markdown.dart';
+import 'package:student_hub/components/markdown/format_markdown.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

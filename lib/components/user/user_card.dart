@@ -1,7 +1,7 @@
-import 'package:eusc_freaks/components/image/avatar.dart';
-import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:eusc_freaks/utils/number_ending_type.dart';
+import 'package:student_hub/components/image/avatar.dart';
+import 'package:student_hub/models/user.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
+import 'package:student_hub/utils/number_ending_type.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -42,7 +42,7 @@ class UserCard extends HookConsumerWidget {
                 user.isMaster == true
                     ? "${user.currentSession?.subject?.formattedName} Teacher since ${user.currentSession?.year}"
                     : "B. ${user.currentSession?.year}'s  ${user.currentSession?.serial}${getNumberEnding(user.currentSession?.serial ?? 999)} of C. ${user.currentSession?.standard}",
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               const Gap(16),
             ],

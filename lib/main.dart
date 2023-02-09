@@ -1,9 +1,9 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:catcher/catcher.dart';
-import 'package:eusc_freaks/collections/env.dart';
-import 'package:eusc_freaks/router.dart';
-import 'package:eusc_freaks/utils/crashlytics_handler.dart';
-import 'package:eusc_freaks/utils/platform.dart';
+import 'package:student_hub/collections/env.dart';
+import 'package:student_hub/router.dart';
+import 'package:student_hub/utils/crashlytics_handler.dart';
+import 'package:student_hub/utils/platform.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -49,21 +49,7 @@ class EuscFreaks extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final theme = ThemeData(
       useMaterial3: true,
-      backgroundColor: Colors.white,
       primaryColor: Colors.black87,
-      colorScheme: ColorScheme.light(
-        primary: Colors.black87,
-        secondary: Colors.black87,
-        background: Colors.white,
-        onBackground: Colors.black87,
-        error: Colors.red[400]!,
-        inversePrimary: Colors.white,
-        onPrimary: Colors.white,
-        onError: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: Colors.grey[800]!,
-        surface: Colors.grey[50]!,
-      ),
       tabBarTheme: TabBarTheme(
         labelColor: Colors.white,
         unselectedLabelColor: Colors.grey[800],
@@ -120,26 +106,25 @@ class EuscFreaks extends HookConsumerWidget {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
+      colorScheme: ColorScheme.light(
+        primary: Colors.black87,
+        secondary: Colors.black87,
+        background: Colors.white,
+        onBackground: Colors.black87,
+        error: Colors.red[400]!,
+        inversePrimary: Colors.white,
+        onPrimary: Colors.white,
+        onError: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: Colors.grey[800]!,
+        surface: Colors.grey[50]!,
+      ).copyWith(background: Colors.white),
     );
 
     final darkTheme = ThemeData(
       useMaterial3: true,
-      backgroundColor: Colors.black,
       primaryColor: Colors.grey[100]!,
       scaffoldBackgroundColor: Colors.black,
-      colorScheme: ColorScheme.dark(
-        primary: Colors.grey[100]!,
-        secondary: Colors.grey[100]!,
-        background: Colors.black,
-        onBackground: Colors.grey[100]!,
-        error: Colors.red[400]!,
-        inversePrimary: Colors.black,
-        onPrimary: Colors.black,
-        onError: Colors.grey[100]!,
-        onSecondary: Colors.black,
-        onSurface: Colors.grey[100]!,
-        surface: Colors.grey[900]!,
-      ),
       navigationRailTheme: const NavigationRailThemeData(
         backgroundColor: Colors.black,
       ),
@@ -200,6 +185,19 @@ class EuscFreaks extends HookConsumerWidget {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
+      colorScheme: ColorScheme.dark(
+        primary: Colors.grey[100]!,
+        secondary: Colors.grey[100]!,
+        background: Colors.black,
+        onBackground: Colors.grey[100]!,
+        error: Colors.red[400]!,
+        inversePrimary: Colors.black,
+        onPrimary: Colors.black,
+        onError: Colors.grey[100]!,
+        onSecondary: Colors.black,
+        onSurface: Colors.grey[100]!,
+        surface: Colors.grey[900]!,
+      ).copyWith(background: Colors.black),
     );
 
     return QueryBowlScope(
@@ -210,7 +208,7 @@ class EuscFreaks extends HookConsumerWidget {
         initial: AdaptiveThemeMode.system,
         builder: (light, dark) => MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'EUSC Hub',
+          title: Env.applicationDisplayName,
           theme: light,
           darkTheme: dark,
           routerConfig: ref.watch(routerConfig),

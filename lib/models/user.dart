@@ -1,5 +1,5 @@
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/mixins/enum_formatted_name.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/mixins/enum_formatted_name.dart';
 import 'package:flutter/animation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:collection/collection.dart';

@@ -1,6 +1,6 @@
 {
-    "name": "EUSC Hub",
-    "short_name": "eusc_hub",
+    "name": "Student Hub",
+    "short_name": "student_hub",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#000000",

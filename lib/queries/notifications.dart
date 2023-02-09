@@ -1,5 +1,5 @@
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/models/notification.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/models/notification.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:pocketbase/pocketbase.dart';
 

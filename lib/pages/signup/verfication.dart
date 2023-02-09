@@ -1,5 +1,5 @@
 import 'package:catcher/catcher.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -53,7 +53,7 @@ class VerificationPage extends HookConsumerWidget {
                 error.value!,
                 style: Theme.of(context)
                     .textTheme
-                    .caption
+                    .bodySmall
                     ?.copyWith(color: Colors.red),
               ),
           ],

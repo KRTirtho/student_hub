@@ -1,6 +1,6 @@
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/models/post.dart';
-import 'package:eusc_freaks/models/user.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/models/post.dart';
+import 'package:student_hub/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';

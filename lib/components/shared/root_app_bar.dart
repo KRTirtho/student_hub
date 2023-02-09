@@ -1,9 +1,10 @@
-import 'package:eusc_freaks/collections/logo.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:eusc_freaks/queries/notifications.dart';
-import 'package:eusc_freaks/utils/crashlytics_query_builder.dart';
-import 'package:eusc_freaks/utils/platform.dart';
+import 'package:student_hub/collections/env.dart';
+import 'package:student_hub/collections/logo.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
+import 'package:student_hub/queries/notifications.dart';
+import 'package:student_hub/utils/crashlytics_query_builder.dart';
+import 'package:student_hub/utils/platform.dart';
 import 'package:flutter/material.dart' hide Notification, Badge;
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
@@ -24,7 +25,7 @@ class RooAppBar extends AppBar {
                 key: const Key("app_title"),
                 builder: (context) {
                   return const Text(
-                    "EUSC Hub",
+                    Env.applicationDisplayName,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,

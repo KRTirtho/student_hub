@@ -1,7 +1,8 @@
-import 'package:eusc_freaks/collections/logo.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/components/scaffold/adaptive_scaffold.dart';
-import 'package:eusc_freaks/models/post.dart';
+import 'package:student_hub/collections/env.dart';
+import 'package:student_hub/collections/logo.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/components/scaffold/adaptive_scaffold.dart';
+import 'package:student_hub/models/post.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -71,7 +72,7 @@ class Shell extends HookConsumerWidget {
           ),
           const Gap(8),
           const Text(
-            "EUSC Hub",
+            Env.applicationDisplayName,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,

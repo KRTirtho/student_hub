@@ -1,5 +1,6 @@
-import 'package:eusc_freaks/collections/assets.gen.dart';
-import 'package:eusc_freaks/collections/logo.dart';
+import 'package:student_hub/collections/assets.gen.dart';
+import 'package:student_hub/collections/env.dart';
+import 'package:student_hub/collections/logo.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -10,11 +11,11 @@ class AboutPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          "About EUSC Hub",
+          "About ${Env.applicationDisplayName}",
         ),
       ),
       body: SingleChildScrollView(
@@ -117,9 +118,9 @@ class AboutPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  "Made with ❤️ in BUET College, Bangladesh🇧🇩\nCopyright © 2021 EUSC Hub",
+                  "Made with ❤️ in BUET College, Bangladesh🇧🇩\nCopyright © 2023 ${Env.applicationDisplayName}",
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.caption,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 20),
               ],

@@ -1,7 +1,7 @@
-import 'package:eusc_freaks/collections/sstorage.dart';
-import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/utils/platform.dart';
+import 'package:student_hub/collections/sstorage.dart';
+import 'package:student_hub/models/user.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/utils/platform.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:riverpod/riverpod.dart';
 

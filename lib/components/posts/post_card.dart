@@ -1,13 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/components/image/avatar.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/components/posts/hazard_prompt_dialog.dart';
-import 'package:eusc_freaks/components/report/report_dialog.dart';
-import 'package:eusc_freaks/models/post.dart';
-import 'package:eusc_freaks/models/report.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:eusc_freaks/utils/number_ending_type.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/components/image/avatar.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/components/posts/hazard_prompt_dialog.dart';
+import 'package:student_hub/components/report/report_dialog.dart';
+import 'package:student_hub/models/post.dart';
+import 'package:student_hub/models/report.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
+import 'package:student_hub/utils/number_ending_type.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -163,7 +163,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                         widget.post.user?.isMaster == true
                             ? "${session?.subject?.formattedName} Teacher since ${session?.year}"
                             : "B. ${session?.year}'s  ${session?.serial}${getNumberEnding(session?.serial ?? 999)} of C. ${session?.standard}",
-                        style: Theme.of(context).textTheme.caption,
+                        style: Theme.of(context).textTheme.bodySmall,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -283,7 +283,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                     ),
                     Text(
                       timeago.format(DateTime.parse(widget.post.created)),
-                      style: Theme.of(context).textTheme.caption,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -312,7 +312,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                       },
                       child: Text(
                         !isHide.value ? "... Show Less" : "... Show More",
-                        style: Theme.of(context).textTheme.caption?.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: isHide.value ? Colors.purple[600] : null,
                             ),
                       ),
@@ -383,7 +383,8 @@ class _PostCardState extends ConsumerState<PostCard> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
-                                      .backgroundColor
+                                      .colorScheme
+                                      .background
                                       .withOpacity(.5),
                                   borderRadius: BorderRadius.circular(50),
                                 ),
@@ -391,7 +392,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                                   "${index + 1}/${medias.length}",
                                   style: Theme.of(context)
                                       .textTheme
-                                      .caption
+                                      .bodySmall
                                       ?.copyWith(
                                         color: Colors.white,
                                       ),
@@ -411,7 +412,8 @@ class _PostCardState extends ConsumerState<PostCard> {
                           child: IconButton(
                             style: IconButton.styleFrom(
                                 backgroundColor: Theme.of(context)
-                                    .backgroundColor
+                                    .colorScheme
+                                    .background
                                     .withOpacity(.5)),
                             icon: const Icon(Icons.chevron_left),
                             onPressed: () {
@@ -429,7 +431,8 @@ class _PostCardState extends ConsumerState<PostCard> {
                           child: IconButton(
                             style: IconButton.styleFrom(
                                 backgroundColor: Theme.of(context)
-                                    .backgroundColor
+                                    .colorScheme
+                                    .background
                                     .withOpacity(.5)),
                             icon: const Icon(Icons.chevron_right),
                             onPressed: () {

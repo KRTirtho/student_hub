@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:eusc_freaks/hooks/use_pdf_controller.dart';
-import 'package:eusc_freaks/utils/platform.dart';
-import 'package:eusc_freaks/utils/save_file/save_file.dart';
-import 'package:eusc_freaks/utils/snackbar.dart';
+import 'package:student_hub/hooks/use_pdf_controller.dart';
+import 'package:student_hub/utils/platform.dart';
+import 'package:student_hub/utils/save_file/save_file.dart';
+import 'package:student_hub/utils/snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';

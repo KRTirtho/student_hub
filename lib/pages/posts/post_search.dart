@@ -1,13 +1,13 @@
 import 'package:collection/collection.dart';
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/components/posts/post_card.dart';
-import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
-import 'package:eusc_freaks/components/scrolling/waypoint.dart';
-import 'package:eusc_freaks/components/user/user_card.dart';
-import 'package:eusc_freaks/hooks/use_debounce.dart';
-import 'package:eusc_freaks/models/post.dart';
-import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/utils/change_notifier_listenable_builder.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/components/posts/post_card.dart';
+import 'package:student_hub/components/scrolling/constrained_list_view.dart';
+import 'package:student_hub/components/scrolling/waypoint.dart';
+import 'package:student_hub/components/user/user_card.dart';
+import 'package:student_hub/hooks/use_debounce.dart';
+import 'package:student_hub/models/post.dart';
+import 'package:student_hub/models/user.dart';
+import 'package:student_hub/utils/change_notifier_listenable_builder.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -77,7 +77,9 @@ class PostSearchPage extends HookConsumerWidget {
                                   .bodyMedium
                                   ?.copyWith(
                                     color: tabController.index == i
-                                        ? Theme.of(context).backgroundColor
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .background
                                         : null,
                                   ),
                               onSelected: (value) {

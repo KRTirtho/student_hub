@@ -1,14 +1,14 @@
 import 'package:catcher/catcher.dart';
-import 'package:eusc_freaks/collections/math_symbols_collection.dart';
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/components/markdown/format_markdown.dart';
-import 'package:eusc_freaks/components/markdown/markdown_input.dart';
-import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
-import 'package:eusc_freaks/models/lol_file.dart';
-import 'package:eusc_freaks/models/post.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:eusc_freaks/queries/posts.dart';
+import 'package:student_hub/collections/math_symbols_collection.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/components/markdown/format_markdown.dart';
+import 'package:student_hub/components/markdown/markdown_input.dart';
+import 'package:student_hub/components/scrolling/constrained_list_view.dart';
+import 'package:student_hub/models/lol_file.dart';
+import 'package:student_hub/models/post.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
+import 'package:student_hub/queries/posts.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/gestures.dart';
@@ -197,7 +197,7 @@ class PostNewPage extends HookConsumerWidget {
             const Gap(20),
             Text(
               "Media",
-              style: Theme.of(context).textTheme.subtitle1?.copyWith(
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
             ),
@@ -304,7 +304,7 @@ class PostNewPage extends HookConsumerWidget {
                 error.value!,
                 style: Theme.of(context)
                     .textTheme
-                    .caption
+                    .bodySmall
                     ?.copyWith(color: Colors.red),
               ),
             const Gap(20),

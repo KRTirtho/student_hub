@@ -1,6 +1,6 @@
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/models/user.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

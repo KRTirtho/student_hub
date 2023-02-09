@@ -1,10 +1,11 @@
 import 'dart:io';
 
-import 'package:eusc_freaks/components/image/universal_image.dart';
-import 'package:eusc_freaks/components/scrolling/constrained_list_view.dart';
-import 'package:eusc_freaks/hooks/use_redirect.dart';
-import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
+import 'package:student_hub/collections/env.dart';
+import 'package:student_hub/components/image/universal_image.dart';
+import 'package:student_hub/components/scrolling/constrained_list_view.dart';
+import 'package:student_hub/hooks/use_redirect.dart';
+import 'package:student_hub/models/user.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -70,7 +71,7 @@ class BannedPage extends HookConsumerWidget {
           ),
           const Gap(20),
           Text(
-            "You have been banned from using EUSC Hub for ${user.bannedUntil?.difference(DateTime.now()).inDays} days (Until ${user.bannedUntil?.toLocal().toString().split(' ')[0]})",
+            "You have been banned from using ${Env.applicationDisplayName} for ${user.bannedUntil?.difference(DateTime.now()).inDays} days (Until ${user.bannedUntil?.toLocal().toString().split(' ')[0]})",
           ),
           const Gap(10),
           Text(

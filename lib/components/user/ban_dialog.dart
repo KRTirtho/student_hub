@@ -1,9 +1,9 @@
 import 'package:catcher/catcher.dart';
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/models/user.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:eusc_freaks/queries/user.dart';
-import 'package:eusc_freaks/utils/snackbar.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/models/user.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
+import 'package:student_hub/queries/user.dart';
+import 'package:student_hub/utils/snackbar.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -198,7 +198,7 @@ class BanDialog extends HookConsumerWidget {
                   title: Text(reason.formattedName),
                   subtitle: Text(
                     _banReasonsSub[reason]!(user.name ?? user.username),
-                    style: Theme.of(context).textTheme.caption,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 )
             ],
@@ -209,7 +209,7 @@ class BanDialog extends HookConsumerWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               error.value!,
-              style: Theme.of(context).textTheme.caption!.copyWith(
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     color: Theme.of(context).colorScheme.error,
                   ),
             ),

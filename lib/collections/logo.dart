@@ -1,4 +1,4 @@
-import 'package:eusc_freaks/collections/assets.gen.dart';
+import 'package:student_hub/collections/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 String getLogoPath(BuildContext context) {

@@ -1,4 +1,4 @@
-import 'package:eusc_freaks/models/user.dart';
+import 'package:student_hub/models/user.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pocketbase/pocketbase.dart';
 

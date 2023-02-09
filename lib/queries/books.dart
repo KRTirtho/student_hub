@@ -1,6 +1,6 @@
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/models/book.dart';
-import 'package:eusc_freaks/models/book_tags.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/models/book.dart';
+import 'package:student_hub/models/book_tags.dart';
 import 'package:fl_query/fl_query.dart';
 import 'package:pocketbase/pocketbase.dart';
 

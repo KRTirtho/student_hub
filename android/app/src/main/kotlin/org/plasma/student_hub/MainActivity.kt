@@ -1,4 +1,4 @@
-package dev.krtirtho.eusc_freaks
+package org.plasma.student_hub
 
 import io.flutter.embedding.android.FlutterActivity
 

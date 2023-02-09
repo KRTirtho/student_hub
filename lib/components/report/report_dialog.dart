@@ -1,8 +1,8 @@
 import 'package:catcher/catcher.dart' hide Report;
-import 'package:eusc_freaks/collections/pocketbase.dart';
-import 'package:eusc_freaks/models/report.dart';
-import 'package:eusc_freaks/providers/authentication_provider.dart';
-import 'package:eusc_freaks/utils/snackbar.dart';
+import 'package:student_hub/collections/pocketbase.dart';
+import 'package:student_hub/models/report.dart';
+import 'package:student_hub/providers/authentication_provider.dart';
+import 'package:student_hub/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -60,7 +60,7 @@ class ReportDialog extends HookConsumerWidget {
       children: [
         Text(
           'Why do you want to report this ${collection.name}?',
-          style: Theme.of(context).textTheme.subtitle1,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         Card(
           margin: const EdgeInsets.only(top: 16),
@@ -85,7 +85,7 @@ class ReportDialog extends HookConsumerWidget {
                   title: Text(reason.formattedName),
                   subtitle: Text(
                     _reportReasonsSub[reason]!(collection.name),
-                    style: Theme.of(context).textTheme.caption,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
               AnimatedSwitcher(
@@ -107,7 +107,7 @@ class ReportDialog extends HookConsumerWidget {
               if (error.value != null)
                 Text(
                   error.value!,
-                  style: Theme.of(context).textTheme.caption!.copyWith(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         color: Theme.of(context).colorScheme.error,
                       ),
                 ),
