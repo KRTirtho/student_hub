@@ -1,0 +1,76 @@
+name: Binaries Build
+on:
+  workflow_dispatch:
+
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.8.0
+        with:
+          cache: true
+          channel: "stable"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev make python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot
+          flutter pub get
+
+      - name: Build Linux Binary
+        run: |
+          dart compile exe bin/init.dart -o build/configure-linux
+
+      - name: Upload built binary
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            build/configure-linux
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.8.0
+        with:
+          cache: true
+          channel: "stable"
+      
+      - name: Install dependencies
+        run: |
+          flutter pub get
+
+      - name: Build Windows Binary
+        run: |
+          dart compile exe bin/init.dart -o build/configure-windows.exe
+
+      - name: Upload built binary
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            build/configure-windows.exe
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.8.0
+        with:
+          cache: true
+          channel: "stable"
+      
+      - name: Install dependencies
+        run: |
+          flutter pub get
+
+      - name: Build MacOS Binary
+        run: |
+          dart compile exe bin/init.dart -o build/configure-macos
+
+      - name: Upload built binary
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            build/configure-macos

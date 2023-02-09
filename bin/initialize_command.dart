@@ -21,6 +21,122 @@ class InitializeCommand extends Command {
   @override
   String get name => "init";
 
+  String get _packageName {
+    final buildGradle = File("android/app/build.gradle");
+
+    final contents = buildGradle.readAsStringSync();
+
+    final reg =
+        RegExp('applicationId "(.*)"', caseSensitive: true, multiLine: false);
+
+    return reg.firstMatch(contents)!.group(1)!;
+  }
+
+  String get _displayName {
+    final buildGradle = File("android/app/src/main/AndroidManifest.xml");
+
+    final contents = buildGradle.readAsStringSync();
+
+    final reg =
+        RegExp('android:label="(.*)"', caseSensitive: true, multiLine: false);
+
+    return reg.firstMatch(contents)!.group(1)!;
+  }
+
+  void printFinalMessage() {
+    final irish = AnsiStyles.rgb(93, 63, 211);
+    print(AnsiStyles.green('Project setup completed successfully\n\n'));
+
+    print(
+      """
+You can now run the following commands to run the app:
+
+${irish("\$ flutter run -d chrome")} (for web browser. Requires Chrome to be installed)
+or,
+${irish("\$ flutter run -d ${Platform.operatingSystem}")} (for ${Platform.operatingSystem})
+
+In another terminal, run the following command to start the server:
+${irish("\$ pocketbase serve pb/pb_data")}
+""",
+    );
+
+    print(AnsiStyles.blueBright("""
+By the way, to Sign the apk with your credentials go to https://docs.flutter.dev/deployment/android#signing-the-app
+Everything is configured, just generate the upload-keystore.jks file and populate the android/key.properties file with your credentials
+"""));
+  }
+
+  String getCapBundleId(String bundleId) {
+    return bundleId
+        .split(".")
+        .map(
+          (e) => e
+              .split("_")
+              .mapIndexed((i, e) => i != 0 ? e.capitalize() : e)
+              .join(""),
+        )
+        .join(".");
+  }
+
+  void _verifyRunningInRightDirectory() {
+    if (!File("pubspec.yaml").existsSync()) {
+      print(
+        AnsiStyles.red(
+          "❌ This command must be run in the root directory of the project",
+        ),
+      );
+      exit(1);
+    }
+  }
+
+  Future<void> _verifyBinariesInstalled() async {
+    print(AnsiStyles.yellow("Verifying if required binaries are installed..."));
+
+    final results = await Future.wait(
+      [
+        Process.run("git", ["--version"]),
+        Process.run("flutter", ["--version"]),
+        Process.run("firebase", ["--version"]),
+      ],
+    );
+
+    final installedConfig = {
+      "git": [
+        results[0].exitCode == 0,
+        "https://git-scm.com/downloads",
+      ],
+      "flutter": [
+        results[1].exitCode == 0,
+        "https://docs.flutter.dev/get-started/install"
+      ],
+      "firebase": [
+        results[2].exitCode == 0,
+        "https://firebase.google.com/docs/cli"
+      ],
+    };
+
+    for (final entry in installedConfig.entries) {
+      if (entry.value.first == false) {
+        print(
+          AnsiStyles.red(
+            "❌ ${entry.key.capitalize()} is not installed. Please install it and try again",
+          ),
+        );
+        print(
+          AnsiStyles.blue(
+            "Install ${entry.key.capitalize()} from ${entry.value.last}\n",
+          ),
+        );
+      }
+    }
+
+    if (installedConfig.values.any((e) => e.first == false)) {
+      exit(1);
+    } else {
+      print(AnsiStyles.green("✅ All required binaries are installed\n\n"));
+    }
+  }
+
   void _updateProjectDartImports(String oldAppName, String appName) {
     final file = Directory("lib").listSync(recursive: true);
 
@@ -37,18 +153,6 @@ class InitializeCommand extends Command {
         print(AnsiStyles.dim("Updated imports of ${f.path}"));
       }
     }
-  }
-
-  String getCapBundleId(String bundleId) {
-    return bundleId
-        .split(".")
-        .map(
-          (e) => e
-              .split("_")
-              .mapIndexed((i, e) => i != 0 ? e.capitalize() : e)
-              .join(""),
-        )
-        .join(".");
   }
 
   void _updateOldPackageNames(
@@ -196,45 +300,12 @@ class InitializeCommand extends Command {
     }
   }
 
-  String get _packageName {
-    final buildGradle = File("android/app/build.gradle");
-
-    final contents = buildGradle.readAsStringSync();
-
-    final reg =
-        RegExp('applicationId "(.*)"', caseSensitive: true, multiLine: false);
-
-    return reg.firstMatch(contents)!.group(1)!;
-  }
-
-  String get _displayName {
-    final buildGradle = File("android/app/src/main/AndroidManifest.xml");
-
-    final contents = buildGradle.readAsStringSync();
-
-    final reg =
-        RegExp('android:label="(.*)"', caseSensitive: true, multiLine: false);
-
-    return reg.firstMatch(contents)!.group(1)!;
-  }
-
-  void printFinalMessage() {
-    print(AnsiStyles.green('Project setup completed successfully\n\n'));
-
-    print(
-      """You can now run the following commands to run the app:
-        \$ flutter run -d chrome (for web browser. Requires Chrome to be installed)
-        or,
-        \$ flutter run -d ${Platform.operatingSystem} (for ${Platform.operatingSystem})
-        
-        In another terminal, run the following command to start the server:
-        \$ pocketbase serve pb/pb_data
-        """,
-    );
-  }
-
   @override
   void run() async {
+    printFinalMessage();
+    return;
+    _verifyRunningInRightDirectory();
+    await _verifyBinariesInstalled();
     final Map<String, dynamic> config = {};
     final packageNameRegex =
         RegExp(r"^([A-Za-z]{1}[A-Za-z\d_]*\.)+[A-Za-z][A-Za-z\d_]*$");
@@ -290,7 +361,7 @@ class InitializeCommand extends Command {
 
     pubspecFile.writeAsStringSync(pubspec.toString());
 
-    print(AnsiStyles.dim("Updated pubspec.yaml"));
+    print(AnsiStyles.dim("\nUpdated pubspec.yaml\n"));
 
     try {
       if (oldDisplayName != displayName ||
@@ -342,10 +413,10 @@ class InitializeCommand extends Command {
       print(AnsiStyles.green('Images generated successfully'));
     }
     print(AnsiStyles.blue(
-      'You can change any files e.g logo, creator_profile etc in the ./assets directory and run the `generate-images` command to regenerate the images\n\n',
+      'You can change any files e.g logo, creator_profile etc in the ./assets directory and run this again to regenerate the images\n\n',
     ));
 
-    print(AnsiStyles.yellow("You've to login with your Firebase Account"));
+    print(AnsiStyles.yellow("🛈 You've to login with your Firebase Account"));
     print(AnsiStyles.dim('> firebase login:ci --interactive'));
 
     final firebaseLoginResult =
@@ -362,11 +433,11 @@ class InitializeCommand extends Command {
       exit(1);
     }
     print(AnsiStyles.dim(firebaseLoginResult.stdout));
-    print(AnsiStyles.green('Firebase login successful'));
+    print(AnsiStyles.green('✅ Firebase login successful\n\n'));
 
     await flutterFireRun(["configure", "--token", token]);
 
-    print(AnsiStyles.green('Firebase configured successfully'));
+    print(AnsiStyles.green('\n✅ Firebase configured successfully\n\n'));
 
     final configureGit = Confirm(
       prompt: "Do you want to configure git?",
@@ -381,7 +452,21 @@ class InitializeCommand extends Command {
 
     Process.runSync('flutter', ['pub', 'get']);
 
-    Process.runSync('git', ['remote', 'remove', 'origin']);
+    final isGitRepoResult = Process.runSync(
+      "git",
+      ['rev-parse', '--is-inside-work-tree'],
+    );
+
+    if (isGitRepoResult.exitCode != 0) {
+      print(AnsiStyles.red('Failed to check if this is a git repo'));
+      print(AnsiStyles.dim(isGitRepoResult.stderr));
+      exit(1);
+    }
+
+    if (isGitRepoResult.stdout.toString().trim() != 'true') {
+      print(AnsiStyles.red('This is not a git repo'));
+      Process.runSync('git', ['init']);
+    }
 
     final gitUrl = Input(
       prompt: 'Enter the github/gitlab url of your project',
@@ -392,13 +477,22 @@ class InitializeCommand extends Command {
       },
     ).interact();
 
-    final result = Process.runSync('git', ['remote', 'add', 'origin', gitUrl]);
+    final originAddResult =
+        Process.runSync('git', ['remote', 'remove', 'origin']);
 
-    if (result.exitCode != 0) {
+    if (originAddResult.exitCode != 0) {
+      print(AnsiStyles.red('Failed to remove git remote'));
+      print(AnsiStyles.dim(originAddResult.stderr));
+    }
+
+    final originRemoveResult =
+        Process.runSync('git', ['remote', 'add', 'origin', gitUrl]);
+
+    if (originRemoveResult.exitCode != 0) {
       print(AnsiStyles.red('Failed to add git remote'));
-      print(AnsiStyles.dim(result.stderr));
+      print(AnsiStyles.dim(originRemoveResult.stderr));
     } else {
-      print(AnsiStyles.green('Git remote added successfully'));
+      print(AnsiStyles.green('Git remote added successfully\n'));
     }
 
     printFinalMessage();
