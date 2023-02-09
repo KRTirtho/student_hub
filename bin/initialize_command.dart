@@ -302,8 +302,6 @@ Everything is configured, just generate the upload-keystore.jks file and populat
 
   @override
   void run() async {
-    printFinalMessage();
-    return;
     _verifyRunningInRightDirectory();
     await _verifyBinariesInstalled();
     final Map<String, dynamic> config = {};
