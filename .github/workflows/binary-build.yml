@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Linux Binary
         run: |
-          dart compile exe bin/init.dart -o build/configure-linux
+          mkdir build; dart compile exe bin/init.dart -o build/configure-linux
 
       - name: Upload built binary
         uses: actions/upload-artifact@v2
@@ -44,7 +44,7 @@ jobs:
 
       - name: Build Windows Binary
         run: |
-          dart compile exe bin/init.dart -o build/configure-windows.exe
+          mkdir build; dart compile exe bin/init.dart -o build/configure-windows.exe
 
       - name: Upload built binary
         uses: actions/upload-artifact@v2
@@ -67,7 +67,7 @@ jobs:
 
       - name: Build MacOS Binary
         run: |
-          dart compile exe bin/init.dart -o build/configure-macos
+          mkdir build; dart compile exe bin/init.dart -o build/configure-macos
 
       - name: Upload built binary
         uses: actions/upload-artifact@v2
